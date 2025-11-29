@@ -1,8 +1,21 @@
 """Pytest configuration for multi_mcp tests."""
 
+import os
 from pathlib import Path
 
 import pytest
+
+# ============================================================================
+# Integration Test Configuration
+# ============================================================================
+
+# Default model for integration tests (cheap, fast model)
+# Can be overridden via INTEGRATION_TEST_MODEL environment variable
+DEFAULT_INTEGRATION_TEST_MODEL = os.getenv("INTEGRATION_TEST_MODEL", "gpt-5-nano")
+
+# Multi-model test configurations
+DEFAULT_COMPARISON_MODELS = [DEFAULT_INTEGRATION_TEST_MODEL, "gemini-2.5-flash"]
+DEFAULT_DEBATE_MODELS = [DEFAULT_INTEGRATION_TEST_MODEL, DEFAULT_INTEGRATION_TEST_MODEL]  # Same model twice for minimal cost
 
 
 @pytest.fixture(autouse=True)
@@ -31,6 +44,31 @@ def temp_project_dir(tmp_path):
     (project / "tests").mkdir()
     (project / "README.md").write_text("# Test Project\n")
     return project
+
+
+@pytest.fixture
+def integration_test_model():
+    """Get the model to use for integration tests.
+
+    Returns the model name configured for integration tests.
+    Can be overridden via INTEGRATION_TEST_MODEL environment variable.
+
+    Example:
+        INTEGRATION_TEST_MODEL=gpt-5-mini pytest tests/integration/
+    """
+    return DEFAULT_INTEGRATION_TEST_MODEL
+
+
+@pytest.fixture
+def comparison_models():
+    """Get models to use for comparison/debate tests."""
+    return DEFAULT_COMPARISON_MODELS.copy()
+
+
+@pytest.fixture
+def debate_models():
+    """Get models to use for debate tests."""
+    return DEFAULT_DEBATE_MODELS.copy()
 
 
 @pytest.fixture

@@ -1,7 +1,6 @@
 """End-to-end integration tests for chat tool."""
 
 import os
-from pathlib import Path
 
 import pytest
 
@@ -11,7 +10,7 @@ pytestmark = pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="Integration te
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
-async def test_chat_basic_conversation():
+async def test_chat_basic_conversation(integration_test_model):
     """Test basic chat interaction with real API."""
     import uuid
 
@@ -25,7 +24,7 @@ async def test_chat_basic_conversation():
         step_number=1,
         next_action="stop",
         base_path="/tmp",
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
     )
 
@@ -44,7 +43,7 @@ async def test_chat_basic_conversation():
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(180)
-async def test_chat_with_conversation_history():
+async def test_chat_with_conversation_history(integration_test_model):
     """Test chat maintains context across multiple turns."""
     import uuid
 
@@ -59,7 +58,7 @@ async def test_chat_with_conversation_history():
         step_number=1,
         next_action="continue",
         base_path="/tmp",
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
     )
 
@@ -73,7 +72,7 @@ async def test_chat_with_conversation_history():
         step_number=2,
         next_action="stop",
         base_path="/tmp",
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
     )
 
@@ -92,7 +91,7 @@ async def test_chat_with_conversation_history():
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
-async def test_chat_with_files(tmp_path):
+async def test_chat_with_files(integration_test_model, tmp_path):
     """Test chat can analyze provided files."""
     import uuid
 
@@ -113,7 +112,7 @@ async def test_chat_with_files(tmp_path):
         step_number=1,
         next_action="stop",
         base_path=str(tmp_path),
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
         relevant_files=[str(test_file)],
     )
@@ -132,7 +131,7 @@ async def test_chat_with_files(tmp_path):
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
-async def test_chat_repository_context(tmp_path):
+async def test_chat_repository_context(integration_test_model, tmp_path):
     """Test chat loads CLAUDE.md context."""
     import uuid
 
@@ -156,7 +155,7 @@ async def test_chat_repository_context(tmp_path):
         step_number=1,
         next_action="stop",
         base_path=str(tmp_path),
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
     )
 

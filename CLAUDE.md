@@ -384,4 +384,5 @@ Follow this pattern to add new tools:
 - **Live Testing**: Always use low-cost models (gpt-5-mini, claude-haiku-4-5-20251001, gemini-2.5-flash) for rapid iteration
 - **Deterministic Patterns**: Prefer checklist-based guidance over LLM-generated suggestions for intermediate steps
 - **Testing**: ALWAYS test after making bigger changes - run `uv run pytest tests/unit/` (fast) or `RUN_E2E=1 uv run pytest` (full)
+- **Git Commits**: Ensure all tests pass `make test-all` and code is linted `make check` before committing
 

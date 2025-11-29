@@ -14,7 +14,7 @@ pytestmark = pytest.mark.skipif(
 
 
 @pytest.mark.asyncio
-async def test_debate_real_api_minimal():
+async def test_debate_real_api_minimal(debate_models):
     """Test debate with real API call using minimal cost (2 cheap models)."""
 
     import uuid
@@ -24,7 +24,7 @@ async def test_debate_real_api_minimal():
         content="What is 2+2? Keep your answer very brief (one sentence).",
         step_number=1,
         next_action="stop",
-        models=["gpt-5-mini", "gpt-5-mini"],  # Same model twice for minimal cost
+        models=debate_models,
         base_path="/tmp",
         thread_id=str(uuid.uuid4()),
     )

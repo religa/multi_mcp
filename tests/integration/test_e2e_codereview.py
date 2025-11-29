@@ -23,7 +23,7 @@ def auth_file_path(test_repo_path):
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
-async def test_codereview_finds_sql_injection(test_repo_path, auth_file_path):
+async def test_codereview_finds_sql_injection(integration_test_model, test_repo_path, auth_file_path):
     """Test that codereview identifies SQL injection vulnerabilities."""
     import uuid
 
@@ -39,7 +39,7 @@ async def test_codereview_finds_sql_injection(test_repo_path, auth_file_path):
         next_action="continue",
         relevant_files=[auth_file_path],
         base_path=test_repo_path,
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
     )
 
@@ -54,7 +54,7 @@ async def test_codereview_finds_sql_injection(test_repo_path, auth_file_path):
         next_action="stop",
         relevant_files=[auth_file_path],
         base_path=test_repo_path,
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
         issues_found=[
             {
@@ -81,7 +81,7 @@ async def test_codereview_finds_sql_injection(test_repo_path, auth_file_path):
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(180)
-async def test_codereview_continuation(test_repo_path, auth_file_path):
+async def test_codereview_continuation(integration_test_model, test_repo_path, auth_file_path):
     """Test multi-step review with thread continuation."""
     # Step 1: Start review (returns checklist since next_action != "stop")
     import uuid
@@ -96,7 +96,7 @@ async def test_codereview_continuation(test_repo_path, auth_file_path):
         next_action="continue",
         relevant_files=[auth_file_path],
         base_path=test_repo_path,
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id_step1,
     )
 
@@ -112,7 +112,7 @@ async def test_codereview_continuation(test_repo_path, auth_file_path):
         next_action="stop",
         relevant_files=[auth_file_path],
         base_path=test_repo_path,
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
         issues_found=[
             {
@@ -139,7 +139,7 @@ async def test_codereview_continuation(test_repo_path, auth_file_path):
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
-async def test_models():
+async def test_models(integration_test_model):
     """Test models tool returns available models."""
     from src.tools.models import models_impl
 
@@ -160,9 +160,9 @@ async def test_models():
         assert "aliases" in model
         assert isinstance(model["aliases"], list)
 
-    # Should include gpt-5-mini
+    # Should include gpt-5-nano
     model_names = [m["name"] for m in models]
-    assert "gpt-5-mini" in model_names
+    assert "gpt-5-nano" in model_names
 
     print(f"\n✓ Found {len(models)} available models")
     print(f"✓ Default model: {response['default_model']}")
@@ -171,7 +171,7 @@ async def test_models():
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
-async def test_codereview_token_budget(test_repo_path, auth_file_path):
+async def test_codereview_token_budget(integration_test_model, test_repo_path, auth_file_path):
     """Test that token budget is respected."""
     import uuid
 
@@ -187,7 +187,7 @@ async def test_codereview_token_budget(test_repo_path, auth_file_path):
         next_action="continue",
         relevant_files=[auth_file_path],
         base_path=test_repo_path,
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
     )
 
@@ -201,7 +201,7 @@ async def test_codereview_token_budget(test_repo_path, auth_file_path):
         next_action="stop",
         relevant_files=[auth_file_path],
         base_path=test_repo_path,
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
     )
 
@@ -214,7 +214,7 @@ async def test_codereview_token_budget(test_repo_path, auth_file_path):
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
-async def test_codereview_repository_context(auth_file_path, tmp_path):
+async def test_codereview_repository_context(integration_test_model, auth_file_path, tmp_path):
     """Test that repository context (CLAUDE.md) is loaded if present."""
     import uuid
 
@@ -248,7 +248,7 @@ async def test_codereview_repository_context(auth_file_path, tmp_path):
         next_action="continue",
         relevant_files=[str(auth_copy)],
         base_path=str(test_repo),
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
     )
 
@@ -262,7 +262,7 @@ async def test_codereview_repository_context(auth_file_path, tmp_path):
         next_action="stop",
         relevant_files=[str(auth_copy)],
         base_path=str(test_repo),
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
     )
 

@@ -11,7 +11,7 @@ from src.tools.comparison import comparison_impl
 
 @pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="E2E tests require RUN_E2E=1")
 @pytest.mark.asyncio
-async def test_comparison_with_real_files():
+async def test_comparison_with_real_files(comparison_models):
     """Test comparison with actual files and API calls."""
     with tempfile.TemporaryDirectory() as tmpdir:
         # Create test file
@@ -25,7 +25,7 @@ async def test_comparison_with_real_files():
             content="Review this function for best practices",
             step_number=1,
             next_action="stop",
-            models=["gpt-5-mini", "gemini-2.5-flash"],  # Fast, cheap models
+            models=comparison_models,
             base_path=tmpdir,
             thread_id=str(uuid.uuid4()),
             relevant_files=[str(test_file)],

@@ -1,7 +1,6 @@
 """End-to-end integration tests for error handling."""
 
 import os
-from pathlib import Path
 
 import pytest
 
@@ -11,7 +10,7 @@ pytestmark = pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="Integration te
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(60)
-async def test_codereview_with_nonexistent_files(tmp_path):
+async def test_codereview_with_nonexistent_files(integration_test_model, tmp_path):
     """Test codereview handles non-existent files gracefully."""
     import uuid
 
@@ -29,7 +28,7 @@ async def test_codereview_with_nonexistent_files(tmp_path):
         next_action="stop",
         relevant_files=[fake_file],
         base_path=str(tmp_path),
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
     )
 
@@ -45,7 +44,7 @@ async def test_codereview_with_nonexistent_files(tmp_path):
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(60)
-async def test_codereview_with_empty_files_list(tmp_path):
+async def test_codereview_with_empty_files_list(integration_test_model, tmp_path):
     """Test codereview handles empty files list."""
     import uuid
 
@@ -60,7 +59,7 @@ async def test_codereview_with_empty_files_list(tmp_path):
         next_action="stop",
         relevant_files=[],
         base_path=str(tmp_path),
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
     )
 
@@ -79,7 +78,7 @@ async def test_codereview_with_empty_files_list(tmp_path):
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(60)
-async def test_codereview_exceeds_file_limit(tmp_path):
+async def test_codereview_exceeds_file_limit(integration_test_model, tmp_path):
     """Test codereview enforces max files limit via Pydantic validation."""
     import uuid
 
@@ -105,7 +104,7 @@ async def test_codereview_exceeds_file_limit(tmp_path):
             next_action="stop",
             relevant_files=files,
             base_path=str(tmp_path),
-            model="gpt-5-mini",
+            model=integration_test_model,
             thread_id=thread_id,
         )
 
@@ -113,13 +112,13 @@ async def test_codereview_exceeds_file_limit(tmp_path):
     error_str = str(exc_info.value).lower()
     assert "too many" in error_str or "maximum" in error_str, f"Expected file limit error, got: {error_str}"
 
-    print(f"\n✓ File limit validation test completed")
+    print("\n✓ File limit validation test completed")
     print(f"✓ Correctly rejected {len(files)} files")
 
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
-async def test_comparison_with_invalid_model():
+async def test_comparison_with_invalid_model(integration_test_model):
     """Test comparison handles invalid model gracefully."""
     import uuid
 
@@ -132,7 +131,7 @@ async def test_comparison_with_invalid_model():
         content="What is 2+2?",
         step_number=1,
         next_action="stop",
-        models=["gpt-5-mini", "invalid-model-xyz"],  # One valid, one invalid
+        models=[integration_test_model, "invalid-model-xyz"],  # One valid, one invalid
         base_path="/tmp",
         thread_id=thread_id,
     )
@@ -147,7 +146,7 @@ async def test_comparison_with_invalid_model():
     errors = [r for r in response["results"] if r["status"] == "error"]
     assert len(errors) >= 1, "Expected at least one model to error"
 
-    # At least one should succeed (gpt-5-mini)
+    # At least one should succeed (gpt-5-nano)
     successes = [r for r in response["results"] if r["status"] == "success"]
     assert len(successes) >= 1, "Expected at least one model to succeed"
 
@@ -158,7 +157,7 @@ async def test_comparison_with_invalid_model():
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
-async def test_debate_with_all_invalid_models():
+async def test_debate_with_all_invalid_models(integration_test_model):
     """Test debate handles complete failure gracefully."""
     import uuid
 
@@ -190,12 +189,12 @@ async def test_debate_with_all_invalid_models():
 
     print(f"\n✓ All invalid models test completed: {thread_id}")
     print(f"✓ Status: {response['status']}")
-    print(f"✓ All models failed as expected")
+    print("✓ All models failed as expected")
 
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
-async def test_chat_with_binary_file(tmp_path):
+async def test_chat_with_binary_file(integration_test_model, tmp_path):
     """Test chat handles binary files gracefully."""
     import uuid
 
@@ -213,7 +212,7 @@ async def test_chat_with_binary_file(tmp_path):
         step_number=1,
         next_action="stop",
         base_path=str(tmp_path),
-        model="gpt-5-mini",
+        model=integration_test_model,
         thread_id=thread_id,
         relevant_files=[str(binary_file)],
     )

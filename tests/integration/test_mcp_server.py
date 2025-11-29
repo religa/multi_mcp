@@ -222,7 +222,7 @@ class TestToolInvocation:
         assert "version" in result or "name" in result
 
     @pytest.mark.asyncio
-    async def test_chat_tool_basic_invocation(self):
+    async def test_chat_tool_basic_invocation(self, integration_test_model):
         """Chat tool should accept valid parameters."""
         import uuid
 
@@ -236,7 +236,7 @@ class TestToolInvocation:
                 step_number=1,
                 next_action="stop",
                 base_path="/tmp/test",
-                model="gpt-5-mini",
+                model=integration_test_model,
                 thread_id=str(uuid.uuid4()),
                 relevant_files=[],
             )
