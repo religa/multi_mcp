@@ -17,6 +17,7 @@ Built as a **Model Context Protocol (MCP) server** for Claude Code CLI, Multi-MC
 - **🔄 Compare** - Multi-model parallel analysis
 - **🎭 Debate** - Two-step multi-model workflow: independent answers followed by critique
 - **🤖 Multi-Model Support** - Works with OpenAI, Anthropic, Google, and OpenRouter
+- **🖥️ CLI Model Execution** - Run CLI-based models (Claude Code CLI, Gemini CLI, Codex CLI) alongside API models
 - **🏷️ Model Aliases** - Use short names like `mini`, `sonnet`, `gemini`
 - **🧵 Conversation Threading** - Maintain context across multi-step reviews
 
@@ -149,6 +150,81 @@ Use short aliases instead of full model names:
 | `gpt` | gpt-5.1 | OpenAI |
 | `gemini` | gemini-3-pro-preview | Google |
 | `flash` | gemini-2.5-flash | Google |
+
+## CLI Models
+
+Multi-MCP can execute **CLI-based AI models** (like Gemini CLI or Codex CLI) alongside API models. CLI models run as subprocesses and work seamlessly with all existing tools.
+
+**Benefits:**
+- Use models with full tool access (file operations, shell commands)
+- Mix API and CLI models in `compare` and `debate` workflows
+- Leverage local CLIs without API overhead
+
+**Configuration:**
+
+CLI models are defined in `config/models.yaml` with `provider: cli`:
+
+```yaml
+gemini-cli:
+  provider: cli
+  cli_command: gemini
+  cli_args:
+    - "-o"
+    - "json"
+    - "--yolo"
+  cli_env:
+    GEMINI_API_KEY: "${GEMINI_API_KEY}"
+  cli_parser: json
+  aliases:
+    - gem-cli
+  notes: "Gemini CLI with full tool access"
+
+codex-cli:
+  provider: cli
+  cli_command: codex
+  cli_args:
+    - "exec"
+    - "--json"
+    - "--dangerously-bypass-approvals-and-sandbox"
+  cli_env: {}
+  cli_parser: jsonl
+  aliases:
+    - cx-cli
+  notes: "Codex CLI with full tool access"
+```
+
+**Usage Examples:**
+
+Use CLI models just like API models:
+
+```bash
+# Code review with CLI model
+Can you multi codereview this module using gemini-cli?
+
+# Compare API vs CLI models
+Can you multi compare the best approach using gpt-5-mini and gemini-cli?
+
+# Chat with CLI model
+Can you ask Multi chat using codex-cli how to optimize this function?
+```
+
+**Prerequisites:**
+
+CLI models require the respective CLI tools to be installed:
+
+```bash
+# Install Gemini CLI
+pip install google-generativeai-cli
+
+# Install Codex CLI (Claude Code CLI)
+npm install -g @anthropics/codex-cli
+```
+
+**Parser Types:**
+
+- `json` - Parses JSON output (e.g., Gemini CLI with `-o json`)
+- `jsonl` - Parses JSONL event streams (e.g., Codex CLI with `--json`)
+- `text` - Raw text output (fallback)
 
 ## Architecture
 

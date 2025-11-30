@@ -43,7 +43,6 @@ models:
       temperature: 1.0
     notes: "Strong general-purpose model, temperature=1.0 only"
 
-
   gpt-5.1-codex:
     litellm_model: openai/gpt-5.1-codex
     aliases:
@@ -81,12 +80,14 @@ models:
   gemini-2.5-pro:
     litellm_model: gemini/gemini-2.5-pro
     aliases:
+      - gemini-2.5
       - gemini-2
     notes: "High-quality Google model"
 
   gemini-2.5-flash:
     litellm_model: gemini/gemini-2.5-flash
     aliases:
+      - gemini-flash
       - flash
     notes: "Fast and cheap"
 
@@ -97,6 +98,50 @@ models:
       - gemini-3
       - gemini
     notes: "Latest Google model"
+
+  # ============================================
+  # CLI Models
+  # ============================================
+
+  gemini-cli:
+    provider: cli
+    cli_command: gemini
+    cli_args:
+      - "-o"
+      - "json"
+      - "--yolo"
+    cli_env:
+      GEMINI_API_KEY: "${GEMINI_API_KEY}"
+    cli_parser: json
+    aliases:
+      - gemcli
+    notes: "Gemini CLI with full tool access"
+
+  codex-cli:
+    provider: cli
+    cli_command: codex
+    cli_args:
+      - "exec"
+      - "--json"
+      - "--dangerously-bypass-approvals-and-sandbox"
+    cli_env: {}
+    cli_parser: jsonl
+    aliases:
+      - cxcli
+    notes: "Codex CLI with full tool access"
+
+  claude-cli:
+    provider: cli
+    cli_command: claude
+    cli_args:
+      - "--output-format"
+      - "json"
+    cli_env:
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+    cli_parser: json
+    aliases:
+      - clcli
+    notes: "Claude CLI with full tool access"
 
   # ============================================
   # OpenRouter Models

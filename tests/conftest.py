@@ -1,6 +1,7 @@
 """Pytest configuration for multi_mcp tests."""
 
 import os
+import shutil
 from pathlib import Path
 
 import pytest
@@ -101,3 +102,54 @@ def pytest_collection_modifyitems(config, items):
         # Auto-mark unit tests
         elif "unit" in str(item.fspath):
             item.add_marker(pytest.mark.unit)
+
+
+# ============================================================================
+# CLI Test Fixtures
+# ============================================================================
+
+
+@pytest.fixture
+def has_gemini_cli():
+    """Check if Gemini CLI is available."""
+    return shutil.which("gemini") is not None
+
+
+@pytest.fixture
+def has_codex_cli():
+    """Check if Codex CLI is available."""
+    return shutil.which("codex") is not None
+
+
+@pytest.fixture
+def has_claude_cli():
+    """Check if Claude CLI is available."""
+    return shutil.which("claude") is not None
+
+
+@pytest.fixture
+def skip_if_no_gemini_cli():
+    """Skip test if Gemini CLI not available."""
+    if not shutil.which("gemini"):
+        pytest.skip("Gemini CLI not installed - install via: npm install -g @google/generative-ai-cli")
+
+
+@pytest.fixture
+def skip_if_no_codex_cli():
+    """Skip test if Codex CLI not available."""
+    if not shutil.which("codex"):
+        pytest.skip("Codex CLI not installed - install via: npm install -g @anthropic-ai/codex-cli")
+
+
+@pytest.fixture
+def skip_if_no_claude_cli():
+    """Skip test if Claude CLI not available."""
+    if not shutil.which("claude"):
+        pytest.skip("Claude CLI not installed - install via: pip install anthropic-cli")
+
+
+@pytest.fixture
+def skip_if_no_any_cli(has_gemini_cli, has_codex_cli, has_claude_cli):
+    """Skip test if no CLI is available."""
+    if not (has_gemini_cli or has_codex_cli or has_claude_cli):
+        pytest.skip("No CLI models available - install at least one CLI tool")

@@ -20,10 +20,10 @@ class ModelConstraints(BaseModel):
 
 
 class ModelConfig(BaseModel):
-    """Configuration for a single model."""
+    """Configuration for a single model (API or CLI)."""
 
     provider: str | None = None  # Optional - derived from litellm_model if not set
-    litellm_model: str
+    litellm_model: str | None = None  # Required for API models, None for CLI models
     aliases: list[str] = Field(default_factory=list)
     context_window: int | None = None
     max_tokens: int | None = None
@@ -32,15 +32,25 @@ class ModelConfig(BaseModel):
     disabled: bool = False
     notes: str = ""
 
+    # CLI-specific fields (only used when provider="cli")
+    cli_command: str | None = None
+    cli_args: list[str] = Field(default_factory=list)
+    cli_env: dict[str, str] = Field(default_factory=dict)
+    cli_parser: str = "json"  # "json", "jsonl", or "text"
+
+    def is_cli_model(self) -> bool:
+        """Check if this is a CLI model."""
+        return self.provider == "cli"
+
     def get_provider(self) -> str:
         """Get provider (explicit > prefix > litellm lookup > unknown)."""
         if self.provider:
             return self.provider
         # Derive from prefix: "gemini/gemini-2.5-pro" → "gemini"
-        if "/" in self.litellm_model:
+        if self.litellm_model and "/" in self.litellm_model:
             return self.litellm_model.split("/")[0]
         # Check litellm.model_cost for litellm_provider
-        if self.litellm_model in litellm.model_cost:
+        if self.litellm_model and self.litellm_model in litellm.model_cost:
             return litellm.model_cost[self.litellm_model].get("litellm_provider", "unknown")
         return "unknown"
 
