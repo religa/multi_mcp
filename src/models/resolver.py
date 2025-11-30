@@ -136,8 +136,11 @@ class ModelResolver:
 
         return {}
 
-    def get_litellm_model(self, name_or_alias: str) -> str:
-        """Get the LiteLLM model string for a name/alias."""
+    def get_litellm_model(self, name_or_alias: str) -> str | None:
+        """Get the LiteLLM model string for a name/alias.
+
+        Returns None for CLI models that don't use LiteLLM.
+        """
         _, config = self.resolve(name_or_alias)
         return config.litellm_model
 
@@ -160,7 +163,8 @@ class ModelResolver:
             context_window = config.context_window
             max_tokens = config.max_tokens
 
-            if context_window is None or max_tokens is None:
+            # Only try to fetch LiteLLM info for API models (not CLI models)
+            if (context_window is None or max_tokens is None) and config.litellm_model:
                 litellm_info = self._get_litellm_model_info(config.litellm_model)
                 if context_window is None:
                     context_window = litellm_info.get("context_window")

@@ -12,8 +12,8 @@ The server is built with FastMCP and uses a streamlined workflow architecture op
 
 **Production Ready** ✅
 - **Unit Tests**: ✅ 401 tests passing (~2s) - All tests passing (includes 17 CLI subprocess mocking tests)
-- **Integration Tests**: ✅ 67 tests passing (~10-15min) - All tests passing (includes 25 CLI workflow & performance tests)
-- **Total Coverage**: ✅ 468 tests passing (~85% code coverage)
+- **Integration Tests**: ✅ 74 tests passing (~10-15min) - All tests passing (18 CLI tests: 3 smoke + 8 workflow + 7 performance)
+- **Total Coverage**: ✅ 475 tests passing (~85% code coverage)
 - **Model Config**: YAML-based model configuration with aliases and use-case defaults
 - **Logging**: MCP tool request/response logging enabled
 - **Implementation**: Checklist-based workflow with expert validation enabled
@@ -32,7 +32,7 @@ uv run ruff format .
 # Run all unit tests (401 tests, ~2s, all passing ✅)
 uv run pytest tests/unit/ -v
 
-# Run integration tests (67 tests, ~5-7min with parallel, all passing ✅)
+# Run integration tests (74 tests, ~5-7min with parallel, all passing ✅)
 # Note: Requires real API keys (OPENAI_API_KEY, etc.)
 # CLI tests will skip gracefully if CLIs not installed
 RUN_E2E=1 uv run pytest tests/integration/ -n auto -v
@@ -40,7 +40,7 @@ RUN_E2E=1 uv run pytest tests/integration/ -n auto -v
 # Or run sequentially (slower, ~15min)
 RUN_E2E=1 uv run pytest tests/integration/ -v
 
-# Run all tests (468 total)
+# Run all tests (475 total)
 RUN_E2E=1 uv run pytest tests/ -v
 
 # Run the MCP server
@@ -295,18 +295,19 @@ Models are defined in `config/models.yaml`. See README.md for model aliases and 
 - Runtime: ~2 seconds
 - **Coverage**: ~85% overall code coverage
 
-### Integration Tests (67 tests) ✅
+### Integration Tests (74 tests) ✅
 **Location:** `tests/integration/`
-- `test_e2e_codereview.py` (5) - End-to-end codereview with real APIs
+- `test_e2e_codereview.py` (6) - End-to-end codereview with real APIs
 - `test_e2e_chat.py` (4) - Chat functionality and repository context
 - `test_e2e_compare.py` (1) - Multi-model compare with real APIs
-- `test_e2e_debate.py` (1) - Two-step debate workflow with real APIs
+- `test_e2e_debate.py` (2) - Two-step debate workflow with real APIs
 - `test_e2e_error_handling.py` (6) - Error handling and edge cases
 - `test_e2e_workflows.py` (3) - Multi-step workflows and continuations
 - `test_e2e_thread_management.py` (2) - Thread isolation and concurrency
 - `test_e2e_context_and_config.py` (3) - AGENTS.md, model aliases, version tool
+- `test_e2e_cli_models.py` (13) - CLI model configuration and execution tests
 - `test_mcp_server.py` (17) - MCP server integration testing
-- `test_cli_real_execution.py` (10) - Real CLI execution with actual API calls (skips if CLI not installed)
+- `test_cli_real_execution.py` (3) - Real CLI smoke tests (removed 7 redundant tests)
 - `test_cli_workflows.py` (8) - CLI models in chat, compare, debate workflows
 - `test_cli_performance.py` (7) - CLI performance, concurrency, and stress testing
 

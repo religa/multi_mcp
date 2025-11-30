@@ -16,20 +16,10 @@ class TestGeminiCLISubprocess:
     """Test Gemini CLI (JSON parser) with subprocess mocking."""
 
     @pytest.mark.asyncio
-    @patch("src.models.litellm_client.shutil.which")
-    @patch("src.models.litellm_client.asyncio.create_subprocess_exec")
-    async def test_gemini_successful_execution(self, mock_subprocess, mock_which):
+    async def test_gemini_successful_execution(self, mock_cli_success):
         """Gemini CLI executes successfully and parses JSON response."""
-        # Setup: CLI command exists
-        mock_which.return_value = "/usr/local/bin/gemini"
-
         # Setup: Successful subprocess execution
-        mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(b'{"response": "The answer is 42"}', b"")
-        )
-        mock_process.returncode = 0
-        mock_subprocess.return_value = mock_process
+        mock_subprocess, mock_process = mock_cli_success(stdout=b'{"response": "The answer is 42"}')
 
         # Test
         client = LiteLLMClient()
@@ -56,16 +46,13 @@ class TestGeminiCLISubprocess:
         assert call_args[0] == ("gemini", "-o", "json", "--yolo")
 
         # Verify communicate was called with prompt
-        mock_process.communicate.assert_called_once_with(
-            input=b"What is the meaning of life?"
-        )
+        mock_process.communicate.assert_called_once_with(input=b"What is the meaning of life?")
 
     @pytest.mark.asyncio
-    @patch("src.models.litellm_client.shutil.which")
-    async def test_gemini_cli_not_found(self, mock_which):
+    async def test_gemini_cli_not_found(self, mock_cli_failure):
         """Gemini CLI not found returns helpful error."""
         # Setup: CLI command not found
-        mock_which.return_value = None
+        mock_cli_failure("not_found")
 
         # Test
         client = LiteLLMClient()
@@ -87,19 +74,10 @@ class TestGeminiCLISubprocess:
         assert "npm install" in result.error.lower()  # Installation hint
 
     @pytest.mark.asyncio
-    @patch("src.models.litellm_client.shutil.which")
-    @patch("src.models.litellm_client.asyncio.create_subprocess_exec")
-    async def test_gemini_non_zero_exit_code(self, mock_subprocess, mock_which):
+    async def test_gemini_non_zero_exit_code(self, mock_cli_failure):
         """Gemini CLI non-zero exit code returns error."""
-        mock_which.return_value = "/usr/local/bin/gemini"
-
         # Setup: Failed subprocess execution
-        mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(b"", b"Error: API key invalid")
-        )
-        mock_process.returncode = 1
-        mock_subprocess.return_value = mock_process
+        mock_cli_failure("exit_code", stderr=b"Error: API key invalid", exit_code=1)
 
         # Test
         client = LiteLLMClient()
@@ -120,16 +98,10 @@ class TestGeminiCLISubprocess:
         assert "API key invalid" in result.error
 
     @pytest.mark.asyncio
-    @patch("src.models.litellm_client.shutil.which")
-    @patch("src.models.litellm_client.asyncio.create_subprocess_exec")
-    async def test_gemini_timeout(self, mock_subprocess, mock_which):
+    async def test_gemini_timeout(self, mock_cli_failure):
         """Gemini CLI timeout returns helpful error."""
-        mock_which.return_value = "/usr/local/bin/gemini"
-
         # Setup: Timeout during communicate
-        mock_process = Mock()
-        mock_process.communicate = AsyncMock(side_effect=TimeoutError())
-        mock_subprocess.return_value = mock_process
+        mock_cli_failure("timeout")
 
         # Test
         client = LiteLLMClient()
@@ -150,18 +122,10 @@ class TestGeminiCLISubprocess:
         assert "MODEL_TIMEOUT_SECONDS" in result.error
 
     @pytest.mark.asyncio
-    @patch("src.models.litellm_client.shutil.which")
-    @patch("src.models.litellm_client.asyncio.create_subprocess_exec")
-    async def test_gemini_json_without_response_field(self, mock_subprocess, mock_which):
+    async def test_gemini_json_without_response_field(self, mock_cli_success):
         """Gemini CLI JSON without 'response' field stringifies JSON."""
-        mock_which.return_value = "/usr/local/bin/gemini"
-
-        mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(b'{"message": "Hello", "status": "ok"}', b"")
-        )
-        mock_process.returncode = 0
-        mock_subprocess.return_value = mock_process
+        # Setup: JSON response without 'response' field
+        mock_cli_success(stdout=b'{"message": "Hello", "status": "ok"}')
 
         # Test
         client = LiteLLMClient()
@@ -198,9 +162,7 @@ class TestCodexCLISubprocess:
             '{"type":"item.completed","item":{"type":"agent_message","text":"Final answer"}}\n'
         )
         mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(jsonl_output.encode("utf-8"), b"")
-        )
+        mock_process.communicate = AsyncMock(return_value=(jsonl_output.encode("utf-8"), b""))
         mock_process.returncode = 0
         mock_subprocess.return_value = mock_process
 
@@ -241,9 +203,7 @@ class TestCodexCLISubprocess:
             '{"type":"item.completed","item":{"type":"agent_message","text":"Should include"}}\n'
         )
         mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(jsonl_output.encode("utf-8"), b"")
-        )
+        mock_process.communicate = AsyncMock(return_value=(jsonl_output.encode("utf-8"), b""))
         mock_process.returncode = 0
         mock_subprocess.return_value = mock_process
 
@@ -277,9 +237,7 @@ class TestCodexCLISubprocess:
             '{"type":"item.completed","item":{"type":"agent_message","text":""}}\n'
         )
         mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(jsonl_output.encode("utf-8"), b"")
-        )
+        mock_process.communicate = AsyncMock(return_value=(jsonl_output.encode("utf-8"), b""))
         mock_process.returncode = 0
         mock_subprocess.return_value = mock_process
 
@@ -306,15 +264,9 @@ class TestCodexCLISubprocess:
         """Codex CLI skips malformed JSONL lines."""
         mock_which.return_value = "/usr/local/bin/codex"
 
-        jsonl_output = (
-            '{"type":"text","text":"Line 1"}\n'
-            '{malformed json\n'
-            '{"type":"text","text":"Line 2"}\n'
-        )
+        jsonl_output = '{"type":"text","text":"Line 1"}\n{malformed json\n{"type":"text","text":"Line 2"}\n'
         mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(jsonl_output.encode("utf-8"), b"")
-        )
+        mock_process.communicate = AsyncMock(return_value=(jsonl_output.encode("utf-8"), b""))
         mock_process.returncode = 0
         mock_subprocess.return_value = mock_process
 
@@ -347,9 +299,7 @@ class TestClaudeCLISubprocess:
         mock_which.return_value = "/usr/local/bin/claude"
 
         mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(b'{"response": "Code analysis complete"}', b"")
-        )
+        mock_process.communicate = AsyncMock(return_value=(b'{"response": "Code analysis complete"}', b""))
         mock_process.returncode = 0
         mock_subprocess.return_value = mock_process
 
@@ -413,9 +363,7 @@ class TestCLISubprocessEnvironment:
         mock_which.return_value = "/usr/local/bin/gemini"
 
         mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(b'{"response": "ok"}', b"")
-        )
+        mock_process.communicate = AsyncMock(return_value=(b'{"response": "ok"}', b""))
         mock_process.returncode = 0
         mock_subprocess.return_value = mock_process
 
@@ -449,9 +397,7 @@ class TestCLISubprocessMessageHandling:
         mock_which.return_value = "/usr/local/bin/gemini"
 
         mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(b'{"response": "ok"}', b"")
-        )
+        mock_process.communicate = AsyncMock(return_value=(b'{"response": "ok"}', b""))
         mock_process.returncode = 0
         mock_subprocess.return_value = mock_process
 
@@ -473,9 +419,7 @@ class TestCLISubprocessMessageHandling:
         await client._execute_cli_model("gemini-cli", config, messages)
 
         # Verify only last message was sent to CLI
-        mock_process.communicate.assert_called_once_with(
-            input=b"Second question"
-        )
+        mock_process.communicate.assert_called_once_with(input=b"Second question")
 
     @pytest.mark.asyncio
     @patch("src.models.litellm_client.shutil.which")
@@ -485,9 +429,7 @@ class TestCLISubprocessMessageHandling:
         mock_which.return_value = "/usr/local/bin/gemini"
 
         mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(b'{"response": "ok"}', b"")
-        )
+        mock_process.communicate = AsyncMock(return_value=(b'{"response": "ok"}', b""))
         mock_process.returncode = 0
         mock_subprocess.return_value = mock_process
 
@@ -518,9 +460,7 @@ class TestCLISubprocessEdgeCases:
         mock_which.return_value = "/usr/local/bin/gemini"
 
         mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=('{"response": "Hello 世界 🌍"}'.encode(), b"")
-        )
+        mock_process.communicate = AsyncMock(return_value=('{"response": "Hello 世界 🌍"}'.encode(), b""))
         mock_process.returncode = 0
         mock_subprocess.return_value = mock_process
 
@@ -579,9 +519,7 @@ class TestCLISubprocessEdgeCases:
         # Setup: Long stderr message
         long_error = "Error: " + "x" * 1000
         mock_process = Mock()
-        mock_process.communicate = AsyncMock(
-            return_value=(b"", long_error.encode("utf-8"))
-        )
+        mock_process.communicate = AsyncMock(return_value=(b"", long_error.encode("utf-8")))
         mock_process.returncode = 1
         mock_subprocess.return_value = mock_process
 

@@ -1,7 +1,5 @@
 """Unit tests for CLI output parsers."""
 
-import pytest
-
 from src.models.litellm_client import LiteLLMClient
 
 
@@ -34,7 +32,7 @@ class TestJSONParser:
     def test_parse_json_fallback_to_text(self):
         """Malformed JSON falls back to text"""
         client = LiteLLMClient()
-        stdout = '{malformed json'
+        stdout = "{malformed json"
         result = client._parse_cli_output(stdout, "json")
         assert result == stdout.strip()
 
@@ -88,9 +86,9 @@ class TestJSONLParser:
     def test_parse_jsonl_mixed_events(self):
         """Mix of text and item.completed events"""
         client = LiteLLMClient()
-        stdout = '''{"type":"text","text":"Step 1"}
+        stdout = """{"type":"text","text":"Step 1"}
 {"type":"item.completed","item":{"type":"agent_message","text":"Final"}}
-{"type":"text","text":"Step 2"}'''
+{"type":"text","text":"Step 2"}"""
         result = client._parse_cli_output(stdout, "jsonl")
         assert "Step 1" in result
         assert "Final" in result
@@ -99,8 +97,8 @@ class TestJSONLParser:
     def test_parse_jsonl_ignore_non_agent_messages(self):
         """Ignore item.completed events that aren't agent_message"""
         client = LiteLLMClient()
-        stdout = '''{"type":"item.completed","item":{"type":"tool_call","text":"Should ignore"}}
-{"type":"item.completed","item":{"type":"agent_message","text":"Should include"}}'''
+        stdout = """{"type":"item.completed","item":{"type":"tool_call","text":"Should ignore"}}
+{"type":"item.completed","item":{"type":"agent_message","text":"Should include"}}"""
         result = client._parse_cli_output(stdout, "jsonl")
         assert "Should include" in result
         assert "Should ignore" not in result
@@ -108,18 +106,18 @@ class TestJSONLParser:
     def test_parse_jsonl_empty_text_fields(self):
         """Skip events with empty text"""
         client = LiteLLMClient()
-        stdout = '''{"type":"text","text":""}
+        stdout = """{"type":"text","text":""}
 {"type":"text","text":"Valid text"}
-{"type":"item.completed","item":{"type":"agent_message","text":""}}'''
+{"type":"item.completed","item":{"type":"agent_message","text":""}}"""
         result = client._parse_cli_output(stdout, "jsonl")
         assert result == "Valid text"
 
     def test_parse_jsonl_malformed_lines_skipped(self):
         """Malformed JSONL lines are skipped"""
         client = LiteLLMClient()
-        stdout = '''{"type":"text","text":"Line 1"}
+        stdout = """{"type":"text","text":"Line 1"}
 {malformed json
-{"type":"text","text":"Line 2"}'''
+{"type":"text","text":"Line 2"}"""
         result = client._parse_cli_output(stdout, "jsonl")
         assert "Line 1" in result
         assert "Line 2" in result
@@ -134,9 +132,9 @@ class TestJSONLParser:
     def test_parse_jsonl_preserves_order(self):
         """Messages are joined in order"""
         client = LiteLLMClient()
-        stdout = '''{"type":"text","text":"First"}
+        stdout = """{"type":"text","text":"First"}
 {"type":"text","text":"Second"}
-{"type":"text","text":"Third"}'''
+{"type":"text","text":"Third"}"""
         result = client._parse_cli_output(stdout, "jsonl")
         lines = result.split("\n")
         assert lines[0] == "First"

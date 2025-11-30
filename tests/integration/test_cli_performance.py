@@ -86,9 +86,7 @@ class TestCLIConcurrency:
 
     @pytest.mark.integration
     @pytest.mark.timeout(90)
-    async def test_concurrent_different_cli_models(
-        self, temp_project_dir, has_gemini_cli, has_codex_cli, has_claude_cli
-    ):
+    async def test_concurrent_different_cli_models(self, temp_project_dir, has_gemini_cli, has_codex_cli, has_claude_cli):
         """Different CLI models can run concurrently."""
         # Build list of available CLIs
         available_clis = []

@@ -105,9 +105,7 @@ class TestCompareWithCLI:
 
     @pytest.mark.integration
     @pytest.mark.timeout(90)
-    async def test_compare_with_mixed_models(
-        self, skip_if_no_any_cli, temp_project_dir, integration_test_model, has_gemini_cli
-    ):
+    async def test_compare_with_mixed_models(self, skip_if_no_any_cli, temp_project_dir, integration_test_model, has_gemini_cli):
         """Compare works with mix of API and CLI models."""
         if not has_gemini_cli:
             pytest.skip("Need Gemini CLI for this test")
@@ -132,9 +130,7 @@ class TestCompareWithCLI:
 
     @pytest.mark.integration
     @pytest.mark.timeout(90)
-    async def test_compare_with_multiple_cli_models(
-        self, temp_project_dir, has_gemini_cli, has_codex_cli, has_claude_cli
-    ):
+    async def test_compare_with_multiple_cli_models(self, temp_project_dir, has_gemini_cli, has_codex_cli, has_claude_cli):
         """Compare works with multiple CLI models."""
         # Build list of available CLIs
         available_clis = []
@@ -168,9 +164,7 @@ class TestDebateWithCLI:
 
     @pytest.mark.integration
     @pytest.mark.timeout(120)
-    async def test_debate_with_cli_models(
-        self, temp_project_dir, has_gemini_cli, has_codex_cli, integration_test_model
-    ):
+    async def test_debate_with_cli_models(self, temp_project_dir, has_gemini_cli, has_codex_cli, integration_test_model):
         """Debate workflow works with CLI models."""
         # Need at least one CLI for this test
         if not (has_gemini_cli or has_codex_cli):
@@ -234,9 +228,7 @@ class TestCLIErrorHandling:
 
     @pytest.mark.integration
     @pytest.mark.timeout(90)
-    async def test_debate_with_one_cli_failure(
-        self, temp_project_dir, integration_test_model, has_gemini_cli, has_codex_cli
-    ):
+    async def test_debate_with_one_cli_failure(self, temp_project_dir, integration_test_model, has_gemini_cli, has_codex_cli):
         """Debate handles CLI failure gracefully."""
         if not (has_gemini_cli or has_codex_cli):
             pytest.skip("Need at least one CLI for this test")

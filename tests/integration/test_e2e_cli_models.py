@@ -61,7 +61,7 @@ async def test_gemini_cli_basic_execution():
     content = response.content.lower()
     assert "4" in content or "four" in content, f"Expected answer to contain '4', got: {content}"
 
-    print(f"\n✓ Gemini CLI test passed")
+    print("\n✓ Gemini CLI test passed")
     print(f"✓ Latency: {response.metadata.latency_ms}ms")
     print(f"✓ Response: {response.content[:100]}...")
 
@@ -86,7 +86,7 @@ async def test_codex_cli_basic_execution():
     content = response.content.lower()
     assert "6" in content or "six" in content, f"Expected answer to contain '6', got: {content}"
 
-    print(f"\n✓ Codex CLI test passed")
+    print("\n✓ Codex CLI test passed")
     print(f"✓ Latency: {response.metadata.latency_ms}ms")
     print(f"✓ Response: {response.content[:100]}...")
 
@@ -111,7 +111,7 @@ async def test_claude_cli_basic_execution():
     content = response.content.lower()
     assert "8" in content or "eight" in content, f"Expected answer to contain '8', got: {content}"
 
-    print(f"\n✓ Claude CLI test passed")
+    print("\n✓ Claude CLI test passed")
     print(f"✓ Latency: {response.metadata.latency_ms}ms")
     print(f"✓ Response: {response.content[:100]}...")
 
@@ -151,7 +151,7 @@ async def test_cli_model_in_chat():
     content = response["content"].lower()
     assert "paris" in content, f"Expected answer to contain 'paris', got: {content}"
 
-    print(f"\n✓ CLI model in chat test passed")
+    print("\n✓ CLI model in chat test passed")
     print(f"✓ Response: {response['content'][:100]}...")
 
 
@@ -194,7 +194,7 @@ async def test_cli_model_in_compare(integration_test_model):
         content = result["content"].lower()
         assert "10" in content or "ten" in content, f"Expected answer to contain '10' from {result['metadata']['model']}, got: {content}"
 
-    print(f"\n✓ CLI model in compare test passed")
+    print("\n✓ CLI model in compare test passed")
     print(f"✓ Status: {response['status']}")
     print(f"✓ Summary: {response['summary']}")
 
@@ -240,7 +240,7 @@ def multiply(x, y):
         assert "content" in response
         assert len(response["content"]) > 0
 
-        print(f"\n✓ CLI model in codereview test passed (P1)")
+        print("\n✓ CLI model in codereview test passed (P1)")
         print(f"✓ Status: {response['status']}")
         print(f"✓ Response length: {len(response['content'])} chars")
         print(f"✓ Response preview: {response['content'][:200]}...")
@@ -284,7 +284,7 @@ async def test_cli_model_in_debate(integration_test_model):
     assert len(step1_successes) >= 1, "Expected at least one step 1 success"
     assert len(step2_successes) >= 1, "Expected at least one step 2 success"
 
-    print(f"\n✓ CLI model in debate test passed")
+    print("\n✓ CLI model in debate test passed")
     print(f"✓ Status: {response['status']}")
     print(f"✓ Summary: {response['summary']}")
 
@@ -332,9 +332,11 @@ async def test_multiple_cli_models_in_compare():
     # Both should mention 15
     for result in response["results"]:
         content = result["content"].lower()
-        assert "15" in content or "fifteen" in content, f"Expected answer to contain '15' from {result['metadata']['model']}, got: {content}"
+        assert "15" in content or "fifteen" in content, (
+            f"Expected answer to contain '15' from {result['metadata']['model']}, got: {content}"
+        )
 
-    print(f"\n✓ Multiple CLI models test passed")
+    print("\n✓ Multiple CLI models test passed")
     print(f"✓ Status: {response['status']}")
 
 
@@ -378,9 +380,11 @@ async def test_all_three_clis_in_compare():
     # All should mention 18
     for result in response["results"]:
         content = result["content"].lower()
-        assert "18" in content or "eighteen" in content, f"Expected answer to contain '18' from {result['metadata']['model']}, got: {content}"
+        assert "18" in content or "eighteen" in content, (
+            f"Expected answer to contain '18' from {result['metadata']['model']}, got: {content}"
+        )
 
-    print(f"\n✓ All three CLI models test passed")
+    print("\n✓ All three CLI models test passed")
     print(f"✓ Status: {response['status']}")
     print(f"✓ Models: {', '.join(models)}")
 
@@ -394,8 +398,8 @@ async def test_all_three_clis_in_compare():
 @pytest.mark.timeout(30)
 async def test_cli_model_invalid_command():
     """Test CLI model with non-existent command returns error."""
-    from src.models.litellm_client import litellm_client
     from src.models.config import ModelConfig, get_models_config
+    from src.models.litellm_client import litellm_client
 
     # Temporarily add a fake CLI model
     config = get_models_config()
@@ -419,7 +423,7 @@ async def test_cli_model_invalid_command():
     # Clean up
     del config.models["fake-cli"]
 
-    print(f"\n✓ CLI error handling test passed")
+    print("\n✓ CLI error handling test passed")
     print(f"✓ Error: {response.error[:100]}...")
 
 
@@ -443,7 +447,7 @@ async def test_gemini_cli_with_alias():
     content = response.content.lower()
     assert "2" in content or "two" in content, f"Expected answer to contain '2', got: {content}"
 
-    print(f"\n✓ Gemini CLI alias test passed")
+    print("\n✓ Gemini CLI alias test passed")
     print(f"✓ Alias 'gem-cli' resolved to: {response.metadata.model}")
 
 
@@ -467,7 +471,7 @@ async def test_codex_cli_with_alias():
     content = response.content.lower()
     assert "8" in content or "eight" in content, f"Expected answer to contain '8', got: {content}"
 
-    print(f"\n✓ Codex CLI alias test passed")
+    print("\n✓ Codex CLI alias test passed")
     print(f"✓ Alias 'cx-cli' resolved to: {response.metadata.model}")
 
 
@@ -491,5 +495,5 @@ async def test_claude_cli_with_alias():
     content = response.content.lower()
     assert "8" in content or "eight" in content, f"Expected answer to contain '8', got: {content}"
 
-    print(f"\n✓ Claude CLI alias test passed")
+    print("\n✓ Claude CLI alias test passed")
     print(f"✓ Alias 'cl-cli' resolved to: {response.metadata.model}")

@@ -153,3 +153,183 @@ def skip_if_no_any_cli(has_gemini_cli, has_codex_cli, has_claude_cli):
     """Skip test if no CLI is available."""
     if not (has_gemini_cli or has_codex_cli or has_claude_cli):
         pytest.skip("No CLI models available - install at least one CLI tool")
+
+
+# ============================================================================
+# Dynamic CLI Fixtures (New Pattern - Testing Strategy V2)
+# ============================================================================
+
+CLI_TOOLS = {
+    "gemini": {
+        "install": "npm install -g @google/generative-ai-cli",
+        "check": "gemini",
+    },
+    "codex": {
+        "install": "npm install -g @anthropic-ai/codex-cli",
+        "check": "codex",
+    },
+    "claude": {
+        "install": "pip install anthropic-cli",
+        "check": "claude",
+    },
+}
+
+
+@pytest.fixture
+def require_cli():
+    """Dynamic CLI requirement checker.
+
+    Usage:
+        async def test_something(require_cli):
+            require_cli("gemini")
+            # Test runs only if gemini CLI is installed
+
+    Example:
+        def test_gemini_execution(require_cli):
+            require_cli("gemini")
+            # ... test code
+    """
+
+    def _check(cli_name: str):
+        if cli_name not in CLI_TOOLS:
+            raise ValueError(f"Unknown CLI: {cli_name}. Known CLIs: {list(CLI_TOOLS.keys())}")
+
+        if not shutil.which(CLI_TOOLS[cli_name]["check"]):
+            install_hint = CLI_TOOLS[cli_name]["install"]
+            pytest.skip(f"{cli_name} CLI not installed - install via: {install_hint}")
+
+    return _check
+
+
+@pytest.fixture
+def available_clis():
+    """Return list of installed CLIs.
+
+    Usage:
+        async def test_multi_cli(available_clis):
+            if len(available_clis) < 2:
+                pytest.skip("Need at least 2 CLIs")
+            # Use available_clis[0], available_clis[1], etc.
+
+    Example:
+        def test_compare_clis(available_clis):
+            assert len(available_clis) >= 2, "Need 2+ CLIs"
+            # ... test with available_clis[0] and available_clis[1]
+    """
+    return [name for name in CLI_TOOLS.keys() if shutil.which(CLI_TOOLS[name]["check"])]
+
+
+# ============================================================================
+# Mock Helper Fixtures (Reduce Boilerplate - Testing Strategy V2)
+# ============================================================================
+
+
+@pytest.fixture
+def mock_cli_success(mocker):
+    """Mock successful CLI subprocess execution.
+
+    Reduces 17 lines of mock setup to 1 line.
+
+    Usage:
+        def test_something(mock_cli_success):
+            mock_cli_success(stdout=b'{"response": "ok"}')
+            # Test code...
+
+    Args:
+        stdout: Bytes to return as stdout (default: b"")
+        stderr: Bytes to return as stderr (default: b"")
+        returncode: Exit code to return (default: 0)
+        cli_path: Path to CLI binary (default: "/usr/bin/cli")
+
+    Returns:
+        Tuple of (mock_subprocess_exec, mock_process)
+
+    Example:
+        def test_gemini_success(mock_cli_success):
+            mock_exec, mock_process = mock_cli_success(
+                stdout=b'{"response": "Hello"}',
+                returncode=0
+            )
+
+            client = LiteLLMClient()
+            result = await client.call_async(...)
+
+            assert result.status == "success"
+            mock_exec.assert_called_once()
+    """
+
+    def _setup(stdout=b"", stderr=b"", returncode=0, cli_path="/usr/bin/cli"):
+        # Mock subprocess execution
+        mock_exec = mocker.patch("src.models.litellm_client.asyncio.create_subprocess_exec")
+
+        # Mock which() to indicate CLI is installed
+        mocker.patch("src.models.litellm_client.shutil.which", return_value=cli_path)
+
+        # Create mock process
+        mock_process = mocker.Mock()
+        mock_process.communicate = mocker.AsyncMock(return_value=(stdout, stderr))
+        mock_process.returncode = returncode
+        mock_exec.return_value = mock_process
+
+        return mock_exec, mock_process
+
+    return _setup
+
+
+@pytest.fixture
+def mock_cli_failure(mocker):
+    """Mock failed CLI subprocess execution.
+
+    Usage:
+        def test_something(mock_cli_failure):
+            mock_cli_failure("not_found")
+            # Test code expecting CLI not found error
+
+    Args:
+        error_type: Type of failure ("not_found", "timeout", "exit_code")
+        stderr: Error message to return (default: b"Command failed")
+        exit_code: Non-zero exit code for "exit_code" type (default: 1)
+
+    Returns:
+        Tuple of (mock_subprocess_exec, mock_process) or (None, None) for "not_found"
+
+    Example:
+        def test_cli_not_found(mock_cli_failure):
+            mock_exec, _ = mock_cli_failure("not_found")
+
+            client = LiteLLMClient()
+            result = await client.call_async(...)
+
+            assert result.status == "error"
+            assert "not found" in result.error.lower()
+    """
+
+    def _setup(error_type="not_found", stderr=b"Command failed", exit_code=1):
+        if error_type == "not_found":
+            # CLI not installed
+            mocker.patch("src.models.litellm_client.shutil.which", return_value=None)
+            return None, None
+
+        elif error_type == "timeout":
+            # CLI execution times out
+            mock_exec = mocker.patch("src.models.litellm_client.asyncio.create_subprocess_exec")
+            mock_process = mocker.Mock()
+            mock_process.communicate = mocker.AsyncMock(side_effect=TimeoutError())
+            mock_exec.return_value = mock_process
+            return mock_exec, mock_process
+
+        elif error_type == "exit_code":
+            # CLI returns non-zero exit code
+            mock_exec = mocker.patch("src.models.litellm_client.asyncio.create_subprocess_exec")
+            mocker.patch("src.models.litellm_client.shutil.which", return_value="/usr/bin/cli")
+
+            mock_process = mocker.Mock()
+            mock_process.communicate = mocker.AsyncMock(return_value=(b"", stderr))
+            mock_process.returncode = exit_code
+            mock_exec.return_value = mock_process
+            return mock_exec, mock_process
+
+        else:
+            raise ValueError(f"Unknown error_type: {error_type}")
+
+    return _setup

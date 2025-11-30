@@ -161,10 +161,22 @@ class LiteLLMClient:
         Returns:
             ModelResponse with CLI output
         """
+        # Validate CLI command is set
+        if not config.cli_command:
+            error_msg = f"CLI model '{canonical_name}' has no cli_command configured"
+            logger.error(f"[CLI_CALL] {error_msg}")
+            return ModelResponse.error_response(
+                error=error_msg,
+                model=canonical_name,
+            )
+
+        # Narrow type for type checker - we know cli_command is str here
+        cli_command: str = config.cli_command
+
         # Check if CLI command exists
-        if not shutil.which(config.cli_command):
-            install_hint = self._get_cli_install_hint(config.cli_command)
-            error_msg = f"CLI command '{config.cli_command}' not found in PATH. {install_hint}"
+        if not shutil.which(cli_command):
+            install_hint = self._get_cli_install_hint(cli_command)
+            error_msg = f"CLI command '{cli_command}' not found in PATH. {install_hint}"
             logger.error(f"[CLI_CALL] {error_msg}")
             return ModelResponse.error_response(
                 error=error_msg,
@@ -175,7 +187,7 @@ class LiteLLMClient:
         prompt = messages[-1]["content"] if messages else ""
 
         # Build command
-        command = [config.cli_command] + config.cli_args
+        command = [cli_command] + config.cli_args
 
         # Prepare environment
         env = os.environ.copy()
@@ -185,7 +197,7 @@ class LiteLLMClient:
         # Use config timeout or fall back to settings
         timeout = settings.model_timeout_seconds
 
-        logger.info(f"[CLI_CALL] model={canonical_name} command={config.cli_command} parser={config.cli_parser}")
+        logger.info(f"[CLI_CALL] model={canonical_name} command={cli_command} parser={config.cli_parser}")
         logger.debug(f"[CLI_CALL] full_command={' '.join(command)}")
 
         start_time = time.perf_counter()
@@ -210,11 +222,11 @@ class LiteLLMClient:
             if process.returncode != 0:
                 stderr = stderr_bytes.decode("utf-8", errors="replace")
                 error_preview = stderr[:500] if stderr else "(no stderr)"
-                install_hint = self._get_cli_install_hint(config.cli_command)
+                install_hint = self._get_cli_install_hint(cli_command)
                 logger.error(f"[CLI_CALL] {canonical_name} failed with exit code {process.returncode}")
                 logger.debug(f"[CLI_CALL] stderr: {stderr[:1000]}")
                 return ModelResponse.error_response(
-                    error=f"CLI '{config.cli_command}' failed with exit code {process.returncode}. "
+                    error=f"CLI '{cli_command}' failed with exit code {process.returncode}. "
                     f"Error: {error_preview}\n\n"
                     f"Troubleshooting: {install_hint}",
                     model=canonical_name,
@@ -250,11 +262,11 @@ class LiteLLMClient:
 
             return response
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             latency_ms = int((time.perf_counter() - start_time) * 1000)
             logger.error(f"[CLI_CALL] {canonical_name} timed out after {timeout}s")
             return ModelResponse.error_response(
-                error=f"CLI '{config.cli_command}' timed out after {timeout}s. "
+                error=f"CLI '{cli_command}' timed out after {timeout}s. "
                 f"The command took longer than expected. "
                 f"Consider using a faster model or increasing MODEL_TIMEOUT_SECONDS in config.",
                 model=canonical_name,
@@ -263,17 +275,17 @@ class LiteLLMClient:
         except FileNotFoundError as e:
             # This shouldn't happen due to shutil.which() check, but handle it anyway
             latency_ms = int((time.perf_counter() - start_time) * 1000)
-            install_hint = self._get_cli_install_hint(config.cli_command)
+            install_hint = self._get_cli_install_hint(cli_command)
             logger.error(f"[CLI_CALL] {canonical_name} command not found: {e}")
             return ModelResponse.error_response(
-                error=f"CLI command '{config.cli_command}' not found. {install_hint}",
+                error=f"CLI command '{cli_command}' not found. {install_hint}",
                 model=canonical_name,
             )
 
         except Exception as e:
             latency_ms = int((time.perf_counter() - start_time) * 1000)
             logger.error(f"[CLI_CALL] {canonical_name} failed with exception: {type(e).__name__}: {e}")
-            logger.debug(f"[CLI_CALL] Full error details", exc_info=True)
+            logger.debug("[CLI_CALL] Full error details", exc_info=True)
             return ModelResponse.error_response(
                 error=f"CLI execution failed: {type(e).__name__}: {str(e)}",
                 model=canonical_name,
