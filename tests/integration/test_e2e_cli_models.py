@@ -274,9 +274,9 @@ async def test_cli_model_in_debate(integration_test_model):
     assert "results" in response
     assert len(response["results"]) == 2
 
-    # Check step 2 results
+    # Check step 2 results (only successful Step 1 models participate)
     assert "step2_results" in response
-    assert len(response["step2_results"]) == 2
+    assert len(response["step2_results"]) >= 1
 
     # Verify both steps had successes
     step1_successes = [r for r in response["results"] if r["status"] == "success"]

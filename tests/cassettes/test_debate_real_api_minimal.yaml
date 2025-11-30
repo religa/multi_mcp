@@ -1,0 +1,583 @@
+interactions:
+- request:
+    body: "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"<USER_MESSAGE>\\nWhat
+      is 2+2? Keep your answer very brief (one sentence).\\n</USER_MESSAGE>\"}]}],\"system_instruction\":{\"parts\":[{\"text\":\"#
+      ROLE\\nYou are a **Principal Engineer and Technical Advocate** participating
+      in a high-stakes architectural debate. Your mission is to identify viable options,
+      rank them systematically, then advocate for the strongest solution backed by
+      repository evidence.\\n\\n**Current Phase:** Independent Analysis (Step 1 of
+      2)\\nYou are generating an initial proposal. You will not see other models'
+      answers yet.\\n\\n# CORE WORKFLOW\\n\\n### STEP 1: Identify Top Options (3 by
+      default, unless user specifies N)\\n1. **Option Discovery:** Based on REPOSITORY_CONTEXT,
+      EDITABLE_FILES and USER_MESSAGE, existing patterns, identify viable approaches\\n2.
+      **Score & Rank:** Rate each option (1-10) on: alignment with codebase, complexity,
+      risk, performance\\n3. **Select Rank 1:** Choose the highest-scored option as
+      your proposal\\n\\n### STEP 2: Build Case for Rank 1\\n1. **Evidence Gathering:**
+      Cite specific file:line locations supporting your choice\\n2. **Implementation
+      Blueprint:** Minimal edits with concrete file changes\\n3. **Trade-offs & Risks:**
+      Document downsides with severity and mitigation\\n4. **Alternatives:** Reference
+      ranked options #2 and #3 from Step 1\\n\\n# SCOPE & ENGINEERING PHILOSOPHY\\n-
+      **Current Stack Focus:** Solutions must fit existing tech stack and patterns\\n-
+      **Anti-Overengineering:** Prefer simple, testable changes over abstraction\\n-
+      **Justified Innovation:** New patterns only when clearly superior with minimal
+      complexity\\n- **Evidence-Based Advocacy:** Every claim needs file:line proof
+      from REPOSITORY_CONTEXT\\n\\n# INPUT DATA\\nYou have access to:\\n- **<REPOSITORY_CONTEXT>:**
+      CLAUDE.md, AGENTS.md, architecture docs defining project conventions\\n- **<EDITABLE_FILES>:**
+      Current source code relevant to the question\\n- **<USER_MESSAGE>:** The technical
+      question or decision to make\\n\\n# CODE CITATION STANDARDS\\n- **Format:**
+      `path/to/file.py:line` or `file.py:start-end`\\n- **No Line Markers:** Input
+      code has \\\"LINE\u2502\\\" markers. **NEVER** include these in output code
+      or quotes.\\n- **Snippet Length:** 3-10 lines for evidence; show enough context
+      to understand\\n- **Multi-file Navigation:** Explain relationships across files:
+      \\\"Function X in `api.py:45` calls Y in `utils.py:78`\\\"\\n\\n# VISUAL INDICATORS\\n\\n**Option
+      Ranking:**\\n- \U0001F947 **Rank 1:** Your proposal (highest composite score)\\n-
+      \U0001F948 **Rank 2:** Strong alternative\\n- \U0001F949 **Rank 3:** Considered
+      but weaker option\\n\\n**Confidence & Evidence:**\\n- \U0001F7E2 **High (8-10/10):**
+      Strong evidence from code/docs with exact citations\\n- \U0001F7E1 **Medium
+      (5-7/10):** Reasonable inference from context\\n- \U0001F534 **Low (1-4/10):**
+      Assumption or external knowledge\\n\\n**Risk Assessment:**\\n- \U0001F534 **CRITICAL:**
+      Security vulnerabilities, data loss risks\\n- \U0001F7E0 **HIGH:** Crashes,
+      race conditions, major bugs\\n- \U0001F7E1 **MEDIUM:** Performance issues, error
+      handling gaps\\n- \U0001F7E2 **LOW:** Code quality, maintainability, style\\n\\n#
+      OUTPUT FORMAT (MANDATORY)\\nFormat your response exactly using these sections
+      in markdown:\\n\\n**# \U0001F947 [Concise Title]: Use [Approach Name]**\\n>
+      \u2705 **Verdict:** [One-sentence justification with emoji verdict \U0001F7E2/\U0001F7E1/\U0001F534]\\n\\n**1.
+      Option Ranking (Top 3 \u2014 Score & Justification)**\\n\\n\U0001F947 **Rank
+      1: [Approach Name]** (Score: X/10)\\n- One-line alignment justification with
+      file citation\\n- Performance/complexity note\\n- Why it's the best fit\\n\\n\U0001F948
+      **Rank 2: [Alternative Approach]** (Score: Y/10)\\n- One-line why it's viable
+      but second choice\\n- Key limitation vs Rank 1\\n\\n\U0001F949 **Rank 3: [Alternative
+      Approach]** (Score: Z/10)\\n- One-line why it was considered\\n- Why it ranks
+      lower\\n\\n**2. Rank 1 Justification**\\nDetailed analysis of your top choice
+      with code evidence (`file:line`), pattern alignment, and performance notes (Big
+      O, benchmarks). Use bullets with inline citations: \\\"Claim \u2014 `file.py:START-END`:
+      quoted snippet\\\"\\n\\n**3. Implementation Blueprint**\\nMinimal file edits
+      and exact commands. Format: `Edit: path/to/file.py:lines \u2192 [change]`. Include
+      code diffs and test commands: `pytest path/to/test.py -v`\\n\\n**4. Trade-offs
+      & Risks**\\nConcise bullets with emoji severity (\U0001F534\U0001F7E0\U0001F7E1\U0001F7E2)
+      and mitigation strategies.\\n\\n**5. Confidence Score**\\n\U0001F7E2 High (8-10/10)
+      / \U0001F7E1 Medium (5-7/10) / \U0001F534 Low (1-4/10): [brief explanation based
+      on evidence quality]\\n\\n**6. Next Steps (Prioritized)**\\nExact commands or
+      file edits in priority order (1-3 items).\\n\\n# STYLE GUIDELINES\\n- **Be Opinionated:**
+      \\\"Use X because...\\\" not \\\"X is an option\\\"\\n- **Be Concise:** Bullets
+      for arguments, avoid prose\\n- **Be Direct:** Skip pleasantries, dive into engineering\\n-
+      **Code-First:** Prefer code examples over descriptions\\n\\n# CRITICAL RULES\\n-
+      **Context Adherence:** If repo uses `pytest`, don't suggest `unittest`. If it
+      uses `FastAPI`, don't suggest `Flask`.\\n- **NEVER** include line number markers
+      (e.g., \\\"   1\u2502\\\") in output code blocks\\n- **ALWAYS** reference line
+      numbers in analysis text for evidence\"}]},\"generationConfig\":{\"temperature\":0.2}}"
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '5140'
+      content-type:
+      - application/json
+      host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - litellm/1.80.0
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not
+        valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n
+        \   \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n
+        \       \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n
+        \       \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n
+        \       }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n
+        \       \"locale\": \"en-US\",\n        \"message\": \"API key not valid.
+        Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 30 Nov 2025 21:08:45 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=52
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+      content-length:
+      - '581'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"<USER_MESSAGE>\\nWhat
+      is 2+2? Keep your answer very brief (one sentence).\\n</USER_MESSAGE>\"}]}],\"system_instruction\":{\"parts\":[{\"text\":\"#
+      ROLE\\nYou are a **Principal Engineer and Technical Advocate** participating
+      in a high-stakes architectural debate. Your mission is to identify viable options,
+      rank them systematically, then advocate for the strongest solution backed by
+      repository evidence.\\n\\n**Current Phase:** Independent Analysis (Step 1 of
+      2)\\nYou are generating an initial proposal. You will not see other models'
+      answers yet.\\n\\n# CORE WORKFLOW\\n\\n### STEP 1: Identify Top Options (3 by
+      default, unless user specifies N)\\n1. **Option Discovery:** Based on REPOSITORY_CONTEXT,
+      EDITABLE_FILES and USER_MESSAGE, existing patterns, identify viable approaches\\n2.
+      **Score & Rank:** Rate each option (1-10) on: alignment with codebase, complexity,
+      risk, performance\\n3. **Select Rank 1:** Choose the highest-scored option as
+      your proposal\\n\\n### STEP 2: Build Case for Rank 1\\n1. **Evidence Gathering:**
+      Cite specific file:line locations supporting your choice\\n2. **Implementation
+      Blueprint:** Minimal edits with concrete file changes\\n3. **Trade-offs & Risks:**
+      Document downsides with severity and mitigation\\n4. **Alternatives:** Reference
+      ranked options #2 and #3 from Step 1\\n\\n# SCOPE & ENGINEERING PHILOSOPHY\\n-
+      **Current Stack Focus:** Solutions must fit existing tech stack and patterns\\n-
+      **Anti-Overengineering:** Prefer simple, testable changes over abstraction\\n-
+      **Justified Innovation:** New patterns only when clearly superior with minimal
+      complexity\\n- **Evidence-Based Advocacy:** Every claim needs file:line proof
+      from REPOSITORY_CONTEXT\\n\\n# INPUT DATA\\nYou have access to:\\n- **<REPOSITORY_CONTEXT>:**
+      CLAUDE.md, AGENTS.md, architecture docs defining project conventions\\n- **<EDITABLE_FILES>:**
+      Current source code relevant to the question\\n- **<USER_MESSAGE>:** The technical
+      question or decision to make\\n\\n# CODE CITATION STANDARDS\\n- **Format:**
+      `path/to/file.py:line` or `file.py:start-end`\\n- **No Line Markers:** Input
+      code has \\\"LINE\u2502\\\" markers. **NEVER** include these in output code
+      or quotes.\\n- **Snippet Length:** 3-10 lines for evidence; show enough context
+      to understand\\n- **Multi-file Navigation:** Explain relationships across files:
+      \\\"Function X in `api.py:45` calls Y in `utils.py:78`\\\"\\n\\n# VISUAL INDICATORS\\n\\n**Option
+      Ranking:**\\n- \U0001F947 **Rank 1:** Your proposal (highest composite score)\\n-
+      \U0001F948 **Rank 2:** Strong alternative\\n- \U0001F949 **Rank 3:** Considered
+      but weaker option\\n\\n**Confidence & Evidence:**\\n- \U0001F7E2 **High (8-10/10):**
+      Strong evidence from code/docs with exact citations\\n- \U0001F7E1 **Medium
+      (5-7/10):** Reasonable inference from context\\n- \U0001F534 **Low (1-4/10):**
+      Assumption or external knowledge\\n\\n**Risk Assessment:**\\n- \U0001F534 **CRITICAL:**
+      Security vulnerabilities, data loss risks\\n- \U0001F7E0 **HIGH:** Crashes,
+      race conditions, major bugs\\n- \U0001F7E1 **MEDIUM:** Performance issues, error
+      handling gaps\\n- \U0001F7E2 **LOW:** Code quality, maintainability, style\\n\\n#
+      OUTPUT FORMAT (MANDATORY)\\nFormat your response exactly using these sections
+      in markdown:\\n\\n**# \U0001F947 [Concise Title]: Use [Approach Name]**\\n>
+      \u2705 **Verdict:** [One-sentence justification with emoji verdict \U0001F7E2/\U0001F7E1/\U0001F534]\\n\\n**1.
+      Option Ranking (Top 3 \u2014 Score & Justification)**\\n\\n\U0001F947 **Rank
+      1: [Approach Name]** (Score: X/10)\\n- One-line alignment justification with
+      file citation\\n- Performance/complexity note\\n- Why it's the best fit\\n\\n\U0001F948
+      **Rank 2: [Alternative Approach]** (Score: Y/10)\\n- One-line why it's viable
+      but second choice\\n- Key limitation vs Rank 1\\n\\n\U0001F949 **Rank 3: [Alternative
+      Approach]** (Score: Z/10)\\n- One-line why it was considered\\n- Why it ranks
+      lower\\n\\n**2. Rank 1 Justification**\\nDetailed analysis of your top choice
+      with code evidence (`file:line`), pattern alignment, and performance notes (Big
+      O, benchmarks). Use bullets with inline citations: \\\"Claim \u2014 `file.py:START-END`:
+      quoted snippet\\\"\\n\\n**3. Implementation Blueprint**\\nMinimal file edits
+      and exact commands. Format: `Edit: path/to/file.py:lines \u2192 [change]`. Include
+      code diffs and test commands: `pytest path/to/test.py -v`\\n\\n**4. Trade-offs
+      & Risks**\\nConcise bullets with emoji severity (\U0001F534\U0001F7E0\U0001F7E1\U0001F7E2)
+      and mitigation strategies.\\n\\n**5. Confidence Score**\\n\U0001F7E2 High (8-10/10)
+      / \U0001F7E1 Medium (5-7/10) / \U0001F534 Low (1-4/10): [brief explanation based
+      on evidence quality]\\n\\n**6. Next Steps (Prioritized)**\\nExact commands or
+      file edits in priority order (1-3 items).\\n\\n# STYLE GUIDELINES\\n- **Be Opinionated:**
+      \\\"Use X because...\\\" not \\\"X is an option\\\"\\n- **Be Concise:** Bullets
+      for arguments, avoid prose\\n- **Be Direct:** Skip pleasantries, dive into engineering\\n-
+      **Code-First:** Prefer code examples over descriptions\\n\\n# CRITICAL RULES\\n-
+      **Context Adherence:** If repo uses `pytest`, don't suggest `unittest`. If it
+      uses `FastAPI`, don't suggest `Flask`.\\n- **NEVER** include line number markers
+      (e.g., \\\"   1\u2502\\\") in output code blocks\\n- **ALWAYS** reference line
+      numbers in analysis text for evidence\"}]},\"generationConfig\":{\"temperature\":0.2}}"
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '5140'
+      content-type:
+      - application/json
+      host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - litellm/1.80.0
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 30 Nov 2025 21:08:45 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=52
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+      content-length:
+      - '0'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"# ROLE\\nYou are a **Principal
+      Engineer and Technical Advocate** participating in a high-stakes architectural
+      debate. Your mission is to identify viable options, rank them systematically,
+      then advocate for the strongest solution backed by repository evidence.\\n\\n**Current
+      Phase:** Independent Analysis (Step 1 of 2)\\nYou are generating an initial
+      proposal. You will not see other models' answers yet.\\n\\n# CORE WORKFLOW\\n\\n###
+      STEP 1: Identify Top Options (3 by default, unless user specifies N)\\n1. **Option
+      Discovery:** Based on REPOSITORY_CONTEXT, EDITABLE_FILES and USER_MESSAGE, existing
+      patterns, identify viable approaches\\n2. **Score & Rank:** Rate each option
+      (1-10) on: alignment with codebase, complexity, risk, performance\\n3. **Select
+      Rank 1:** Choose the highest-scored option as your proposal\\n\\n### STEP 2:
+      Build Case for Rank 1\\n1. **Evidence Gathering:** Cite specific file:line locations
+      supporting your choice\\n2. **Implementation Blueprint:** Minimal edits with
+      concrete file changes\\n3. **Trade-offs & Risks:** Document downsides with severity
+      and mitigation\\n4. **Alternatives:** Reference ranked options #2 and #3 from
+      Step 1\\n\\n# SCOPE & ENGINEERING PHILOSOPHY\\n- **Current Stack Focus:** Solutions
+      must fit existing tech stack and patterns\\n- **Anti-Overengineering:** Prefer
+      simple, testable changes over abstraction\\n- **Justified Innovation:** New
+      patterns only when clearly superior with minimal complexity\\n- **Evidence-Based
+      Advocacy:** Every claim needs file:line proof from REPOSITORY_CONTEXT\\n\\n#
+      INPUT DATA\\nYou have access to:\\n- **<REPOSITORY_CONTEXT>:** CLAUDE.md, AGENTS.md,
+      architecture docs defining project conventions\\n- **<EDITABLE_FILES>:** Current
+      source code relevant to the question\\n- **<USER_MESSAGE>:** The technical question
+      or decision to make\\n\\n# CODE CITATION STANDARDS\\n- **Format:** `path/to/file.py:line`
+      or `file.py:start-end`\\n- **No Line Markers:** Input code has \\\"LINE\u2502\\\"
+      markers. **NEVER** include these in output code or quotes.\\n- **Snippet Length:**
+      3-10 lines for evidence; show enough context to understand\\n- **Multi-file
+      Navigation:** Explain relationships across files: \\\"Function X in `api.py:45`
+      calls Y in `utils.py:78`\\\"\\n\\n# VISUAL INDICATORS\\n\\n**Option Ranking:**\\n-
+      \U0001F947 **Rank 1:** Your proposal (highest composite score)\\n- \U0001F948
+      **Rank 2:** Strong alternative\\n- \U0001F949 **Rank 3:** Considered but weaker
+      option\\n\\n**Confidence & Evidence:**\\n- \U0001F7E2 **High (8-10/10):** Strong
+      evidence from code/docs with exact citations\\n- \U0001F7E1 **Medium (5-7/10):**
+      Reasonable inference from context\\n- \U0001F534 **Low (1-4/10):** Assumption
+      or external knowledge\\n\\n**Risk Assessment:**\\n- \U0001F534 **CRITICAL:**
+      Security vulnerabilities, data loss risks\\n- \U0001F7E0 **HIGH:** Crashes,
+      race conditions, major bugs\\n- \U0001F7E1 **MEDIUM:** Performance issues, error
+      handling gaps\\n- \U0001F7E2 **LOW:** Code quality, maintainability, style\\n\\n#
+      OUTPUT FORMAT (MANDATORY)\\nFormat your response exactly using these sections
+      in markdown:\\n\\n**# \U0001F947 [Concise Title]: Use [Approach Name]**\\n>
+      \u2705 **Verdict:** [One-sentence justification with emoji verdict \U0001F7E2/\U0001F7E1/\U0001F534]\\n\\n**1.
+      Option Ranking (Top 3 \u2014 Score & Justification)**\\n\\n\U0001F947 **Rank
+      1: [Approach Name]** (Score: X/10)\\n- One-line alignment justification with
+      file citation\\n- Performance/complexity note\\n- Why it's the best fit\\n\\n\U0001F948
+      **Rank 2: [Alternative Approach]** (Score: Y/10)\\n- One-line why it's viable
+      but second choice\\n- Key limitation vs Rank 1\\n\\n\U0001F949 **Rank 3: [Alternative
+      Approach]** (Score: Z/10)\\n- One-line why it was considered\\n- Why it ranks
+      lower\\n\\n**2. Rank 1 Justification**\\nDetailed analysis of your top choice
+      with code evidence (`file:line`), pattern alignment, and performance notes (Big
+      O, benchmarks). Use bullets with inline citations: \\\"Claim \u2014 `file.py:START-END`:
+      quoted snippet\\\"\\n\\n**3. Implementation Blueprint**\\nMinimal file edits
+      and exact commands. Format: `Edit: path/to/file.py:lines \u2192 [change]`. Include
+      code diffs and test commands: `pytest path/to/test.py -v`\\n\\n**4. Trade-offs
+      & Risks**\\nConcise bullets with emoji severity (\U0001F534\U0001F7E0\U0001F7E1\U0001F7E2)
+      and mitigation strategies.\\n\\n**5. Confidence Score**\\n\U0001F7E2 High (8-10/10)
+      / \U0001F7E1 Medium (5-7/10) / \U0001F534 Low (1-4/10): [brief explanation based
+      on evidence quality]\\n\\n**6. Next Steps (Prioritized)**\\nExact commands or
+      file edits in priority order (1-3 items).\\n\\n# STYLE GUIDELINES\\n- **Be Opinionated:**
+      \\\"Use X because...\\\" not \\\"X is an option\\\"\\n- **Be Concise:** Bullets
+      for arguments, avoid prose\\n- **Be Direct:** Skip pleasantries, dive into engineering\\n-
+      **Code-First:** Prefer code examples over descriptions\\n\\n# CRITICAL RULES\\n-
+      **Context Adherence:** If repo uses `pytest`, don't suggest `unittest`. If it
+      uses `FastAPI`, don't suggest `Flask`.\\n- **NEVER** include line number markers
+      (e.g., \\\"   1\u2502\\\") in output code blocks\\n- **ALWAYS** reference line
+      numbers in analysis text for evidence\"},{\"role\":\"user\",\"content\":\"<USER_MESSAGE>\\nWhat
+      is 2+2? Keep your answer very brief (one sentence).\\n</USER_MESSAGE>\"}],\"model\":\"gpt-5-nano\",\"temperature\":1.0}"
+    headers:
+      Cookie:
+      - _cfuvid=SygFWC6G9u0rZI6BPFpVBc45sqXP1Nzg0HX5ix35sc0-1764526255243-0.0.1.1-604800000
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '5117'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - AsyncOpenAI/Python 2.8.1
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 2.8.1
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '180.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.0
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: "{\n  \"id\": \"chatcmpl-Chiwv8TIhhfJ0BN2duXYGpRzb1aA6\",\n  \"object\":
+        \"chat.completion\",\n  \"created\": 1764536925,\n  \"model\": \"gpt-5-nano-2025-08-07\",\n
+        \ \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\":
+        \"assistant\",\n        \"content\": \"2+2 equals 4.\",\n        \"refusal\":
+        null,\n        \"annotations\": []\n      },\n      \"finish_reason\": \"stop\"\n
+        \   }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 1247,\n    \"completion_tokens\":
+        1488,\n    \"total_tokens\": 2735,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\":
+        1152,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\":
+        {\n      \"reasoning_tokens\": 1472,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\":
+        0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\":
+        \"default\",\n  \"system_fingerprint\": null\n}\n"
+    headers:
+      Access-Control-Expose-Headers:
+      - X-Request-ID
+      CF-RAY:
+      - 9a6d5265bc9dd469-SEA
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 30 Nov 2025 21:09:05 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=Fz8LDiwXBdM4NuxHZPY2qiLSYh07E3ZKBMZhrxtHHw4-1764536945-1.0.1.1-pKZuZXk3CnvIkXRLUxOE89ZDyH6iPTe81YWCl9xu9sYSpHm_kdM8gExPjgahVf_lsYPtPC0iohu2S18jEDTPxu_Fi_KKIC35EkN.M_Z_3PY;
+        path=/; expires=Sun, 30-Nov-25 21:39:05 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '796'
+      openai-organization:
+      - tom-llc
+      openai-processing-ms:
+      - '20053'
+      openai-project:
+      - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
+      openai-version:
+      - '2020-10-01'
+      x-envoy-upstream-service-time:
+      - '20193'
+      x-openai-proxy-wasm:
+      - v0.1
+      x-ratelimit-limit-requests:
+      - '5000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '4999'
+      x-ratelimit-remaining-tokens:
+      - '1998774'
+      x-ratelimit-reset-requests:
+      - 12ms
+      x-ratelimit-reset-tokens:
+      - 36ms
+      x-request-id:
+      - req_3c30cbe9891642139a5897f7e734d726
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"# ROLE\\nYou are a **Principal
+      Engineer and Technical Advocate** participating in a high-stakes architectural
+      debate. Your mission is to identify viable options, rank them systematically,
+      then advocate for the strongest solution backed by repository evidence.\\n\\n**Current
+      Phase:** Independent Analysis (Step 1 of 2)\\nYou are generating an initial
+      proposal. You will not see other models' answers yet.\\n\\n# CORE WORKFLOW\\n\\n###
+      STEP 1: Identify Top Options (3 by default, unless user specifies N)\\n1. **Option
+      Discovery:** Based on REPOSITORY_CONTEXT, EDITABLE_FILES and USER_MESSAGE, existing
+      patterns, identify viable approaches\\n2. **Score & Rank:** Rate each option
+      (1-10) on: alignment with codebase, complexity, risk, performance\\n3. **Select
+      Rank 1:** Choose the highest-scored option as your proposal\\n\\n### STEP 2:
+      Build Case for Rank 1\\n1. **Evidence Gathering:** Cite specific file:line locations
+      supporting your choice\\n2. **Implementation Blueprint:** Minimal edits with
+      concrete file changes\\n3. **Trade-offs & Risks:** Document downsides with severity
+      and mitigation\\n4. **Alternatives:** Reference ranked options #2 and #3 from
+      Step 1\\n\\n# SCOPE & ENGINEERING PHILOSOPHY\\n- **Current Stack Focus:** Solutions
+      must fit existing tech stack and patterns\\n- **Anti-Overengineering:** Prefer
+      simple, testable changes over abstraction\\n- **Justified Innovation:** New
+      patterns only when clearly superior with minimal complexity\\n- **Evidence-Based
+      Advocacy:** Every claim needs file:line proof from REPOSITORY_CONTEXT\\n\\n#
+      INPUT DATA\\nYou have access to:\\n- **<REPOSITORY_CONTEXT>:** CLAUDE.md, AGENTS.md,
+      architecture docs defining project conventions\\n- **<EDITABLE_FILES>:** Current
+      source code relevant to the question\\n- **<USER_MESSAGE>:** The technical question
+      or decision to make\\n\\n# CODE CITATION STANDARDS\\n- **Format:** `path/to/file.py:line`
+      or `file.py:start-end`\\n- **No Line Markers:** Input code has \\\"LINE\u2502\\\"
+      markers. **NEVER** include these in output code or quotes.\\n- **Snippet Length:**
+      3-10 lines for evidence; show enough context to understand\\n- **Multi-file
+      Navigation:** Explain relationships across files: \\\"Function X in `api.py:45`
+      calls Y in `utils.py:78`\\\"\\n\\n# VISUAL INDICATORS\\n\\n**Option Ranking:**\\n-
+      \U0001F947 **Rank 1:** Your proposal (highest composite score)\\n- \U0001F948
+      **Rank 2:** Strong alternative\\n- \U0001F949 **Rank 3:** Considered but weaker
+      option\\n\\n**Confidence & Evidence:**\\n- \U0001F7E2 **High (8-10/10):** Strong
+      evidence from code/docs with exact citations\\n- \U0001F7E1 **Medium (5-7/10):**
+      Reasonable inference from context\\n- \U0001F534 **Low (1-4/10):** Assumption
+      or external knowledge\\n\\n**Risk Assessment:**\\n- \U0001F534 **CRITICAL:**
+      Security vulnerabilities, data loss risks\\n- \U0001F7E0 **HIGH:** Crashes,
+      race conditions, major bugs\\n- \U0001F7E1 **MEDIUM:** Performance issues, error
+      handling gaps\\n- \U0001F7E2 **LOW:** Code quality, maintainability, style\\n\\n#
+      OUTPUT FORMAT (MANDATORY)\\nFormat your response exactly using these sections
+      in markdown:\\n\\n**# \U0001F947 [Concise Title]: Use [Approach Name]**\\n>
+      \u2705 **Verdict:** [One-sentence justification with emoji verdict \U0001F7E2/\U0001F7E1/\U0001F534]\\n\\n**1.
+      Option Ranking (Top 3 \u2014 Score & Justification)**\\n\\n\U0001F947 **Rank
+      1: [Approach Name]** (Score: X/10)\\n- One-line alignment justification with
+      file citation\\n- Performance/complexity note\\n- Why it's the best fit\\n\\n\U0001F948
+      **Rank 2: [Alternative Approach]** (Score: Y/10)\\n- One-line why it's viable
+      but second choice\\n- Key limitation vs Rank 1\\n\\n\U0001F949 **Rank 3: [Alternative
+      Approach]** (Score: Z/10)\\n- One-line why it was considered\\n- Why it ranks
+      lower\\n\\n**2. Rank 1 Justification**\\nDetailed analysis of your top choice
+      with code evidence (`file:line`), pattern alignment, and performance notes (Big
+      O, benchmarks). Use bullets with inline citations: \\\"Claim \u2014 `file.py:START-END`:
+      quoted snippet\\\"\\n\\n**3. Implementation Blueprint**\\nMinimal file edits
+      and exact commands. Format: `Edit: path/to/file.py:lines \u2192 [change]`. Include
+      code diffs and test commands: `pytest path/to/test.py -v`\\n\\n**4. Trade-offs
+      & Risks**\\nConcise bullets with emoji severity (\U0001F534\U0001F7E0\U0001F7E1\U0001F7E2)
+      and mitigation strategies.\\n\\n**5. Confidence Score**\\n\U0001F7E2 High (8-10/10)
+      / \U0001F7E1 Medium (5-7/10) / \U0001F534 Low (1-4/10): [brief explanation based
+      on evidence quality]\\n\\n**6. Next Steps (Prioritized)**\\nExact commands or
+      file edits in priority order (1-3 items).\\n\\n# STYLE GUIDELINES\\n- **Be Opinionated:**
+      \\\"Use X because...\\\" not \\\"X is an option\\\"\\n- **Be Concise:** Bullets
+      for arguments, avoid prose\\n- **Be Direct:** Skip pleasantries, dive into engineering\\n-
+      **Code-First:** Prefer code examples over descriptions\\n\\n# CRITICAL RULES\\n-
+      **Context Adherence:** If repo uses `pytest`, don't suggest `unittest`. If it
+      uses `FastAPI`, don't suggest `Flask`.\\n- **NEVER** include line number markers
+      (e.g., \\\"   1\u2502\\\") in output code blocks\\n- **ALWAYS** reference line
+      numbers in analysis text for evidence\"},{\"role\":\"user\",\"content\":\"<USER_MESSAGE>\\nWhat
+      is 2+2? Keep your answer very brief (one sentence).\\n</USER_MESSAGE>\"}],\"model\":\"gpt-5-nano\",\"temperature\":1.0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '5117'
+      content-type:
+      - application/json
+      cookie:
+      - _cfuvid=SygFWC6G9u0rZI6BPFpVBc45sqXP1Nzg0HX5ix35sc0-1764526255243-0.0.1.1-604800000
+      host:
+      - api.openai.com
+      user-agent:
+      - AsyncOpenAI/Python 2.8.1
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 2.8.1
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '180.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.0
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Expose-Headers:
+      - X-Request-ID
+      CF-RAY:
+      - 9a6d5265bc9dd469-SEA
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 30 Nov 2025 21:09:05 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=Fz8LDiwXBdM4NuxHZPY2qiLSYh07E3ZKBMZhrxtHHw4-1764536945-1.0.1.1-pKZuZXk3CnvIkXRLUxOE89ZDyH6iPTe81YWCl9xu9sYSpHm_kdM8gExPjgahVf_lsYPtPC0iohu2S18jEDTPxu_Fi_KKIC35EkN.M_Z_3PY;
+        path=/; expires=Sun, 30-Nov-25 21:39:05 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '0'
+      openai-organization:
+      - tom-llc
+      openai-processing-ms:
+      - '20053'
+      openai-project:
+      - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
+      openai-version:
+      - '2020-10-01'
+      x-envoy-upstream-service-time:
+      - '20193'
+      x-openai-proxy-wasm:
+      - v0.1
+      x-ratelimit-limit-requests:
+      - '5000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '4999'
+      x-ratelimit-remaining-tokens:
+      - '1998774'
+      x-ratelimit-reset-requests:
+      - 12ms
+      x-ratelimit-reset-tokens:
+      - 36ms
+      x-request-id:
+      - req_3c30cbe9891642139a5897f7e734d726
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,1520 @@
+interactions:
+- request:
+    body: "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"<EDITABLE_FILES>\\n<file
+      path=\\\"asynctaskqueue/scheduler.py\\\" relative_path=\\\"asynctaskqueue/scheduler.py\\\"
+      filename=\\\"scheduler.py\\\">\\n   1\u2502 \\\"\\\"\\\"Task scheduler for periodic
+      and delayed task execution.\\n   2\u2502 \\n   3\u2502 This module provides
+      scheduling capabilities for recurring and one-time delayed tasks.\\n   4\u2502
+      \\\"\\\"\\\"\\n   5\u2502 \\n   6\u2502 import threading\\n   7\u2502 import
+      time\\n   8\u2502 import uuid\\n   9\u2502 from collections.abc import Callable\\n
+      \ 10\u2502 \\n  11\u2502 from .queue import TaskQueue\\n  12\u2502 \\n  13\u2502
+      \\n  14\u2502 class ScheduledJob:\\n  15\u2502     \\\"\\\"\\\"Represents a
+      scheduled job.\\\"\\\"\\\"\\n  16\u2502 \\n  17\u2502     def __init__(\\n  18\u2502
+      \        self,\\n  19\u2502         job_id: str,\\n  20\u2502         func:
+      Callable,\\n  21\u2502         interval: float,\\n  22\u2502         args: tuple
+      = (),\\n  23\u2502         kwargs: dict = None\\n  24\u2502     ):\\n  25\u2502
+      \        self.job_id = job_id\\n  26\u2502         self.func = func\\n  27\u2502
+      \        self.interval = interval\\n  28\u2502         self.args = args\\n  29\u2502
+      \        self.kwargs = kwargs or {}\\n  30\u2502         self.timer: threading.Timer
+      | None = None\\n  31\u2502         self.paused = False\\n  32\u2502 \\n  33\u2502
+      \\n  34\u2502 class Scheduler:\\n  35\u2502     \\\"\\\"\\\"Scheduler for periodic
+      and one-time tasks.\\\"\\\"\\\"\\n  36\u2502 \\n  37\u2502     def __init__(self,
+      queue: TaskQueue):\\n  38\u2502         self._queue = queue\\n  39\u2502         self._jobs:
+      dict[str, ScheduledJob] = {}\\n  40\u2502         self._lock = threading.Lock()\\n
+      \ 41\u2502 \\n  42\u2502     def schedule_periodic(\\n  43\u2502         self,\\n
+      \ 44\u2502         func: Callable,\\n  45\u2502         interval: float,\\n
+      \ 46\u2502         args: tuple = (),\\n  47\u2502         kwargs: dict = None,\\n
+      \ 48\u2502         job_id: str = None\\n  49\u2502     ) -> str:\\n  50\u2502
+      \        \\\"\\\"\\\"Schedule a function to run periodically.\\n  51\u2502 \\n
+      \ 52\u2502         Args:\\n  53\u2502             func: The function to execute\\n
+      \ 54\u2502             interval: Interval in seconds between executions\\n  55\u2502
+      \            args: Positional arguments\\n  56\u2502             kwargs: Keyword
+      arguments\\n  57\u2502             job_id: Optional job identifier (generated
+      if not provided)\\n  58\u2502 \\n  59\u2502         Returns:\\n  60\u2502             The
+      job identifier\\n  61\u2502         \\\"\\\"\\\"\\n  62\u2502         if job_id
+      is None:\\n  63\u2502             job_id = str(uuid.uuid4())\\n  64\u2502 \\n
+      \ 65\u2502         with self._lock:\\n  66\u2502             job = ScheduledJob(job_id,
+      func, interval, args, kwargs)\\n  67\u2502             self._jobs[job_id] =
+      job\\n  68\u2502             self._schedule_next_run(job)\\n  69\u2502 \\n  70\u2502
+      \        return job_id\\n  71\u2502 \\n  72\u2502     def _schedule_next_run(self,
+      job: ScheduledJob) -> None:\\n  73\u2502         \\\"\\\"\\\"Schedule the next
+      run of a periodic job.\\\"\\\"\\\"\\n  74\u2502         if job.paused:\\n  75\u2502
+      \            return\\n  76\u2502 \\n  77\u2502         job.timer = threading.Timer(job.interval,
+      self._execute_job, args=(job,))\\n  78\u2502         job.timer.daemon = True\\n
+      \ 79\u2502         job.timer.start()\\n  80\u2502 \\n  81\u2502     def _execute_job(self,
+      job: ScheduledJob) -> None:\\n  82\u2502         \\\"\\\"\\\"Execute a scheduled
+      job.\\\"\\\"\\\"\\n  83\u2502         if job.paused:\\n  84\u2502             return\\n
+      \ 85\u2502 \\n  86\u2502         task_id = f\\\"{job.job_id}_{int(time.time()
+      * 1000)}\\\"\\n  87\u2502 \\n  88\u2502         try:\\n  89\u2502             self._queue.add_task(\\n
+      \ 90\u2502                 task_id=task_id,\\n  91\u2502                 func=job.func,\\n
+      \ 92\u2502                 args=job.args,\\n  93\u2502                 kwargs=job.kwargs\\n
+      \ 94\u2502             )\\n  95\u2502         except Exception as e:\\n  96\u2502
+      \            print(f\\\"Failed to enqueue job {job.job_id}: {e}\\\")\\n  97\u2502
+      \\n  98\u2502         if not job.paused:\\n  99\u2502             self._schedule_next_run(job)\\n
+      100\u2502 \\n 101\u2502     def cancel_job(self, job_id: str) -> bool:\\n 102\u2502
+      \        \\\"\\\"\\\"Cancel a scheduled job.\\n 103\u2502 \\n 104\u2502         Args:\\n
+      105\u2502             job_id: The job identifier\\n 106\u2502 \\n 107\u2502
+      \        Returns:\\n 108\u2502             True if job was canceled, False if
+      not found\\n 109\u2502         \\\"\\\"\\\"\\n 110\u2502         with self._lock:\\n
+      111\u2502             job = self._jobs.get(job_id)\\n 112\u2502             if
+      not job:\\n 113\u2502                 return False\\n 114\u2502 \\n 115\u2502
+      \            job.paused = True\\n 116\u2502 \\n 117\u2502             if job.timer:\\n
+      118\u2502                 job.timer.cancel()\\n 119\u2502 \\n 120\u2502             return
+      True\\n 121\u2502 \\n 122\u2502     def resume_job(self, job_id: str) -> bool:\\n
+      123\u2502         \\\"\\\"\\\"Resume a paused job.\\n 124\u2502 \\n 125\u2502
+      \        Args:\\n 126\u2502             job_id: The job identifier\\n 127\u2502
+      \\n 128\u2502         Returns:\\n 129\u2502             True if job was resumed,
+      False if not found\\n 130\u2502         \\\"\\\"\\\"\\n 131\u2502         with
+      self._lock:\\n 132\u2502             job = self._jobs.get(job_id)\\n 133\u2502
+      \            if not job:\\n 134\u2502                 return False\\n 135\u2502
+      \\n 136\u2502             job.paused = False\\n 137\u2502             self._schedule_next_run(job)\\n
+      138\u2502             return True\\n 139\u2502 \\n 140\u2502     def remove_job(self,
+      job_id: str) -> bool:\\n 141\u2502         \\\"\\\"\\\"Permanently remove a
+      job.\\n 142\u2502 \\n 143\u2502         Args:\\n 144\u2502             job_id:
+      The job identifier\\n 145\u2502 \\n 146\u2502         Returns:\\n 147\u2502
+      \            True if job was removed, False if not found\\n 148\u2502         \\\"\\\"\\\"\\n
+      149\u2502         with self._lock:\\n 150\u2502             job = self._jobs.pop(job_id,
+      None)\\n 151\u2502             if not job:\\n 152\u2502                 return
+      False\\n 153\u2502 \\n 154\u2502             if job.timer:\\n 155\u2502                 job.timer.cancel()\\n
+      156\u2502 \\n 157\u2502             return True\\n 158\u2502 \\n 159\u2502     def
+      get_all_jobs(self) -> dict[str, ScheduledJob]:\\n 160\u2502         \\\"\\\"\\\"Get
+      all scheduled jobs.\\\"\\\"\\\"\\n 161\u2502         with self._lock:\\n 162\u2502
+      \            return dict(self._jobs)\\n</file>\\n\\n<file path=\\\"asynctaskqueue/queue.py\\\"
+      relative_path=\\\"asynctaskqueue/queue.py\\\" filename=\\\"queue.py\\\">\\n
+      \  1\u2502 \\\"\\\"\\\"Task queue management.\\n   2\u2502 \\n   3\u2502 This
+      module manages the task queue and task lifecycle.\\n   4\u2502 \\\"\\\"\\\"\\n
+      \  5\u2502 \\n   6\u2502 import asyncio\\n   7\u2502 from collections.abc import
+      Callable\\n   8\u2502 from dataclasses import dataclass\\n   9\u2502 from enum
+      import Enum\\n  10\u2502 \\n  11\u2502 \\n  12\u2502 class TaskStatus(Enum):\\n
+      \ 13\u2502     \\\"\\\"\\\"Task execution status.\\\"\\\"\\\"\\n  14\u2502     PENDING
+      = \\\"pending\\\"\\n  15\u2502     RUNNING = \\\"running\\\"\\n  16\u2502     COMPLETED
+      = \\\"completed\\\"\\n  17\u2502     FAILED = \\\"failed\\\"\\n  18\u2502     CANCELLED
+      = \\\"cancelled\\\"\\n  19\u2502 \\n  20\u2502 \\n  21\u2502 @dataclass\\n  22\u2502
+      class Task:\\n  23\u2502     \\\"\\\"\\\"Represents a task in the queue.\\\"\\\"\\\"\\n
+      \ 24\u2502     task_id: str\\n  25\u2502     func: Callable\\n  26\u2502     args:
+      tuple\\n  27\u2502     kwargs: dict\\n  28\u2502     status: TaskStatus = TaskStatus.PENDING\\n
+      \ 29\u2502 \\n  30\u2502 \\n  31\u2502 class QueueFullError(Exception):\\n  32\u2502
+      \    \\\"\\\"\\\"Raised when attempting to add a task to a full queue.\\\"\\\"\\\"\\n
+      \ 33\u2502     pass\\n  34\u2502 \\n  35\u2502 \\n  36\u2502 class TaskNotFoundError(Exception):\\n
+      \ 37\u2502     \\\"\\\"\\\"Raised when a task is not found in the queue.\\\"\\\"\\\"\\n
+      \ 38\u2502     pass\\n  39\u2502 \\n  40\u2502 \\n  41\u2502 class TaskQueue:\\n
+      \ 42\u2502     \\\"\\\"\\\"Manages a queue of tasks for asynchronous execution.\\\"\\\"\\\"\\n
+      \ 43\u2502 \\n  44\u2502     def __init__(self, max_size: int = 1000):\\n  45\u2502
+      \        self._queue: asyncio.Queue = asyncio.Queue(maxsize=max_size)\\n  46\u2502
+      \        self._tasks: dict[str, Task] = {}\\n  47\u2502         self._lock =
+      asyncio.Lock()\\n  48\u2502         self._max_size = max_size\\n  49\u2502 \\n
+      \ 50\u2502     async def add_task(\\n  51\u2502         self,\\n  52\u2502         task_id:
+      str,\\n  53\u2502         func: Callable,\\n  54\u2502         args: tuple =
+      (),\\n  55\u2502         kwargs: dict = None\\n  56\u2502     ) -> None:\\n
+      \ 57\u2502         \\\"\\\"\\\"Add a task to the queue.\\n  58\u2502 \\n  59\u2502
+      \        Args:\\n  60\u2502             task_id: Unique task identifier\\n  61\u2502
+      \            func: The function to execute\\n  62\u2502             args: Positional
+      arguments for the function\\n  63\u2502             kwargs: Keyword arguments
+      for the function\\n  64\u2502 \\n  65\u2502         Raises:\\n  66\u2502             QueueFullError:
+      If the queue is at maximum capacity\\n  67\u2502         \\\"\\\"\\\"\\n  68\u2502
+      \        async with self._lock:\\n  69\u2502             if len(self._tasks)
+      >= self._max_size:\\n  70\u2502                 raise QueueFullError(f\\\"Queue
+      is full (max size: {self._max_size})\\\")\\n  71\u2502 \\n  72\u2502             task
+      = Task(\\n  73\u2502                 task_id=task_id,\\n  74\u2502                 func=func,\\n
+      \ 75\u2502                 args=args,\\n  76\u2502                 kwargs=kwargs
+      or {}\\n  77\u2502             )\\n  78\u2502             self._tasks[task_id]
+      = task\\n  79\u2502             await self._queue.put(task)\\n  80\u2502 \\n
+      \ 81\u2502     async def get_task(self) -> Task | None:\\n  82\u2502         \\\"\\\"\\\"Get
+      the next task from the queue.\\n  83\u2502 \\n  84\u2502         Returns:\\n
+      \ 85\u2502             The next task, or None if queue is empty (with timeout)\\n
+      \ 86\u2502         \\\"\\\"\\\"\\n  87\u2502         try:\\n  88\u2502             task
+      = await asyncio.wait_for(self._queue.get(), timeout=0.1)\\n  89\u2502             async
+      with self._lock:\\n  90\u2502                 if task.task_id in self._tasks:\\n
+      \ 91\u2502                     self._tasks[task.task_id].status = TaskStatus.RUNNING\\n
+      \ 92\u2502             return task\\n  93\u2502         except TimeoutError:\\n
+      \ 94\u2502             return None\\n  95\u2502 \\n  96\u2502     async def
+      mark_completed(self, task_id: str, success: bool = True) -> None:\\n  97\u2502
+      \        \\\"\\\"\\\"Mark a task as completed or failed.\\n  98\u2502 \\n  99\u2502
+      \        Args:\\n 100\u2502             task_id: The task identifier\\n 101\u2502
+      \            success: Whether the task completed successfully\\n 102\u2502         \\\"\\\"\\\"\\n
+      103\u2502         async with self._lock:\\n 104\u2502             if task_id
+      in self._tasks:\\n 105\u2502                 self._tasks[task_id].status = (\\n
+      106\u2502                     TaskStatus.COMPLETED if success else TaskStatus.FAILED\\n
+      107\u2502                 )\\n 108\u2502 \\n 109\u2502     async def remove_task(self,
+      task_id: str) -> None:\\n 110\u2502         \\\"\\\"\\\"Remove a task from the
+      queue (cancels it).\\n 111\u2502 \\n 112\u2502         Args:\\n 113\u2502             task_id:
+      The task identifier\\n 114\u2502 \\n 115\u2502         Raises:\\n 116\u2502
+      \            TaskNotFoundError: If task is not found\\n 117\u2502         \\\"\\\"\\\"\\n
+      118\u2502         async with self._lock:\\n 119\u2502             if task_id
+      not in self._tasks:\\n 120\u2502                 raise TaskNotFoundError(f\\\"Task
+      {task_id} not found\\\")\\n 121\u2502             self._tasks[task_id].status
+      = TaskStatus.CANCELLED\\n 122\u2502             del self._tasks[task_id]\\n
+      123\u2502 \\n 124\u2502     def get_status(self, task_id: str) -> TaskStatus
+      | None:\\n 125\u2502         \\\"\\\"\\\"Get the status of a task.\\n 126\u2502
+      \\n 127\u2502         Args:\\n 128\u2502             task_id: The task identifier\\n
+      129\u2502 \\n 130\u2502         Returns:\\n 131\u2502             The task status
+      or None if not found\\n 132\u2502         \\\"\\\"\\\"\\n 133\u2502         task
+      = self._tasks.get(task_id)\\n 134\u2502         return task.status if task else
+      None\\n 135\u2502 \\n 136\u2502     def get_pending_count(self) -> int:\\n 137\u2502
+      \        \\\"\\\"\\\"Get the number of pending tasks.\\\"\\\"\\\"\\n 138\u2502
+      \        return sum(1 for t in self._tasks.values() if t.status == TaskStatus.PENDING)\\n
+      139\u2502 \\n 140\u2502     def get_running_count(self) -> int:\\n 141\u2502
+      \        \\\"\\\"\\\"Get the number of running tasks.\\\"\\\"\\\"\\n 142\u2502
+      \        return sum(1 for t in self._tasks.values() if t.status == TaskStatus.RUNNING)\\n</file>\\n\\n<file
+      path=\\\"asynctaskqueue/worker.py\\\" relative_path=\\\"asynctaskqueue/worker.py\\\"
+      filename=\\\"worker.py\\\">\\n   1\u2502 \\\"\\\"\\\"Worker pool for task execution.\\n
+      \  2\u2502 \\n   3\u2502 This module manages a pool of worker threads that execute
+      tasks from the queue.\\n   4\u2502 \\\"\\\"\\\"\\n   5\u2502 \\n   6\u2502 import
+      asyncio\\n   7\u2502 import logging\\n   8\u2502 import threading\\n   9\u2502
+      import time\\n  10\u2502 from concurrent.futures import ThreadPoolExecutor\\n
+      \ 11\u2502 \\n  12\u2502 from .config import Config\\n  13\u2502 from .queue
+      import Task, TaskQueue\\n  14\u2502 from .storage import ResultStorage\\n  15\u2502
+      \\n  16\u2502 logger = logging.getLogger(__name__)\\n  17\u2502 \\n  18\u2502
+      \\n  19\u2502 class WorkerPool:\\n  20\u2502     \\\"\\\"\\\"Pool of worker
+      threads for executing tasks.\\\"\\\"\\\"\\n  21\u2502 \\n  22\u2502     def
+      __init__(\\n  23\u2502         self,\\n  24\u2502         queue: TaskQueue,\\n
+      \ 25\u2502         storage: ResultStorage,\\n  26\u2502         config: Config\\n
+      \ 27\u2502     ):\\n  28\u2502         self._queue = queue\\n  29\u2502         self._storage
+      = storage\\n  30\u2502         self._config = config\\n  31\u2502         self._running
+      = False\\n  32\u2502         self._executor: ThreadPoolExecutor | None = None\\n
+      \ 33\u2502 \\n  34\u2502         if config.max_workers == 0:\\n  35\u2502             self._max_workers
+      = None\\n  36\u2502         else:\\n  37\u2502             self._max_workers
+      = config.max_workers\\n  38\u2502 \\n  39\u2502     def start(self) -> None:\\n
+      \ 40\u2502         \\\"\\\"\\\"Start the worker pool.\\\"\\\"\\\"\\n  41\u2502
+      \        if self._running:\\n  42\u2502             return\\n  43\u2502 \\n
+      \ 44\u2502         self._running = True\\n  45\u2502         self._executor
+      = ThreadPoolExecutor(max_workers=self._max_workers)\\n  46\u2502         threading.Thread(target=self._run_worker_loop,
+      daemon=True).start()\\n  47\u2502 \\n  48\u2502     def stop(self) -> None:\\n
+      \ 49\u2502         \\\"\\\"\\\"Stop the worker pool.\\\"\\\"\\\"\\n  50\u2502
+      \        self._running = False\\n  51\u2502         if self._executor:\\n  52\u2502
+      \            self._executor.shutdown(wait=True)\\n  53\u2502 \\n  54\u2502     def
+      _run_worker_loop(self) -> None:\\n  55\u2502         \\\"\\\"\\\"Main worker
+      loop that processes tasks from the queue.\\\"\\\"\\\"\\n  56\u2502         asyncio.run(self._async_worker_loop())\\n
+      \ 57\u2502 \\n  58\u2502     async def _async_worker_loop(self) -> None:\\n
+      \ 59\u2502         \\\"\\\"\\\"Async worker loop.\\\"\\\"\\\"\\n  60\u2502         while
+      self._running:\\n  61\u2502             task = await self._queue.get_task()\\n
+      \ 62\u2502             if task:\\n  63\u2502                 self._executor.submit(self._execute_task,
+      task)\\n  64\u2502 \\n  65\u2502     def _execute_task(self, task: Task) ->
+      None:\\n  66\u2502         \\\"\\\"\\\"Execute a single task.\\n  67\u2502 \\n
+      \ 68\u2502         Args:\\n  69\u2502             task: The task to execute\\n
+      \ 70\u2502         \\\"\\\"\\\"\\n  71\u2502         try:\\n  72\u2502             timeout_ms
+      = self._config.task_timeout\\n  73\u2502             start_time = time.time()\\n
+      \ 74\u2502 \\n  75\u2502             result = task.func(*task.args, **task.kwargs)\\n
+      \ 76\u2502 \\n  77\u2502             elapsed_ms = (time.time() - start_time)
+      * 1000\\n  78\u2502             if elapsed_ms > timeout_ms:\\n  79\u2502                 logger.warning(f\\\"Task
+      {task.task_id} exceeded timeout\\\")\\n  80\u2502                 asyncio.run(self._queue.mark_completed(task.task_id,
+      success=False))\\n  81\u2502                 return\\n  82\u2502 \\n  83\u2502
+      \            self._storage.store_result(task.task_id, result)\\n  84\u2502             asyncio.run(self._queue.mark_completed(task.task_id,
+      success=True))\\n  85\u2502 \\n  86\u2502         except Exception as e:\\n
+      \ 87\u2502             logger.error(f\\\"Task {task.task_id} failed: {e}\\\")\\n
+      \ 88\u2502 \\n  89\u2502             retry_count = self._storage.increment_retry_count(task.task_id)\\n
+      \ 90\u2502 \\n  91\u2502             if retry_count < self._config.retry_attempts:\\n
+      \ 92\u2502                 logger.info(f\\\"Will retry task {task.task_id} ({retry_count}/{self._config.retry_attempts})\\\")\\n
+      \ 93\u2502             else:\\n  94\u2502                 logger.error(f\\\"Task
+      {task.task_id} failed after {retry_count} attempts\\\")\\n  95\u2502 \\n  96\u2502
+      \            asyncio.run(self._queue.mark_completed(task.task_id, success=False))\\n
+      \ 97\u2502 \\n  98\u2502     def get_active_workers(self) -> int:\\n  99\u2502
+      \        \\\"\\\"\\\"Get the number of active worker threads.\\\"\\\"\\\"\\n
+      100\u2502         if not self._executor:\\n 101\u2502             return 0\\n
+      102\u2502         return self._max_workers or 0\\n</file>\\n\\n</EDITABLE_FILES>\\n\\n<USER_MESSAGE>\\nWe
+      have a critical deadlock in asynctaskqueue between the async scheduler\\nand
+      sync queue operations. What&#x27;s the best approach to fix this?\\n\\nOptions
+      to consider:\\n1. Convert entire codebase to async (queue, workers, scheduler)\\n2.
+      Use run_in_executor() to bridge async/sync boundary\\n3. Separate async scheduler
+      from sync worker pool with thread-safe queue\\n4. Replace asyncio scheduler
+      with threading-based approach\\n\\nConsider: backwards compatibility, performance,
+      complexity, testing effort.\\nProvide a clear recommendation at the end.\\nKeep
+      responses under 3 sentences each.\\n</USER_MESSAGE>\"}]}],\"system_instruction\":{\"parts\":[{\"text\":\"#
+      ROLE\\nYou are a **Principal Engineer and Technical Advocate** participating
+      in a high-stakes architectural debate. Your mission is to identify viable options,
+      rank them systematically, then advocate for the strongest solution backed by
+      repository evidence.\\n\\n**Current Phase:** Independent Analysis (Step 1 of
+      2)\\nYou are generating an initial proposal. You will not see other models'
+      answers yet.\\n\\n# CORE WORKFLOW\\n\\n### STEP 1: Identify Top Options (3 by
+      default, unless user specifies N)\\n1. **Option Discovery:** Based on REPOSITORY_CONTEXT,
+      EDITABLE_FILES and USER_MESSAGE, existing patterns, identify viable approaches\\n2.
+      **Score & Rank:** Rate each option (1-10) on: alignment with codebase, complexity,
+      risk, performance\\n3. **Select Rank 1:** Choose the highest-scored option as
+      your proposal\\n\\n### STEP 2: Build Case for Rank 1\\n1. **Evidence Gathering:**
+      Cite specific file:line locations supporting your choice\\n2. **Implementation
+      Blueprint:** Minimal edits with concrete file changes\\n3. **Trade-offs & Risks:**
+      Document downsides with severity and mitigation\\n4. **Alternatives:** Reference
+      ranked options #2 and #3 from Step 1\\n\\n# SCOPE & ENGINEERING PHILOSOPHY\\n-
+      **Current Stack Focus:** Solutions must fit existing tech stack and patterns\\n-
+      **Anti-Overengineering:** Prefer simple, testable changes over abstraction\\n-
+      **Justified Innovation:** New patterns only when clearly superior with minimal
+      complexity\\n- **Evidence-Based Advocacy:** Every claim needs file:line proof
+      from REPOSITORY_CONTEXT\\n\\n# INPUT DATA\\nYou have access to:\\n- **<REPOSITORY_CONTEXT>:**
+      CLAUDE.md, AGENTS.md, architecture docs defining project conventions\\n- **<EDITABLE_FILES>:**
+      Current source code relevant to the question\\n- **<USER_MESSAGE>:** The technical
+      question or decision to make\\n\\n# CODE CITATION STANDARDS\\n- **Format:**
+      `path/to/file.py:line` or `file.py:start-end`\\n- **No Line Markers:** Input
+      code has \\\"LINE\u2502\\\" markers. **NEVER** include these in output code
+      or quotes.\\n- **Snippet Length:** 3-10 lines for evidence; show enough context
+      to understand\\n- **Multi-file Navigation:** Explain relationships across files:
+      \\\"Function X in `api.py:45` calls Y in `utils.py:78`\\\"\\n\\n# VISUAL INDICATORS\\n\\n**Option
+      Ranking:**\\n- \U0001F947 **Rank 1:** Your proposal (highest composite score)\\n-
+      \U0001F948 **Rank 2:** Strong alternative\\n- \U0001F949 **Rank 3:** Considered
+      but weaker option\\n\\n**Confidence & Evidence:**\\n- \U0001F7E2 **High (8-10/10):**
+      Strong evidence from code/docs with exact citations\\n- \U0001F7E1 **Medium
+      (5-7/10):** Reasonable inference from context\\n- \U0001F534 **Low (1-4/10):**
+      Assumption or external knowledge\\n\\n**Risk Assessment:**\\n- \U0001F534 **CRITICAL:**
+      Security vulnerabilities, data loss risks\\n- \U0001F7E0 **HIGH:** Crashes,
+      race conditions, major bugs\\n- \U0001F7E1 **MEDIUM:** Performance issues, error
+      handling gaps\\n- \U0001F7E2 **LOW:** Code quality, maintainability, style\\n\\n#
+      OUTPUT FORMAT (MANDATORY)\\nFormat your response exactly using these sections
+      in markdown:\\n\\n**# \U0001F947 [Concise Title]: Use [Approach Name]**\\n>
+      \u2705 **Verdict:** [One-sentence justification with emoji verdict \U0001F7E2/\U0001F7E1/\U0001F534]\\n\\n**1.
+      Option Ranking (Top 3 \u2014 Score & Justification)**\\n\\n\U0001F947 **Rank
+      1: [Approach Name]** (Score: X/10)\\n- One-line alignment justification with
+      file citation\\n- Performance/complexity note\\n- Why it's the best fit\\n\\n\U0001F948
+      **Rank 2: [Alternative Approach]** (Score: Y/10)\\n- One-line why it's viable
+      but second choice\\n- Key limitation vs Rank 1\\n\\n\U0001F949 **Rank 3: [Alternative
+      Approach]** (Score: Z/10)\\n- One-line why it was considered\\n- Why it ranks
+      lower\\n\\n**2. Rank 1 Justification**\\nDetailed analysis of your top choice
+      with code evidence (`file:line`), pattern alignment, and performance notes (Big
+      O, benchmarks). Use bullets with inline citations: \\\"Claim \u2014 `file.py:START-END`:
+      quoted snippet\\\"\\n\\n**3. Implementation Blueprint**\\nMinimal file edits
+      and exact commands. Format: `Edit: path/to/file.py:lines \u2192 [change]`. Include
+      code diffs and test commands: `pytest path/to/test.py -v`\\n\\n**4. Trade-offs
+      & Risks**\\nConcise bullets with emoji severity (\U0001F534\U0001F7E0\U0001F7E1\U0001F7E2)
+      and mitigation strategies.\\n\\n**5. Confidence Score**\\n\U0001F7E2 High (8-10/10)
+      / \U0001F7E1 Medium (5-7/10) / \U0001F534 Low (1-4/10): [brief explanation based
+      on evidence quality]\\n\\n**6. Next Steps (Prioritized)**\\nExact commands or
+      file edits in priority order (1-3 items).\\n\\n# STYLE GUIDELINES\\n- **Be Opinionated:**
+      \\\"Use X because...\\\" not \\\"X is an option\\\"\\n- **Be Concise:** Bullets
+      for arguments, avoid prose\\n- **Be Direct:** Skip pleasantries, dive into engineering\\n-
+      **Code-First:** Prefer code examples over descriptions\\n\\n# CRITICAL RULES\\n-
+      **Context Adherence:** If repo uses `pytest`, don't suggest `unittest`. If it
+      uses `FastAPI`, don't suggest `Flask`.\\n- **NEVER** include line number markers
+      (e.g., \\\"   1\u2502\\\") in output code blocks\\n- **ALWAYS** reference line
+      numbers in analysis text for evidence\"}]},\"generationConfig\":{\"temperature\":0.2}}"
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '21350'
+      content-type:
+      - application/json
+      host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - litellm/1.80.0
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not
+        valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n
+        \   \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n
+        \       \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n
+        \       \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n
+        \       }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n
+        \       \"locale\": \"en-US\",\n        \"message\": \"API key not valid.
+        Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 30 Nov 2025 21:07:58 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=73
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+      content-length:
+      - '581'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"<EDITABLE_FILES>\\n<file
+      path=\\\"asynctaskqueue/scheduler.py\\\" relative_path=\\\"asynctaskqueue/scheduler.py\\\"
+      filename=\\\"scheduler.py\\\">\\n   1\u2502 \\\"\\\"\\\"Task scheduler for periodic
+      and delayed task execution.\\n   2\u2502 \\n   3\u2502 This module provides
+      scheduling capabilities for recurring and one-time delayed tasks.\\n   4\u2502
+      \\\"\\\"\\\"\\n   5\u2502 \\n   6\u2502 import threading\\n   7\u2502 import
+      time\\n   8\u2502 import uuid\\n   9\u2502 from collections.abc import Callable\\n
+      \ 10\u2502 \\n  11\u2502 from .queue import TaskQueue\\n  12\u2502 \\n  13\u2502
+      \\n  14\u2502 class ScheduledJob:\\n  15\u2502     \\\"\\\"\\\"Represents a
+      scheduled job.\\\"\\\"\\\"\\n  16\u2502 \\n  17\u2502     def __init__(\\n  18\u2502
+      \        self,\\n  19\u2502         job_id: str,\\n  20\u2502         func:
+      Callable,\\n  21\u2502         interval: float,\\n  22\u2502         args: tuple
+      = (),\\n  23\u2502         kwargs: dict = None\\n  24\u2502     ):\\n  25\u2502
+      \        self.job_id = job_id\\n  26\u2502         self.func = func\\n  27\u2502
+      \        self.interval = interval\\n  28\u2502         self.args = args\\n  29\u2502
+      \        self.kwargs = kwargs or {}\\n  30\u2502         self.timer: threading.Timer
+      | None = None\\n  31\u2502         self.paused = False\\n  32\u2502 \\n  33\u2502
+      \\n  34\u2502 class Scheduler:\\n  35\u2502     \\\"\\\"\\\"Scheduler for periodic
+      and one-time tasks.\\\"\\\"\\\"\\n  36\u2502 \\n  37\u2502     def __init__(self,
+      queue: TaskQueue):\\n  38\u2502         self._queue = queue\\n  39\u2502         self._jobs:
+      dict[str, ScheduledJob] = {}\\n  40\u2502         self._lock = threading.Lock()\\n
+      \ 41\u2502 \\n  42\u2502     def schedule_periodic(\\n  43\u2502         self,\\n
+      \ 44\u2502         func: Callable,\\n  45\u2502         interval: float,\\n
+      \ 46\u2502         args: tuple = (),\\n  47\u2502         kwargs: dict = None,\\n
+      \ 48\u2502         job_id: str = None\\n  49\u2502     ) -> str:\\n  50\u2502
+      \        \\\"\\\"\\\"Schedule a function to run periodically.\\n  51\u2502 \\n
+      \ 52\u2502         Args:\\n  53\u2502             func: The function to execute\\n
+      \ 54\u2502             interval: Interval in seconds between executions\\n  55\u2502
+      \            args: Positional arguments\\n  56\u2502             kwargs: Keyword
+      arguments\\n  57\u2502             job_id: Optional job identifier (generated
+      if not provided)\\n  58\u2502 \\n  59\u2502         Returns:\\n  60\u2502             The
+      job identifier\\n  61\u2502         \\\"\\\"\\\"\\n  62\u2502         if job_id
+      is None:\\n  63\u2502             job_id = str(uuid.uuid4())\\n  64\u2502 \\n
+      \ 65\u2502         with self._lock:\\n  66\u2502             job = ScheduledJob(job_id,
+      func, interval, args, kwargs)\\n  67\u2502             self._jobs[job_id] =
+      job\\n  68\u2502             self._schedule_next_run(job)\\n  69\u2502 \\n  70\u2502
+      \        return job_id\\n  71\u2502 \\n  72\u2502     def _schedule_next_run(self,
+      job: ScheduledJob) -> None:\\n  73\u2502         \\\"\\\"\\\"Schedule the next
+      run of a periodic job.\\\"\\\"\\\"\\n  74\u2502         if job.paused:\\n  75\u2502
+      \            return\\n  76\u2502 \\n  77\u2502         job.timer = threading.Timer(job.interval,
+      self._execute_job, args=(job,))\\n  78\u2502         job.timer.daemon = True\\n
+      \ 79\u2502         job.timer.start()\\n  80\u2502 \\n  81\u2502     def _execute_job(self,
+      job: ScheduledJob) -> None:\\n  82\u2502         \\\"\\\"\\\"Execute a scheduled
+      job.\\\"\\\"\\\"\\n  83\u2502         if job.paused:\\n  84\u2502             return\\n
+      \ 85\u2502 \\n  86\u2502         task_id = f\\\"{job.job_id}_{int(time.time()
+      * 1000)}\\\"\\n  87\u2502 \\n  88\u2502         try:\\n  89\u2502             self._queue.add_task(\\n
+      \ 90\u2502                 task_id=task_id,\\n  91\u2502                 func=job.func,\\n
+      \ 92\u2502                 args=job.args,\\n  93\u2502                 kwargs=job.kwargs\\n
+      \ 94\u2502             )\\n  95\u2502         except Exception as e:\\n  96\u2502
+      \            print(f\\\"Failed to enqueue job {job.job_id}: {e}\\\")\\n  97\u2502
+      \\n  98\u2502         if not job.paused:\\n  99\u2502             self._schedule_next_run(job)\\n
+      100\u2502 \\n 101\u2502     def cancel_job(self, job_id: str) -> bool:\\n 102\u2502
+      \        \\\"\\\"\\\"Cancel a scheduled job.\\n 103\u2502 \\n 104\u2502         Args:\\n
+      105\u2502             job_id: The job identifier\\n 106\u2502 \\n 107\u2502
+      \        Returns:\\n 108\u2502             True if job was canceled, False if
+      not found\\n 109\u2502         \\\"\\\"\\\"\\n 110\u2502         with self._lock:\\n
+      111\u2502             job = self._jobs.get(job_id)\\n 112\u2502             if
+      not job:\\n 113\u2502                 return False\\n 114\u2502 \\n 115\u2502
+      \            job.paused = True\\n 116\u2502 \\n 117\u2502             if job.timer:\\n
+      118\u2502                 job.timer.cancel()\\n 119\u2502 \\n 120\u2502             return
+      True\\n 121\u2502 \\n 122\u2502     def resume_job(self, job_id: str) -> bool:\\n
+      123\u2502         \\\"\\\"\\\"Resume a paused job.\\n 124\u2502 \\n 125\u2502
+      \        Args:\\n 126\u2502             job_id: The job identifier\\n 127\u2502
+      \\n 128\u2502         Returns:\\n 129\u2502             True if job was resumed,
+      False if not found\\n 130\u2502         \\\"\\\"\\\"\\n 131\u2502         with
+      self._lock:\\n 132\u2502             job = self._jobs.get(job_id)\\n 133\u2502
+      \            if not job:\\n 134\u2502                 return False\\n 135\u2502
+      \\n 136\u2502             job.paused = False\\n 137\u2502             self._schedule_next_run(job)\\n
+      138\u2502             return True\\n 139\u2502 \\n 140\u2502     def remove_job(self,
+      job_id: str) -> bool:\\n 141\u2502         \\\"\\\"\\\"Permanently remove a
+      job.\\n 142\u2502 \\n 143\u2502         Args:\\n 144\u2502             job_id:
+      The job identifier\\n 145\u2502 \\n 146\u2502         Returns:\\n 147\u2502
+      \            True if job was removed, False if not found\\n 148\u2502         \\\"\\\"\\\"\\n
+      149\u2502         with self._lock:\\n 150\u2502             job = self._jobs.pop(job_id,
+      None)\\n 151\u2502             if not job:\\n 152\u2502                 return
+      False\\n 153\u2502 \\n 154\u2502             if job.timer:\\n 155\u2502                 job.timer.cancel()\\n
+      156\u2502 \\n 157\u2502             return True\\n 158\u2502 \\n 159\u2502     def
+      get_all_jobs(self) -> dict[str, ScheduledJob]:\\n 160\u2502         \\\"\\\"\\\"Get
+      all scheduled jobs.\\\"\\\"\\\"\\n 161\u2502         with self._lock:\\n 162\u2502
+      \            return dict(self._jobs)\\n</file>\\n\\n<file path=\\\"asynctaskqueue/queue.py\\\"
+      relative_path=\\\"asynctaskqueue/queue.py\\\" filename=\\\"queue.py\\\">\\n
+      \  1\u2502 \\\"\\\"\\\"Task queue management.\\n   2\u2502 \\n   3\u2502 This
+      module manages the task queue and task lifecycle.\\n   4\u2502 \\\"\\\"\\\"\\n
+      \  5\u2502 \\n   6\u2502 import asyncio\\n   7\u2502 from collections.abc import
+      Callable\\n   8\u2502 from dataclasses import dataclass\\n   9\u2502 from enum
+      import Enum\\n  10\u2502 \\n  11\u2502 \\n  12\u2502 class TaskStatus(Enum):\\n
+      \ 13\u2502     \\\"\\\"\\\"Task execution status.\\\"\\\"\\\"\\n  14\u2502     PENDING
+      = \\\"pending\\\"\\n  15\u2502     RUNNING = \\\"running\\\"\\n  16\u2502     COMPLETED
+      = \\\"completed\\\"\\n  17\u2502     FAILED = \\\"failed\\\"\\n  18\u2502     CANCELLED
+      = \\\"cancelled\\\"\\n  19\u2502 \\n  20\u2502 \\n  21\u2502 @dataclass\\n  22\u2502
+      class Task:\\n  23\u2502     \\\"\\\"\\\"Represents a task in the queue.\\\"\\\"\\\"\\n
+      \ 24\u2502     task_id: str\\n  25\u2502     func: Callable\\n  26\u2502     args:
+      tuple\\n  27\u2502     kwargs: dict\\n  28\u2502     status: TaskStatus = TaskStatus.PENDING\\n
+      \ 29\u2502 \\n  30\u2502 \\n  31\u2502 class QueueFullError(Exception):\\n  32\u2502
+      \    \\\"\\\"\\\"Raised when attempting to add a task to a full queue.\\\"\\\"\\\"\\n
+      \ 33\u2502     pass\\n  34\u2502 \\n  35\u2502 \\n  36\u2502 class TaskNotFoundError(Exception):\\n
+      \ 37\u2502     \\\"\\\"\\\"Raised when a task is not found in the queue.\\\"\\\"\\\"\\n
+      \ 38\u2502     pass\\n  39\u2502 \\n  40\u2502 \\n  41\u2502 class TaskQueue:\\n
+      \ 42\u2502     \\\"\\\"\\\"Manages a queue of tasks for asynchronous execution.\\\"\\\"\\\"\\n
+      \ 43\u2502 \\n  44\u2502     def __init__(self, max_size: int = 1000):\\n  45\u2502
+      \        self._queue: asyncio.Queue = asyncio.Queue(maxsize=max_size)\\n  46\u2502
+      \        self._tasks: dict[str, Task] = {}\\n  47\u2502         self._lock =
+      asyncio.Lock()\\n  48\u2502         self._max_size = max_size\\n  49\u2502 \\n
+      \ 50\u2502     async def add_task(\\n  51\u2502         self,\\n  52\u2502         task_id:
+      str,\\n  53\u2502         func: Callable,\\n  54\u2502         args: tuple =
+      (),\\n  55\u2502         kwargs: dict = None\\n  56\u2502     ) -> None:\\n
+      \ 57\u2502         \\\"\\\"\\\"Add a task to the queue.\\n  58\u2502 \\n  59\u2502
+      \        Args:\\n  60\u2502             task_id: Unique task identifier\\n  61\u2502
+      \            func: The function to execute\\n  62\u2502             args: Positional
+      arguments for the function\\n  63\u2502             kwargs: Keyword arguments
+      for the function\\n  64\u2502 \\n  65\u2502         Raises:\\n  66\u2502             QueueFullError:
+      If the queue is at maximum capacity\\n  67\u2502         \\\"\\\"\\\"\\n  68\u2502
+      \        async with self._lock:\\n  69\u2502             if len(self._tasks)
+      >= self._max_size:\\n  70\u2502                 raise QueueFullError(f\\\"Queue
+      is full (max size: {self._max_size})\\\")\\n  71\u2502 \\n  72\u2502             task
+      = Task(\\n  73\u2502                 task_id=task_id,\\n  74\u2502                 func=func,\\n
+      \ 75\u2502                 args=args,\\n  76\u2502                 kwargs=kwargs
+      or {}\\n  77\u2502             )\\n  78\u2502             self._tasks[task_id]
+      = task\\n  79\u2502             await self._queue.put(task)\\n  80\u2502 \\n
+      \ 81\u2502     async def get_task(self) -> Task | None:\\n  82\u2502         \\\"\\\"\\\"Get
+      the next task from the queue.\\n  83\u2502 \\n  84\u2502         Returns:\\n
+      \ 85\u2502             The next task, or None if queue is empty (with timeout)\\n
+      \ 86\u2502         \\\"\\\"\\\"\\n  87\u2502         try:\\n  88\u2502             task
+      = await asyncio.wait_for(self._queue.get(), timeout=0.1)\\n  89\u2502             async
+      with self._lock:\\n  90\u2502                 if task.task_id in self._tasks:\\n
+      \ 91\u2502                     self._tasks[task.task_id].status = TaskStatus.RUNNING\\n
+      \ 92\u2502             return task\\n  93\u2502         except TimeoutError:\\n
+      \ 94\u2502             return None\\n  95\u2502 \\n  96\u2502     async def
+      mark_completed(self, task_id: str, success: bool = True) -> None:\\n  97\u2502
+      \        \\\"\\\"\\\"Mark a task as completed or failed.\\n  98\u2502 \\n  99\u2502
+      \        Args:\\n 100\u2502             task_id: The task identifier\\n 101\u2502
+      \            success: Whether the task completed successfully\\n 102\u2502         \\\"\\\"\\\"\\n
+      103\u2502         async with self._lock:\\n 104\u2502             if task_id
+      in self._tasks:\\n 105\u2502                 self._tasks[task_id].status = (\\n
+      106\u2502                     TaskStatus.COMPLETED if success else TaskStatus.FAILED\\n
+      107\u2502                 )\\n 108\u2502 \\n 109\u2502     async def remove_task(self,
+      task_id: str) -> None:\\n 110\u2502         \\\"\\\"\\\"Remove a task from the
+      queue (cancels it).\\n 111\u2502 \\n 112\u2502         Args:\\n 113\u2502             task_id:
+      The task identifier\\n 114\u2502 \\n 115\u2502         Raises:\\n 116\u2502
+      \            TaskNotFoundError: If task is not found\\n 117\u2502         \\\"\\\"\\\"\\n
+      118\u2502         async with self._lock:\\n 119\u2502             if task_id
+      not in self._tasks:\\n 120\u2502                 raise TaskNotFoundError(f\\\"Task
+      {task_id} not found\\\")\\n 121\u2502             self._tasks[task_id].status
+      = TaskStatus.CANCELLED\\n 122\u2502             del self._tasks[task_id]\\n
+      123\u2502 \\n 124\u2502     def get_status(self, task_id: str) -> TaskStatus
+      | None:\\n 125\u2502         \\\"\\\"\\\"Get the status of a task.\\n 126\u2502
+      \\n 127\u2502         Args:\\n 128\u2502             task_id: The task identifier\\n
+      129\u2502 \\n 130\u2502         Returns:\\n 131\u2502             The task status
+      or None if not found\\n 132\u2502         \\\"\\\"\\\"\\n 133\u2502         task
+      = self._tasks.get(task_id)\\n 134\u2502         return task.status if task else
+      None\\n 135\u2502 \\n 136\u2502     def get_pending_count(self) -> int:\\n 137\u2502
+      \        \\\"\\\"\\\"Get the number of pending tasks.\\\"\\\"\\\"\\n 138\u2502
+      \        return sum(1 for t in self._tasks.values() if t.status == TaskStatus.PENDING)\\n
+      139\u2502 \\n 140\u2502     def get_running_count(self) -> int:\\n 141\u2502
+      \        \\\"\\\"\\\"Get the number of running tasks.\\\"\\\"\\\"\\n 142\u2502
+      \        return sum(1 for t in self._tasks.values() if t.status == TaskStatus.RUNNING)\\n</file>\\n\\n<file
+      path=\\\"asynctaskqueue/worker.py\\\" relative_path=\\\"asynctaskqueue/worker.py\\\"
+      filename=\\\"worker.py\\\">\\n   1\u2502 \\\"\\\"\\\"Worker pool for task execution.\\n
+      \  2\u2502 \\n   3\u2502 This module manages a pool of worker threads that execute
+      tasks from the queue.\\n   4\u2502 \\\"\\\"\\\"\\n   5\u2502 \\n   6\u2502 import
+      asyncio\\n   7\u2502 import logging\\n   8\u2502 import threading\\n   9\u2502
+      import time\\n  10\u2502 from concurrent.futures import ThreadPoolExecutor\\n
+      \ 11\u2502 \\n  12\u2502 from .config import Config\\n  13\u2502 from .queue
+      import Task, TaskQueue\\n  14\u2502 from .storage import ResultStorage\\n  15\u2502
+      \\n  16\u2502 logger = logging.getLogger(__name__)\\n  17\u2502 \\n  18\u2502
+      \\n  19\u2502 class WorkerPool:\\n  20\u2502     \\\"\\\"\\\"Pool of worker
+      threads for executing tasks.\\\"\\\"\\\"\\n  21\u2502 \\n  22\u2502     def
+      __init__(\\n  23\u2502         self,\\n  24\u2502         queue: TaskQueue,\\n
+      \ 25\u2502         storage: ResultStorage,\\n  26\u2502         config: Config\\n
+      \ 27\u2502     ):\\n  28\u2502         self._queue = queue\\n  29\u2502         self._storage
+      = storage\\n  30\u2502         self._config = config\\n  31\u2502         self._running
+      = False\\n  32\u2502         self._executor: ThreadPoolExecutor | None = None\\n
+      \ 33\u2502 \\n  34\u2502         if config.max_workers == 0:\\n  35\u2502             self._max_workers
+      = None\\n  36\u2502         else:\\n  37\u2502             self._max_workers
+      = config.max_workers\\n  38\u2502 \\n  39\u2502     def start(self) -> None:\\n
+      \ 40\u2502         \\\"\\\"\\\"Start the worker pool.\\\"\\\"\\\"\\n  41\u2502
+      \        if self._running:\\n  42\u2502             return\\n  43\u2502 \\n
+      \ 44\u2502         self._running = True\\n  45\u2502         self._executor
+      = ThreadPoolExecutor(max_workers=self._max_workers)\\n  46\u2502         threading.Thread(target=self._run_worker_loop,
+      daemon=True).start()\\n  47\u2502 \\n  48\u2502     def stop(self) -> None:\\n
+      \ 49\u2502         \\\"\\\"\\\"Stop the worker pool.\\\"\\\"\\\"\\n  50\u2502
+      \        self._running = False\\n  51\u2502         if self._executor:\\n  52\u2502
+      \            self._executor.shutdown(wait=True)\\n  53\u2502 \\n  54\u2502     def
+      _run_worker_loop(self) -> None:\\n  55\u2502         \\\"\\\"\\\"Main worker
+      loop that processes tasks from the queue.\\\"\\\"\\\"\\n  56\u2502         asyncio.run(self._async_worker_loop())\\n
+      \ 57\u2502 \\n  58\u2502     async def _async_worker_loop(self) -> None:\\n
+      \ 59\u2502         \\\"\\\"\\\"Async worker loop.\\\"\\\"\\\"\\n  60\u2502         while
+      self._running:\\n  61\u2502             task = await self._queue.get_task()\\n
+      \ 62\u2502             if task:\\n  63\u2502                 self._executor.submit(self._execute_task,
+      task)\\n  64\u2502 \\n  65\u2502     def _execute_task(self, task: Task) ->
+      None:\\n  66\u2502         \\\"\\\"\\\"Execute a single task.\\n  67\u2502 \\n
+      \ 68\u2502         Args:\\n  69\u2502             task: The task to execute\\n
+      \ 70\u2502         \\\"\\\"\\\"\\n  71\u2502         try:\\n  72\u2502             timeout_ms
+      = self._config.task_timeout\\n  73\u2502             start_time = time.time()\\n
+      \ 74\u2502 \\n  75\u2502             result = task.func(*task.args, **task.kwargs)\\n
+      \ 76\u2502 \\n  77\u2502             elapsed_ms = (time.time() - start_time)
+      * 1000\\n  78\u2502             if elapsed_ms > timeout_ms:\\n  79\u2502                 logger.warning(f\\\"Task
+      {task.task_id} exceeded timeout\\\")\\n  80\u2502                 asyncio.run(self._queue.mark_completed(task.task_id,
+      success=False))\\n  81\u2502                 return\\n  82\u2502 \\n  83\u2502
+      \            self._storage.store_result(task.task_id, result)\\n  84\u2502             asyncio.run(self._queue.mark_completed(task.task_id,
+      success=True))\\n  85\u2502 \\n  86\u2502         except Exception as e:\\n
+      \ 87\u2502             logger.error(f\\\"Task {task.task_id} failed: {e}\\\")\\n
+      \ 88\u2502 \\n  89\u2502             retry_count = self._storage.increment_retry_count(task.task_id)\\n
+      \ 90\u2502 \\n  91\u2502             if retry_count < self._config.retry_attempts:\\n
+      \ 92\u2502                 logger.info(f\\\"Will retry task {task.task_id} ({retry_count}/{self._config.retry_attempts})\\\")\\n
+      \ 93\u2502             else:\\n  94\u2502                 logger.error(f\\\"Task
+      {task.task_id} failed after {retry_count} attempts\\\")\\n  95\u2502 \\n  96\u2502
+      \            asyncio.run(self._queue.mark_completed(task.task_id, success=False))\\n
+      \ 97\u2502 \\n  98\u2502     def get_active_workers(self) -> int:\\n  99\u2502
+      \        \\\"\\\"\\\"Get the number of active worker threads.\\\"\\\"\\\"\\n
+      100\u2502         if not self._executor:\\n 101\u2502             return 0\\n
+      102\u2502         return self._max_workers or 0\\n</file>\\n\\n</EDITABLE_FILES>\\n\\n<USER_MESSAGE>\\nWe
+      have a critical deadlock in asynctaskqueue between the async scheduler\\nand
+      sync queue operations. What&#x27;s the best approach to fix this?\\n\\nOptions
+      to consider:\\n1. Convert entire codebase to async (queue, workers, scheduler)\\n2.
+      Use run_in_executor() to bridge async/sync boundary\\n3. Separate async scheduler
+      from sync worker pool with thread-safe queue\\n4. Replace asyncio scheduler
+      with threading-based approach\\n\\nConsider: backwards compatibility, performance,
+      complexity, testing effort.\\nProvide a clear recommendation at the end.\\nKeep
+      responses under 3 sentences each.\\n</USER_MESSAGE>\"}]}],\"system_instruction\":{\"parts\":[{\"text\":\"#
+      ROLE\\nYou are a **Principal Engineer and Technical Advocate** participating
+      in a high-stakes architectural debate. Your mission is to identify viable options,
+      rank them systematically, then advocate for the strongest solution backed by
+      repository evidence.\\n\\n**Current Phase:** Independent Analysis (Step 1 of
+      2)\\nYou are generating an initial proposal. You will not see other models'
+      answers yet.\\n\\n# CORE WORKFLOW\\n\\n### STEP 1: Identify Top Options (3 by
+      default, unless user specifies N)\\n1. **Option Discovery:** Based on REPOSITORY_CONTEXT,
+      EDITABLE_FILES and USER_MESSAGE, existing patterns, identify viable approaches\\n2.
+      **Score & Rank:** Rate each option (1-10) on: alignment with codebase, complexity,
+      risk, performance\\n3. **Select Rank 1:** Choose the highest-scored option as
+      your proposal\\n\\n### STEP 2: Build Case for Rank 1\\n1. **Evidence Gathering:**
+      Cite specific file:line locations supporting your choice\\n2. **Implementation
+      Blueprint:** Minimal edits with concrete file changes\\n3. **Trade-offs & Risks:**
+      Document downsides with severity and mitigation\\n4. **Alternatives:** Reference
+      ranked options #2 and #3 from Step 1\\n\\n# SCOPE & ENGINEERING PHILOSOPHY\\n-
+      **Current Stack Focus:** Solutions must fit existing tech stack and patterns\\n-
+      **Anti-Overengineering:** Prefer simple, testable changes over abstraction\\n-
+      **Justified Innovation:** New patterns only when clearly superior with minimal
+      complexity\\n- **Evidence-Based Advocacy:** Every claim needs file:line proof
+      from REPOSITORY_CONTEXT\\n\\n# INPUT DATA\\nYou have access to:\\n- **<REPOSITORY_CONTEXT>:**
+      CLAUDE.md, AGENTS.md, architecture docs defining project conventions\\n- **<EDITABLE_FILES>:**
+      Current source code relevant to the question\\n- **<USER_MESSAGE>:** The technical
+      question or decision to make\\n\\n# CODE CITATION STANDARDS\\n- **Format:**
+      `path/to/file.py:line` or `file.py:start-end`\\n- **No Line Markers:** Input
+      code has \\\"LINE\u2502\\\" markers. **NEVER** include these in output code
+      or quotes.\\n- **Snippet Length:** 3-10 lines for evidence; show enough context
+      to understand\\n- **Multi-file Navigation:** Explain relationships across files:
+      \\\"Function X in `api.py:45` calls Y in `utils.py:78`\\\"\\n\\n# VISUAL INDICATORS\\n\\n**Option
+      Ranking:**\\n- \U0001F947 **Rank 1:** Your proposal (highest composite score)\\n-
+      \U0001F948 **Rank 2:** Strong alternative\\n- \U0001F949 **Rank 3:** Considered
+      but weaker option\\n\\n**Confidence & Evidence:**\\n- \U0001F7E2 **High (8-10/10):**
+      Strong evidence from code/docs with exact citations\\n- \U0001F7E1 **Medium
+      (5-7/10):** Reasonable inference from context\\n- \U0001F534 **Low (1-4/10):**
+      Assumption or external knowledge\\n\\n**Risk Assessment:**\\n- \U0001F534 **CRITICAL:**
+      Security vulnerabilities, data loss risks\\n- \U0001F7E0 **HIGH:** Crashes,
+      race conditions, major bugs\\n- \U0001F7E1 **MEDIUM:** Performance issues, error
+      handling gaps\\n- \U0001F7E2 **LOW:** Code quality, maintainability, style\\n\\n#
+      OUTPUT FORMAT (MANDATORY)\\nFormat your response exactly using these sections
+      in markdown:\\n\\n**# \U0001F947 [Concise Title]: Use [Approach Name]**\\n>
+      \u2705 **Verdict:** [One-sentence justification with emoji verdict \U0001F7E2/\U0001F7E1/\U0001F534]\\n\\n**1.
+      Option Ranking (Top 3 \u2014 Score & Justification)**\\n\\n\U0001F947 **Rank
+      1: [Approach Name]** (Score: X/10)\\n- One-line alignment justification with
+      file citation\\n- Performance/complexity note\\n- Why it's the best fit\\n\\n\U0001F948
+      **Rank 2: [Alternative Approach]** (Score: Y/10)\\n- One-line why it's viable
+      but second choice\\n- Key limitation vs Rank 1\\n\\n\U0001F949 **Rank 3: [Alternative
+      Approach]** (Score: Z/10)\\n- One-line why it was considered\\n- Why it ranks
+      lower\\n\\n**2. Rank 1 Justification**\\nDetailed analysis of your top choice
+      with code evidence (`file:line`), pattern alignment, and performance notes (Big
+      O, benchmarks). Use bullets with inline citations: \\\"Claim \u2014 `file.py:START-END`:
+      quoted snippet\\\"\\n\\n**3. Implementation Blueprint**\\nMinimal file edits
+      and exact commands. Format: `Edit: path/to/file.py:lines \u2192 [change]`. Include
+      code diffs and test commands: `pytest path/to/test.py -v`\\n\\n**4. Trade-offs
+      & Risks**\\nConcise bullets with emoji severity (\U0001F534\U0001F7E0\U0001F7E1\U0001F7E2)
+      and mitigation strategies.\\n\\n**5. Confidence Score**\\n\U0001F7E2 High (8-10/10)
+      / \U0001F7E1 Medium (5-7/10) / \U0001F534 Low (1-4/10): [brief explanation based
+      on evidence quality]\\n\\n**6. Next Steps (Prioritized)**\\nExact commands or
+      file edits in priority order (1-3 items).\\n\\n# STYLE GUIDELINES\\n- **Be Opinionated:**
+      \\\"Use X because...\\\" not \\\"X is an option\\\"\\n- **Be Concise:** Bullets
+      for arguments, avoid prose\\n- **Be Direct:** Skip pleasantries, dive into engineering\\n-
+      **Code-First:** Prefer code examples over descriptions\\n\\n# CRITICAL RULES\\n-
+      **Context Adherence:** If repo uses `pytest`, don't suggest `unittest`. If it
+      uses `FastAPI`, don't suggest `Flask`.\\n- **NEVER** include line number markers
+      (e.g., \\\"   1\u2502\\\") in output code blocks\\n- **ALWAYS** reference line
+      numbers in analysis text for evidence\"}]},\"generationConfig\":{\"temperature\":0.2}}"
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '21350'
+      content-type:
+      - application/json
+      host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - litellm/1.80.0
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 30 Nov 2025 21:07:58 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=73
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+      content-length:
+      - '0'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"# ROLE\\nYou are a **Principal
+      Engineer and Technical Advocate** participating in a high-stakes architectural
+      debate. Your mission is to identify viable options, rank them systematically,
+      then advocate for the strongest solution backed by repository evidence.\\n\\n**Current
+      Phase:** Independent Analysis (Step 1 of 2)\\nYou are generating an initial
+      proposal. You will not see other models' answers yet.\\n\\n# CORE WORKFLOW\\n\\n###
+      STEP 1: Identify Top Options (3 by default, unless user specifies N)\\n1. **Option
+      Discovery:** Based on REPOSITORY_CONTEXT, EDITABLE_FILES and USER_MESSAGE, existing
+      patterns, identify viable approaches\\n2. **Score & Rank:** Rate each option
+      (1-10) on: alignment with codebase, complexity, risk, performance\\n3. **Select
+      Rank 1:** Choose the highest-scored option as your proposal\\n\\n### STEP 2:
+      Build Case for Rank 1\\n1. **Evidence Gathering:** Cite specific file:line locations
+      supporting your choice\\n2. **Implementation Blueprint:** Minimal edits with
+      concrete file changes\\n3. **Trade-offs & Risks:** Document downsides with severity
+      and mitigation\\n4. **Alternatives:** Reference ranked options #2 and #3 from
+      Step 1\\n\\n# SCOPE & ENGINEERING PHILOSOPHY\\n- **Current Stack Focus:** Solutions
+      must fit existing tech stack and patterns\\n- **Anti-Overengineering:** Prefer
+      simple, testable changes over abstraction\\n- **Justified Innovation:** New
+      patterns only when clearly superior with minimal complexity\\n- **Evidence-Based
+      Advocacy:** Every claim needs file:line proof from REPOSITORY_CONTEXT\\n\\n#
+      INPUT DATA\\nYou have access to:\\n- **<REPOSITORY_CONTEXT>:** CLAUDE.md, AGENTS.md,
+      architecture docs defining project conventions\\n- **<EDITABLE_FILES>:** Current
+      source code relevant to the question\\n- **<USER_MESSAGE>:** The technical question
+      or decision to make\\n\\n# CODE CITATION STANDARDS\\n- **Format:** `path/to/file.py:line`
+      or `file.py:start-end`\\n- **No Line Markers:** Input code has \\\"LINE\u2502\\\"
+      markers. **NEVER** include these in output code or quotes.\\n- **Snippet Length:**
+      3-10 lines for evidence; show enough context to understand\\n- **Multi-file
+      Navigation:** Explain relationships across files: \\\"Function X in `api.py:45`
+      calls Y in `utils.py:78`\\\"\\n\\n# VISUAL INDICATORS\\n\\n**Option Ranking:**\\n-
+      \U0001F947 **Rank 1:** Your proposal (highest composite score)\\n- \U0001F948
+      **Rank 2:** Strong alternative\\n- \U0001F949 **Rank 3:** Considered but weaker
+      option\\n\\n**Confidence & Evidence:**\\n- \U0001F7E2 **High (8-10/10):** Strong
+      evidence from code/docs with exact citations\\n- \U0001F7E1 **Medium (5-7/10):**
+      Reasonable inference from context\\n- \U0001F534 **Low (1-4/10):** Assumption
+      or external knowledge\\n\\n**Risk Assessment:**\\n- \U0001F534 **CRITICAL:**
+      Security vulnerabilities, data loss risks\\n- \U0001F7E0 **HIGH:** Crashes,
+      race conditions, major bugs\\n- \U0001F7E1 **MEDIUM:** Performance issues, error
+      handling gaps\\n- \U0001F7E2 **LOW:** Code quality, maintainability, style\\n\\n#
+      OUTPUT FORMAT (MANDATORY)\\nFormat your response exactly using these sections
+      in markdown:\\n\\n**# \U0001F947 [Concise Title]: Use [Approach Name]**\\n>
+      \u2705 **Verdict:** [One-sentence justification with emoji verdict \U0001F7E2/\U0001F7E1/\U0001F534]\\n\\n**1.
+      Option Ranking (Top 3 \u2014 Score & Justification)**\\n\\n\U0001F947 **Rank
+      1: [Approach Name]** (Score: X/10)\\n- One-line alignment justification with
+      file citation\\n- Performance/complexity note\\n- Why it's the best fit\\n\\n\U0001F948
+      **Rank 2: [Alternative Approach]** (Score: Y/10)\\n- One-line why it's viable
+      but second choice\\n- Key limitation vs Rank 1\\n\\n\U0001F949 **Rank 3: [Alternative
+      Approach]** (Score: Z/10)\\n- One-line why it was considered\\n- Why it ranks
+      lower\\n\\n**2. Rank 1 Justification**\\nDetailed analysis of your top choice
+      with code evidence (`file:line`), pattern alignment, and performance notes (Big
+      O, benchmarks). Use bullets with inline citations: \\\"Claim \u2014 `file.py:START-END`:
+      quoted snippet\\\"\\n\\n**3. Implementation Blueprint**\\nMinimal file edits
+      and exact commands. Format: `Edit: path/to/file.py:lines \u2192 [change]`. Include
+      code diffs and test commands: `pytest path/to/test.py -v`\\n\\n**4. Trade-offs
+      & Risks**\\nConcise bullets with emoji severity (\U0001F534\U0001F7E0\U0001F7E1\U0001F7E2)
+      and mitigation strategies.\\n\\n**5. Confidence Score**\\n\U0001F7E2 High (8-10/10)
+      / \U0001F7E1 Medium (5-7/10) / \U0001F534 Low (1-4/10): [brief explanation based
+      on evidence quality]\\n\\n**6. Next Steps (Prioritized)**\\nExact commands or
+      file edits in priority order (1-3 items).\\n\\n# STYLE GUIDELINES\\n- **Be Opinionated:**
+      \\\"Use X because...\\\" not \\\"X is an option\\\"\\n- **Be Concise:** Bullets
+      for arguments, avoid prose\\n- **Be Direct:** Skip pleasantries, dive into engineering\\n-
+      **Code-First:** Prefer code examples over descriptions\\n\\n# CRITICAL RULES\\n-
+      **Context Adherence:** If repo uses `pytest`, don't suggest `unittest`. If it
+      uses `FastAPI`, don't suggest `Flask`.\\n- **NEVER** include line number markers
+      (e.g., \\\"   1\u2502\\\") in output code blocks\\n- **ALWAYS** reference line
+      numbers in analysis text for evidence\"},{\"role\":\"user\",\"content\":\"<EDITABLE_FILES>\\n<file
+      path=\\\"asynctaskqueue/scheduler.py\\\" relative_path=\\\"asynctaskqueue/scheduler.py\\\"
+      filename=\\\"scheduler.py\\\">\\n   1\u2502 \\\"\\\"\\\"Task scheduler for periodic
+      and delayed task execution.\\n   2\u2502 \\n   3\u2502 This module provides
+      scheduling capabilities for recurring and one-time delayed tasks.\\n   4\u2502
+      \\\"\\\"\\\"\\n   5\u2502 \\n   6\u2502 import threading\\n   7\u2502 import
+      time\\n   8\u2502 import uuid\\n   9\u2502 from collections.abc import Callable\\n
+      \ 10\u2502 \\n  11\u2502 from .queue import TaskQueue\\n  12\u2502 \\n  13\u2502
+      \\n  14\u2502 class ScheduledJob:\\n  15\u2502     \\\"\\\"\\\"Represents a
+      scheduled job.\\\"\\\"\\\"\\n  16\u2502 \\n  17\u2502     def __init__(\\n  18\u2502
+      \        self,\\n  19\u2502         job_id: str,\\n  20\u2502         func:
+      Callable,\\n  21\u2502         interval: float,\\n  22\u2502         args: tuple
+      = (),\\n  23\u2502         kwargs: dict = None\\n  24\u2502     ):\\n  25\u2502
+      \        self.job_id = job_id\\n  26\u2502         self.func = func\\n  27\u2502
+      \        self.interval = interval\\n  28\u2502         self.args = args\\n  29\u2502
+      \        self.kwargs = kwargs or {}\\n  30\u2502         self.timer: threading.Timer
+      | None = None\\n  31\u2502         self.paused = False\\n  32\u2502 \\n  33\u2502
+      \\n  34\u2502 class Scheduler:\\n  35\u2502     \\\"\\\"\\\"Scheduler for periodic
+      and one-time tasks.\\\"\\\"\\\"\\n  36\u2502 \\n  37\u2502     def __init__(self,
+      queue: TaskQueue):\\n  38\u2502         self._queue = queue\\n  39\u2502         self._jobs:
+      dict[str, ScheduledJob] = {}\\n  40\u2502         self._lock = threading.Lock()\\n
+      \ 41\u2502 \\n  42\u2502     def schedule_periodic(\\n  43\u2502         self,\\n
+      \ 44\u2502         func: Callable,\\n  45\u2502         interval: float,\\n
+      \ 46\u2502         args: tuple = (),\\n  47\u2502         kwargs: dict = None,\\n
+      \ 48\u2502         job_id: str = None\\n  49\u2502     ) -> str:\\n  50\u2502
+      \        \\\"\\\"\\\"Schedule a function to run periodically.\\n  51\u2502 \\n
+      \ 52\u2502         Args:\\n  53\u2502             func: The function to execute\\n
+      \ 54\u2502             interval: Interval in seconds between executions\\n  55\u2502
+      \            args: Positional arguments\\n  56\u2502             kwargs: Keyword
+      arguments\\n  57\u2502             job_id: Optional job identifier (generated
+      if not provided)\\n  58\u2502 \\n  59\u2502         Returns:\\n  60\u2502             The
+      job identifier\\n  61\u2502         \\\"\\\"\\\"\\n  62\u2502         if job_id
+      is None:\\n  63\u2502             job_id = str(uuid.uuid4())\\n  64\u2502 \\n
+      \ 65\u2502         with self._lock:\\n  66\u2502             job = ScheduledJob(job_id,
+      func, interval, args, kwargs)\\n  67\u2502             self._jobs[job_id] =
+      job\\n  68\u2502             self._schedule_next_run(job)\\n  69\u2502 \\n  70\u2502
+      \        return job_id\\n  71\u2502 \\n  72\u2502     def _schedule_next_run(self,
+      job: ScheduledJob) -> None:\\n  73\u2502         \\\"\\\"\\\"Schedule the next
+      run of a periodic job.\\\"\\\"\\\"\\n  74\u2502         if job.paused:\\n  75\u2502
+      \            return\\n  76\u2502 \\n  77\u2502         job.timer = threading.Timer(job.interval,
+      self._execute_job, args=(job,))\\n  78\u2502         job.timer.daemon = True\\n
+      \ 79\u2502         job.timer.start()\\n  80\u2502 \\n  81\u2502     def _execute_job(self,
+      job: ScheduledJob) -> None:\\n  82\u2502         \\\"\\\"\\\"Execute a scheduled
+      job.\\\"\\\"\\\"\\n  83\u2502         if job.paused:\\n  84\u2502             return\\n
+      \ 85\u2502 \\n  86\u2502         task_id = f\\\"{job.job_id}_{int(time.time()
+      * 1000)}\\\"\\n  87\u2502 \\n  88\u2502         try:\\n  89\u2502             self._queue.add_task(\\n
+      \ 90\u2502                 task_id=task_id,\\n  91\u2502                 func=job.func,\\n
+      \ 92\u2502                 args=job.args,\\n  93\u2502                 kwargs=job.kwargs\\n
+      \ 94\u2502             )\\n  95\u2502         except Exception as e:\\n  96\u2502
+      \            print(f\\\"Failed to enqueue job {job.job_id}: {e}\\\")\\n  97\u2502
+      \\n  98\u2502         if not job.paused:\\n  99\u2502             self._schedule_next_run(job)\\n
+      100\u2502 \\n 101\u2502     def cancel_job(self, job_id: str) -> bool:\\n 102\u2502
+      \        \\\"\\\"\\\"Cancel a scheduled job.\\n 103\u2502 \\n 104\u2502         Args:\\n
+      105\u2502             job_id: The job identifier\\n 106\u2502 \\n 107\u2502
+      \        Returns:\\n 108\u2502             True if job was canceled, False if
+      not found\\n 109\u2502         \\\"\\\"\\\"\\n 110\u2502         with self._lock:\\n
+      111\u2502             job = self._jobs.get(job_id)\\n 112\u2502             if
+      not job:\\n 113\u2502                 return False\\n 114\u2502 \\n 115\u2502
+      \            job.paused = True\\n 116\u2502 \\n 117\u2502             if job.timer:\\n
+      118\u2502                 job.timer.cancel()\\n 119\u2502 \\n 120\u2502             return
+      True\\n 121\u2502 \\n 122\u2502     def resume_job(self, job_id: str) -> bool:\\n
+      123\u2502         \\\"\\\"\\\"Resume a paused job.\\n 124\u2502 \\n 125\u2502
+      \        Args:\\n 126\u2502             job_id: The job identifier\\n 127\u2502
+      \\n 128\u2502         Returns:\\n 129\u2502             True if job was resumed,
+      False if not found\\n 130\u2502         \\\"\\\"\\\"\\n 131\u2502         with
+      self._lock:\\n 132\u2502             job = self._jobs.get(job_id)\\n 133\u2502
+      \            if not job:\\n 134\u2502                 return False\\n 135\u2502
+      \\n 136\u2502             job.paused = False\\n 137\u2502             self._schedule_next_run(job)\\n
+      138\u2502             return True\\n 139\u2502 \\n 140\u2502     def remove_job(self,
+      job_id: str) -> bool:\\n 141\u2502         \\\"\\\"\\\"Permanently remove a
+      job.\\n 142\u2502 \\n 143\u2502         Args:\\n 144\u2502             job_id:
+      The job identifier\\n 145\u2502 \\n 146\u2502         Returns:\\n 147\u2502
+      \            True if job was removed, False if not found\\n 148\u2502         \\\"\\\"\\\"\\n
+      149\u2502         with self._lock:\\n 150\u2502             job = self._jobs.pop(job_id,
+      None)\\n 151\u2502             if not job:\\n 152\u2502                 return
+      False\\n 153\u2502 \\n 154\u2502             if job.timer:\\n 155\u2502                 job.timer.cancel()\\n
+      156\u2502 \\n 157\u2502             return True\\n 158\u2502 \\n 159\u2502     def
+      get_all_jobs(self) -> dict[str, ScheduledJob]:\\n 160\u2502         \\\"\\\"\\\"Get
+      all scheduled jobs.\\\"\\\"\\\"\\n 161\u2502         with self._lock:\\n 162\u2502
+      \            return dict(self._jobs)\\n</file>\\n\\n<file path=\\\"asynctaskqueue/queue.py\\\"
+      relative_path=\\\"asynctaskqueue/queue.py\\\" filename=\\\"queue.py\\\">\\n
+      \  1\u2502 \\\"\\\"\\\"Task queue management.\\n   2\u2502 \\n   3\u2502 This
+      module manages the task queue and task lifecycle.\\n   4\u2502 \\\"\\\"\\\"\\n
+      \  5\u2502 \\n   6\u2502 import asyncio\\n   7\u2502 from collections.abc import
+      Callable\\n   8\u2502 from dataclasses import dataclass\\n   9\u2502 from enum
+      import Enum\\n  10\u2502 \\n  11\u2502 \\n  12\u2502 class TaskStatus(Enum):\\n
+      \ 13\u2502     \\\"\\\"\\\"Task execution status.\\\"\\\"\\\"\\n  14\u2502     PENDING
+      = \\\"pending\\\"\\n  15\u2502     RUNNING = \\\"running\\\"\\n  16\u2502     COMPLETED
+      = \\\"completed\\\"\\n  17\u2502     FAILED = \\\"failed\\\"\\n  18\u2502     CANCELLED
+      = \\\"cancelled\\\"\\n  19\u2502 \\n  20\u2502 \\n  21\u2502 @dataclass\\n  22\u2502
+      class Task:\\n  23\u2502     \\\"\\\"\\\"Represents a task in the queue.\\\"\\\"\\\"\\n
+      \ 24\u2502     task_id: str\\n  25\u2502     func: Callable\\n  26\u2502     args:
+      tuple\\n  27\u2502     kwargs: dict\\n  28\u2502     status: TaskStatus = TaskStatus.PENDING\\n
+      \ 29\u2502 \\n  30\u2502 \\n  31\u2502 class QueueFullError(Exception):\\n  32\u2502
+      \    \\\"\\\"\\\"Raised when attempting to add a task to a full queue.\\\"\\\"\\\"\\n
+      \ 33\u2502     pass\\n  34\u2502 \\n  35\u2502 \\n  36\u2502 class TaskNotFoundError(Exception):\\n
+      \ 37\u2502     \\\"\\\"\\\"Raised when a task is not found in the queue.\\\"\\\"\\\"\\n
+      \ 38\u2502     pass\\n  39\u2502 \\n  40\u2502 \\n  41\u2502 class TaskQueue:\\n
+      \ 42\u2502     \\\"\\\"\\\"Manages a queue of tasks for asynchronous execution.\\\"\\\"\\\"\\n
+      \ 43\u2502 \\n  44\u2502     def __init__(self, max_size: int = 1000):\\n  45\u2502
+      \        self._queue: asyncio.Queue = asyncio.Queue(maxsize=max_size)\\n  46\u2502
+      \        self._tasks: dict[str, Task] = {}\\n  47\u2502         self._lock =
+      asyncio.Lock()\\n  48\u2502         self._max_size = max_size\\n  49\u2502 \\n
+      \ 50\u2502     async def add_task(\\n  51\u2502         self,\\n  52\u2502         task_id:
+      str,\\n  53\u2502         func: Callable,\\n  54\u2502         args: tuple =
+      (),\\n  55\u2502         kwargs: dict = None\\n  56\u2502     ) -> None:\\n
+      \ 57\u2502         \\\"\\\"\\\"Add a task to the queue.\\n  58\u2502 \\n  59\u2502
+      \        Args:\\n  60\u2502             task_id: Unique task identifier\\n  61\u2502
+      \            func: The function to execute\\n  62\u2502             args: Positional
+      arguments for the function\\n  63\u2502             kwargs: Keyword arguments
+      for the function\\n  64\u2502 \\n  65\u2502         Raises:\\n  66\u2502             QueueFullError:
+      If the queue is at maximum capacity\\n  67\u2502         \\\"\\\"\\\"\\n  68\u2502
+      \        async with self._lock:\\n  69\u2502             if len(self._tasks)
+      >= self._max_size:\\n  70\u2502                 raise QueueFullError(f\\\"Queue
+      is full (max size: {self._max_size})\\\")\\n  71\u2502 \\n  72\u2502             task
+      = Task(\\n  73\u2502                 task_id=task_id,\\n  74\u2502                 func=func,\\n
+      \ 75\u2502                 args=args,\\n  76\u2502                 kwargs=kwargs
+      or {}\\n  77\u2502             )\\n  78\u2502             self._tasks[task_id]
+      = task\\n  79\u2502             await self._queue.put(task)\\n  80\u2502 \\n
+      \ 81\u2502     async def get_task(self) -> Task | None:\\n  82\u2502         \\\"\\\"\\\"Get
+      the next task from the queue.\\n  83\u2502 \\n  84\u2502         Returns:\\n
+      \ 85\u2502             The next task, or None if queue is empty (with timeout)\\n
+      \ 86\u2502         \\\"\\\"\\\"\\n  87\u2502         try:\\n  88\u2502             task
+      = await asyncio.wait_for(self._queue.get(), timeout=0.1)\\n  89\u2502             async
+      with self._lock:\\n  90\u2502                 if task.task_id in self._tasks:\\n
+      \ 91\u2502                     self._tasks[task.task_id].status = TaskStatus.RUNNING\\n
+      \ 92\u2502             return task\\n  93\u2502         except TimeoutError:\\n
+      \ 94\u2502             return None\\n  95\u2502 \\n  96\u2502     async def
+      mark_completed(self, task_id: str, success: bool = True) -> None:\\n  97\u2502
+      \        \\\"\\\"\\\"Mark a task as completed or failed.\\n  98\u2502 \\n  99\u2502
+      \        Args:\\n 100\u2502             task_id: The task identifier\\n 101\u2502
+      \            success: Whether the task completed successfully\\n 102\u2502         \\\"\\\"\\\"\\n
+      103\u2502         async with self._lock:\\n 104\u2502             if task_id
+      in self._tasks:\\n 105\u2502                 self._tasks[task_id].status = (\\n
+      106\u2502                     TaskStatus.COMPLETED if success else TaskStatus.FAILED\\n
+      107\u2502                 )\\n 108\u2502 \\n 109\u2502     async def remove_task(self,
+      task_id: str) -> None:\\n 110\u2502         \\\"\\\"\\\"Remove a task from the
+      queue (cancels it).\\n 111\u2502 \\n 112\u2502         Args:\\n 113\u2502             task_id:
+      The task identifier\\n 114\u2502 \\n 115\u2502         Raises:\\n 116\u2502
+      \            TaskNotFoundError: If task is not found\\n 117\u2502         \\\"\\\"\\\"\\n
+      118\u2502         async with self._lock:\\n 119\u2502             if task_id
+      not in self._tasks:\\n 120\u2502                 raise TaskNotFoundError(f\\\"Task
+      {task_id} not found\\\")\\n 121\u2502             self._tasks[task_id].status
+      = TaskStatus.CANCELLED\\n 122\u2502             del self._tasks[task_id]\\n
+      123\u2502 \\n 124\u2502     def get_status(self, task_id: str) -> TaskStatus
+      | None:\\n 125\u2502         \\\"\\\"\\\"Get the status of a task.\\n 126\u2502
+      \\n 127\u2502         Args:\\n 128\u2502             task_id: The task identifier\\n
+      129\u2502 \\n 130\u2502         Returns:\\n 131\u2502             The task status
+      or None if not found\\n 132\u2502         \\\"\\\"\\\"\\n 133\u2502         task
+      = self._tasks.get(task_id)\\n 134\u2502         return task.status if task else
+      None\\n 135\u2502 \\n 136\u2502     def get_pending_count(self) -> int:\\n 137\u2502
+      \        \\\"\\\"\\\"Get the number of pending tasks.\\\"\\\"\\\"\\n 138\u2502
+      \        return sum(1 for t in self._tasks.values() if t.status == TaskStatus.PENDING)\\n
+      139\u2502 \\n 140\u2502     def get_running_count(self) -> int:\\n 141\u2502
+      \        \\\"\\\"\\\"Get the number of running tasks.\\\"\\\"\\\"\\n 142\u2502
+      \        return sum(1 for t in self._tasks.values() if t.status == TaskStatus.RUNNING)\\n</file>\\n\\n<file
+      path=\\\"asynctaskqueue/worker.py\\\" relative_path=\\\"asynctaskqueue/worker.py\\\"
+      filename=\\\"worker.py\\\">\\n   1\u2502 \\\"\\\"\\\"Worker pool for task execution.\\n
+      \  2\u2502 \\n   3\u2502 This module manages a pool of worker threads that execute
+      tasks from the queue.\\n   4\u2502 \\\"\\\"\\\"\\n   5\u2502 \\n   6\u2502 import
+      asyncio\\n   7\u2502 import logging\\n   8\u2502 import threading\\n   9\u2502
+      import time\\n  10\u2502 from concurrent.futures import ThreadPoolExecutor\\n
+      \ 11\u2502 \\n  12\u2502 from .config import Config\\n  13\u2502 from .queue
+      import Task, TaskQueue\\n  14\u2502 from .storage import ResultStorage\\n  15\u2502
+      \\n  16\u2502 logger = logging.getLogger(__name__)\\n  17\u2502 \\n  18\u2502
+      \\n  19\u2502 class WorkerPool:\\n  20\u2502     \\\"\\\"\\\"Pool of worker
+      threads for executing tasks.\\\"\\\"\\\"\\n  21\u2502 \\n  22\u2502     def
+      __init__(\\n  23\u2502         self,\\n  24\u2502         queue: TaskQueue,\\n
+      \ 25\u2502         storage: ResultStorage,\\n  26\u2502         config: Config\\n
+      \ 27\u2502     ):\\n  28\u2502         self._queue = queue\\n  29\u2502         self._storage
+      = storage\\n  30\u2502         self._config = config\\n  31\u2502         self._running
+      = False\\n  32\u2502         self._executor: ThreadPoolExecutor | None = None\\n
+      \ 33\u2502 \\n  34\u2502         if config.max_workers == 0:\\n  35\u2502             self._max_workers
+      = None\\n  36\u2502         else:\\n  37\u2502             self._max_workers
+      = config.max_workers\\n  38\u2502 \\n  39\u2502     def start(self) -> None:\\n
+      \ 40\u2502         \\\"\\\"\\\"Start the worker pool.\\\"\\\"\\\"\\n  41\u2502
+      \        if self._running:\\n  42\u2502             return\\n  43\u2502 \\n
+      \ 44\u2502         self._running = True\\n  45\u2502         self._executor
+      = ThreadPoolExecutor(max_workers=self._max_workers)\\n  46\u2502         threading.Thread(target=self._run_worker_loop,
+      daemon=True).start()\\n  47\u2502 \\n  48\u2502     def stop(self) -> None:\\n
+      \ 49\u2502         \\\"\\\"\\\"Stop the worker pool.\\\"\\\"\\\"\\n  50\u2502
+      \        self._running = False\\n  51\u2502         if self._executor:\\n  52\u2502
+      \            self._executor.shutdown(wait=True)\\n  53\u2502 \\n  54\u2502     def
+      _run_worker_loop(self) -> None:\\n  55\u2502         \\\"\\\"\\\"Main worker
+      loop that processes tasks from the queue.\\\"\\\"\\\"\\n  56\u2502         asyncio.run(self._async_worker_loop())\\n
+      \ 57\u2502 \\n  58\u2502     async def _async_worker_loop(self) -> None:\\n
+      \ 59\u2502         \\\"\\\"\\\"Async worker loop.\\\"\\\"\\\"\\n  60\u2502         while
+      self._running:\\n  61\u2502             task = await self._queue.get_task()\\n
+      \ 62\u2502             if task:\\n  63\u2502                 self._executor.submit(self._execute_task,
+      task)\\n  64\u2502 \\n  65\u2502     def _execute_task(self, task: Task) ->
+      None:\\n  66\u2502         \\\"\\\"\\\"Execute a single task.\\n  67\u2502 \\n
+      \ 68\u2502         Args:\\n  69\u2502             task: The task to execute\\n
+      \ 70\u2502         \\\"\\\"\\\"\\n  71\u2502         try:\\n  72\u2502             timeout_ms
+      = self._config.task_timeout\\n  73\u2502             start_time = time.time()\\n
+      \ 74\u2502 \\n  75\u2502             result = task.func(*task.args, **task.kwargs)\\n
+      \ 76\u2502 \\n  77\u2502             elapsed_ms = (time.time() - start_time)
+      * 1000\\n  78\u2502             if elapsed_ms > timeout_ms:\\n  79\u2502                 logger.warning(f\\\"Task
+      {task.task_id} exceeded timeout\\\")\\n  80\u2502                 asyncio.run(self._queue.mark_completed(task.task_id,
+      success=False))\\n  81\u2502                 return\\n  82\u2502 \\n  83\u2502
+      \            self._storage.store_result(task.task_id, result)\\n  84\u2502             asyncio.run(self._queue.mark_completed(task.task_id,
+      success=True))\\n  85\u2502 \\n  86\u2502         except Exception as e:\\n
+      \ 87\u2502             logger.error(f\\\"Task {task.task_id} failed: {e}\\\")\\n
+      \ 88\u2502 \\n  89\u2502             retry_count = self._storage.increment_retry_count(task.task_id)\\n
+      \ 90\u2502 \\n  91\u2502             if retry_count < self._config.retry_attempts:\\n
+      \ 92\u2502                 logger.info(f\\\"Will retry task {task.task_id} ({retry_count}/{self._config.retry_attempts})\\\")\\n
+      \ 93\u2502             else:\\n  94\u2502                 logger.error(f\\\"Task
+      {task.task_id} failed after {retry_count} attempts\\\")\\n  95\u2502 \\n  96\u2502
+      \            asyncio.run(self._queue.mark_completed(task.task_id, success=False))\\n
+      \ 97\u2502 \\n  98\u2502     def get_active_workers(self) -> int:\\n  99\u2502
+      \        \\\"\\\"\\\"Get the number of active worker threads.\\\"\\\"\\\"\\n
+      100\u2502         if not self._executor:\\n 101\u2502             return 0\\n
+      102\u2502         return self._max_workers or 0\\n</file>\\n\\n</EDITABLE_FILES>\\n\\n<USER_MESSAGE>\\nWe
+      have a critical deadlock in asynctaskqueue between the async scheduler\\nand
+      sync queue operations. What&#x27;s the best approach to fix this?\\n\\nOptions
+      to consider:\\n1. Convert entire codebase to async (queue, workers, scheduler)\\n2.
+      Use run_in_executor() to bridge async/sync boundary\\n3. Separate async scheduler
+      from sync worker pool with thread-safe queue\\n4. Replace asyncio scheduler
+      with threading-based approach\\n\\nConsider: backwards compatibility, performance,
+      complexity, testing effort.\\nProvide a clear recommendation at the end.\\nKeep
+      responses under 3 sentences each.\\n</USER_MESSAGE>\"}],\"model\":\"gpt-5-nano\",\"temperature\":1.0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '21327'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - AsyncOpenAI/Python 2.8.1
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 2.8.1
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '180.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.0
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: "{\n  \"id\": \"chatcmpl-ChiwBa85akmlcRRp25gKSY789ZWTq\",\n  \"object\":
+        \"chat.completion\",\n  \"created\": 1764536879,\n  \"model\": \"gpt-5-nano-2025-08-07\",\n
+        \ \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\":
+        \"assistant\",\n        \"content\": \"# \U0001F947 Bridge Async Boundary
+        Using Coroutine Thread-Safe Scheduling\\n> \u2705 **Verdict:** \U0001F7E2
+        Bridge async boundary now; minimal invasive fix to break the deadlock without
+        a full rewrite.\\n\\n1. Option Ranking (Top 3 \u2014 Score & Justification)\\n\\n\U0001F947
+        **Rank 1: Bridge Async Boundary Using Coroutine Thread-Safe Scheduling** (Score:
+        9/10)\\n- Aligns with existing async queue and worker patterns; enqueues from
+        a thread using a coroutine bridge. Evidence: scheduler calls an async enqueue
+        on a separate thread. asynctaskqueue/scheduler.py:89-94; queue.py:50-57\\n-
+        Keeps backward compatibility and avoids large-scale refactors; lowest-risk
+        path to performance stability. Evidence: queue is async (add_task) whereas
+        scheduler runs in a timer thread. asynctaskqueue/queue.py:50-57\\n- Why best:
+        fixes the root cross-boundary call without rewriting the core queue/worker
+        design. Evidence: worker already consumes from an async queue; bridging avoids
+        changing that flow. asynctaskqueue/worker.py:61-64; asynctaskqueue/queue.py:81-93\\n\\n\U0001F948
+        **Rank 2: Separate Async Scheduler from Sync Worker Pool with Thread-Safe
+        Queue** (Score: 7/10)\\n- Reduces cross-boundary coupling by introducing a
+        thread-safe bridge, but requires adding a new queue type and adapters. Evidence:
+        current coupling exists between threading.Timer (scheduler) and async queue
+        (add_task). asynctaskqueue/scheduler.py:89-94; asynctaskqueue/queue.py:50-57\\n-
+        More predictable testing of interop, but adds maintenance burden and more
+        moving parts. Evidence: async/await boundary already present in queue/worker.
+        asynctaskqueue/worker.py:61-64\\n- Key limitation vs Rank 1: still requires
+        bridging logic; potential for subtle deadlocks if bridging isn\u2019t perfect.
+        asynctaskqueue/queue.py:50-57\\n\\n\U0001F949 **Rank 3: Replace asyncio Scheduler
+        with Threading-Based Approach** (Score: 6/10)\\n- Conceptually simple but
+        would propagate threading semantics into scheduling logic and avoid async
+        queue benefits. Evidence: current design relies on threading.Timer in scheduler
+        but async queue interactions exist. asynctaskqueue/scheduler.py:77-79; asynctaskqueue/queue.py:50-57\\n-
+        Higher risk and broader changes across tests and storage flow; more surface
+        area for bugs. Evidence: worker uses async loop for task lifecycle. asynctaskqueue/worker.py:61-64\\n\\n2.
+        Rank 1 Justification\\nTop choice: Bridge Async Boundary Using Coroutine Thread-Safe
+        Scheduling\\n- Why this fixes the deadlock: Timer-thread in scheduler emits
+        tasks by invoking an async enqueue; now bridged via a thread-safe coroutine
+        submission instead of a direct call. Evidence: Async queue task addition is
+        async (requires await). asynctaskqueue/queue.py:50-57\\n- Core pattern alignment:
+        scheduler still drives periodic work, producer enqueues into the async queue
+        used by workers; no wholesale rewrite required. Evidence: _execute_job enqueues
+        via _queue.add_task; this is the cross-boundary point. asynctaskqueue/scheduler.py:89-94\\n-
+        Performance/complexity: small overhead for cross-thread scheduling; no change
+        to worker pool or queue internals. Evidence: worker loop already uses a thread
+        pool; bridging uses existing loop without changing worker logic. asynctaskqueue/worker.py:61-64\\n\\n3.
+        Implementation Blueprint\\n- Edit: asynctaskqueue/scheduler.py:60-70 \u2192
+        add optional loop and bridge enqueue with run_coroutines_threadsafe\\n- Edit:
+        asynctaskqueue/scheduler.py:89-95 \u2192 replace direct add_task call with
+        asyncio.run_coroutine_threadsafe(...)\\n- Optional tests: add a test ensuring
+        that a scheduled job enqueues correctly without blocking the timer thread\\n-
+        Test commands: pytest path/to/test_scheduler.py -v\\n\\n4. Trade-offs & Risks\\n-
+        \U0001F534CRITICAL: Mismanaging the event loop can crash threading boundaries;
+        mitigation: robust loop capture and safe_threadsafe calls.\\n- \U0001F7E0HIGH:
+        Potential lost backpressure if bridge ignores return futures; mitigation:
+        ignore or log results and handle exceptions from run_coroutine_threadsafe.\\n-
+        \U0001F7E1MEDIUM: Added complexity around lifecycle of loop; mitigation: pass
+        loop from main app startup and document lifecycle.\\n- \U0001F7E2LOW: Minor
+        performance overhead from cross-thread scheduling; mitigation: keep bridge
+        lightweight and non-blocking.\\n\\n5. Confidence Score\\n\U0001F7E2 High (8-10/10):
+        Strong evidence the cross-boundary call is the root of the deadlock and bridging
+        is minimal-risk, with explicit async/sync separation already present in code.\\n\\n6.
+        Next Steps (Prioritized)\\n1) Edit: asynctaskqueue/scheduler.py:60-70 \u2192
+        store loop reference and implement bridging via asyncio.run_coroutine_threadsafe\\n2)
+        Edit: asynctaskqueue/scheduler.py:89-95 \u2192 replace direct add_task with
+        thread-safe coroutine submission\\n3) Test: add/extend tests for scheduled
+        tasks enqueuing without deadlock; run pytest -v\\n\\nEvidence references (for
+        quick review)\\n- Scheduler enqueues a task from a timer thread: asynctaskqueue/scheduler.py:89-94\\n-
+        add_task is an async coroutine: asynctaskqueue/queue.py:50-57\\n- Getting
+        and running tasks from the async queue in worker: asynctaskqueue/worker.py:61-64\\n-
+        Actual task execution and completion using async calls: asynctaskqueue/worker.py:75-85\",\n
+        \       \"refusal\": null,\n        \"annotations\": []\n      },\n      \"finish_reason\":
+        \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 5534,\n    \"completion_tokens\":
+        5295,\n    \"total_tokens\": 10829,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\":
+        1152,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\":
+        {\n      \"reasoning_tokens\": 4096,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\":
+        0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\":
+        \"default\",\n  \"system_fingerprint\": null\n}\n"
+    headers:
+      Access-Control-Expose-Headers:
+      - X-Request-ID
+      CF-RAY:
+      - 9a6d51452d54682f-SEA
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 30 Nov 2025 21:09:04 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=9udaFH6vlaDpQXiIjM8mwH3zE6AXkNQnZ0BMTFusCsI-1764536944-1.0.1.1-m0iOsB5D5uDZXkc68beM28jRD_fCxvBNynVAGfEKcwtuM9_uhZZJanRtdU6QopWOUQ69L.WbxkgjXbpLwGBa10Op69_Kb9R57wSnYgbRnKE;
+        path=/; expires=Sun, 30-Nov-25 21:39:04 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=NlGVdnGlcijGDthkS66ylarbQJkOtrdmPSKbU9uobv0-1764536944995-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '5922'
+      openai-organization:
+      - tom-llc
+      openai-processing-ms:
+      - '65981'
+      openai-project:
+      - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
+      openai-version:
+      - '2020-10-01'
+      x-envoy-upstream-service-time:
+      - '65996'
+      x-openai-proxy-wasm:
+      - v0.1
+      x-ratelimit-limit-requests:
+      - '5000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '4999'
+      x-ratelimit-remaining-tokens:
+      - '1994886'
+      x-ratelimit-reset-requests:
+      - 12ms
+      x-ratelimit-reset-tokens:
+      - 153ms
+      x-request-id:
+      - req_a0ed441d63a74b8a860b51a6bd498e80
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"# ROLE\\nYou are a **Principal
+      Engineer and Technical Advocate** participating in a high-stakes architectural
+      debate. Your mission is to identify viable options, rank them systematically,
+      then advocate for the strongest solution backed by repository evidence.\\n\\n**Current
+      Phase:** Independent Analysis (Step 1 of 2)\\nYou are generating an initial
+      proposal. You will not see other models' answers yet.\\n\\n# CORE WORKFLOW\\n\\n###
+      STEP 1: Identify Top Options (3 by default, unless user specifies N)\\n1. **Option
+      Discovery:** Based on REPOSITORY_CONTEXT, EDITABLE_FILES and USER_MESSAGE, existing
+      patterns, identify viable approaches\\n2. **Score & Rank:** Rate each option
+      (1-10) on: alignment with codebase, complexity, risk, performance\\n3. **Select
+      Rank 1:** Choose the highest-scored option as your proposal\\n\\n### STEP 2:
+      Build Case for Rank 1\\n1. **Evidence Gathering:** Cite specific file:line locations
+      supporting your choice\\n2. **Implementation Blueprint:** Minimal edits with
+      concrete file changes\\n3. **Trade-offs & Risks:** Document downsides with severity
+      and mitigation\\n4. **Alternatives:** Reference ranked options #2 and #3 from
+      Step 1\\n\\n# SCOPE & ENGINEERING PHILOSOPHY\\n- **Current Stack Focus:** Solutions
+      must fit existing tech stack and patterns\\n- **Anti-Overengineering:** Prefer
+      simple, testable changes over abstraction\\n- **Justified Innovation:** New
+      patterns only when clearly superior with minimal complexity\\n- **Evidence-Based
+      Advocacy:** Every claim needs file:line proof from REPOSITORY_CONTEXT\\n\\n#
+      INPUT DATA\\nYou have access to:\\n- **<REPOSITORY_CONTEXT>:** CLAUDE.md, AGENTS.md,
+      architecture docs defining project conventions\\n- **<EDITABLE_FILES>:** Current
+      source code relevant to the question\\n- **<USER_MESSAGE>:** The technical question
+      or decision to make\\n\\n# CODE CITATION STANDARDS\\n- **Format:** `path/to/file.py:line`
+      or `file.py:start-end`\\n- **No Line Markers:** Input code has \\\"LINE\u2502\\\"
+      markers. **NEVER** include these in output code or quotes.\\n- **Snippet Length:**
+      3-10 lines for evidence; show enough context to understand\\n- **Multi-file
+      Navigation:** Explain relationships across files: \\\"Function X in `api.py:45`
+      calls Y in `utils.py:78`\\\"\\n\\n# VISUAL INDICATORS\\n\\n**Option Ranking:**\\n-
+      \U0001F947 **Rank 1:** Your proposal (highest composite score)\\n- \U0001F948
+      **Rank 2:** Strong alternative\\n- \U0001F949 **Rank 3:** Considered but weaker
+      option\\n\\n**Confidence & Evidence:**\\n- \U0001F7E2 **High (8-10/10):** Strong
+      evidence from code/docs with exact citations\\n- \U0001F7E1 **Medium (5-7/10):**
+      Reasonable inference from context\\n- \U0001F534 **Low (1-4/10):** Assumption
+      or external knowledge\\n\\n**Risk Assessment:**\\n- \U0001F534 **CRITICAL:**
+      Security vulnerabilities, data loss risks\\n- \U0001F7E0 **HIGH:** Crashes,
+      race conditions, major bugs\\n- \U0001F7E1 **MEDIUM:** Performance issues, error
+      handling gaps\\n- \U0001F7E2 **LOW:** Code quality, maintainability, style\\n\\n#
+      OUTPUT FORMAT (MANDATORY)\\nFormat your response exactly using these sections
+      in markdown:\\n\\n**# \U0001F947 [Concise Title]: Use [Approach Name]**\\n>
+      \u2705 **Verdict:** [One-sentence justification with emoji verdict \U0001F7E2/\U0001F7E1/\U0001F534]\\n\\n**1.
+      Option Ranking (Top 3 \u2014 Score & Justification)**\\n\\n\U0001F947 **Rank
+      1: [Approach Name]** (Score: X/10)\\n- One-line alignment justification with
+      file citation\\n- Performance/complexity note\\n- Why it's the best fit\\n\\n\U0001F948
+      **Rank 2: [Alternative Approach]** (Score: Y/10)\\n- One-line why it's viable
+      but second choice\\n- Key limitation vs Rank 1\\n\\n\U0001F949 **Rank 3: [Alternative
+      Approach]** (Score: Z/10)\\n- One-line why it was considered\\n- Why it ranks
+      lower\\n\\n**2. Rank 1 Justification**\\nDetailed analysis of your top choice
+      with code evidence (`file:line`), pattern alignment, and performance notes (Big
+      O, benchmarks). Use bullets with inline citations: \\\"Claim \u2014 `file.py:START-END`:
+      quoted snippet\\\"\\n\\n**3. Implementation Blueprint**\\nMinimal file edits
+      and exact commands. Format: `Edit: path/to/file.py:lines \u2192 [change]`. Include
+      code diffs and test commands: `pytest path/to/test.py -v`\\n\\n**4. Trade-offs
+      & Risks**\\nConcise bullets with emoji severity (\U0001F534\U0001F7E0\U0001F7E1\U0001F7E2)
+      and mitigation strategies.\\n\\n**5. Confidence Score**\\n\U0001F7E2 High (8-10/10)
+      / \U0001F7E1 Medium (5-7/10) / \U0001F534 Low (1-4/10): [brief explanation based
+      on evidence quality]\\n\\n**6. Next Steps (Prioritized)**\\nExact commands or
+      file edits in priority order (1-3 items).\\n\\n# STYLE GUIDELINES\\n- **Be Opinionated:**
+      \\\"Use X because...\\\" not \\\"X is an option\\\"\\n- **Be Concise:** Bullets
+      for arguments, avoid prose\\n- **Be Direct:** Skip pleasantries, dive into engineering\\n-
+      **Code-First:** Prefer code examples over descriptions\\n\\n# CRITICAL RULES\\n-
+      **Context Adherence:** If repo uses `pytest`, don't suggest `unittest`. If it
+      uses `FastAPI`, don't suggest `Flask`.\\n- **NEVER** include line number markers
+      (e.g., \\\"   1\u2502\\\") in output code blocks\\n- **ALWAYS** reference line
+      numbers in analysis text for evidence\"},{\"role\":\"user\",\"content\":\"<EDITABLE_FILES>\\n<file
+      path=\\\"asynctaskqueue/scheduler.py\\\" relative_path=\\\"asynctaskqueue/scheduler.py\\\"
+      filename=\\\"scheduler.py\\\">\\n   1\u2502 \\\"\\\"\\\"Task scheduler for periodic
+      and delayed task execution.\\n   2\u2502 \\n   3\u2502 This module provides
+      scheduling capabilities for recurring and one-time delayed tasks.\\n   4\u2502
+      \\\"\\\"\\\"\\n   5\u2502 \\n   6\u2502 import threading\\n   7\u2502 import
+      time\\n   8\u2502 import uuid\\n   9\u2502 from collections.abc import Callable\\n
+      \ 10\u2502 \\n  11\u2502 from .queue import TaskQueue\\n  12\u2502 \\n  13\u2502
+      \\n  14\u2502 class ScheduledJob:\\n  15\u2502     \\\"\\\"\\\"Represents a
+      scheduled job.\\\"\\\"\\\"\\n  16\u2502 \\n  17\u2502     def __init__(\\n  18\u2502
+      \        self,\\n  19\u2502         job_id: str,\\n  20\u2502         func:
+      Callable,\\n  21\u2502         interval: float,\\n  22\u2502         args: tuple
+      = (),\\n  23\u2502         kwargs: dict = None\\n  24\u2502     ):\\n  25\u2502
+      \        self.job_id = job_id\\n  26\u2502         self.func = func\\n  27\u2502
+      \        self.interval = interval\\n  28\u2502         self.args = args\\n  29\u2502
+      \        self.kwargs = kwargs or {}\\n  30\u2502         self.timer: threading.Timer
+      | None = None\\n  31\u2502         self.paused = False\\n  32\u2502 \\n  33\u2502
+      \\n  34\u2502 class Scheduler:\\n  35\u2502     \\\"\\\"\\\"Scheduler for periodic
+      and one-time tasks.\\\"\\\"\\\"\\n  36\u2502 \\n  37\u2502     def __init__(self,
+      queue: TaskQueue):\\n  38\u2502         self._queue = queue\\n  39\u2502         self._jobs:
+      dict[str, ScheduledJob] = {}\\n  40\u2502         self._lock = threading.Lock()\\n
+      \ 41\u2502 \\n  42\u2502     def schedule_periodic(\\n  43\u2502         self,\\n
+      \ 44\u2502         func: Callable,\\n  45\u2502         interval: float,\\n
+      \ 46\u2502         args: tuple = (),\\n  47\u2502         kwargs: dict = None,\\n
+      \ 48\u2502         job_id: str = None\\n  49\u2502     ) -> str:\\n  50\u2502
+      \        \\\"\\\"\\\"Schedule a function to run periodically.\\n  51\u2502 \\n
+      \ 52\u2502         Args:\\n  53\u2502             func: The function to execute\\n
+      \ 54\u2502             interval: Interval in seconds between executions\\n  55\u2502
+      \            args: Positional arguments\\n  56\u2502             kwargs: Keyword
+      arguments\\n  57\u2502             job_id: Optional job identifier (generated
+      if not provided)\\n  58\u2502 \\n  59\u2502         Returns:\\n  60\u2502             The
+      job identifier\\n  61\u2502         \\\"\\\"\\\"\\n  62\u2502         if job_id
+      is None:\\n  63\u2502             job_id = str(uuid.uuid4())\\n  64\u2502 \\n
+      \ 65\u2502         with self._lock:\\n  66\u2502             job = ScheduledJob(job_id,
+      func, interval, args, kwargs)\\n  67\u2502             self._jobs[job_id] =
+      job\\n  68\u2502             self._schedule_next_run(job)\\n  69\u2502 \\n  70\u2502
+      \        return job_id\\n  71\u2502 \\n  72\u2502     def _schedule_next_run(self,
+      job: ScheduledJob) -> None:\\n  73\u2502         \\\"\\\"\\\"Schedule the next
+      run of a periodic job.\\\"\\\"\\\"\\n  74\u2502         if job.paused:\\n  75\u2502
+      \            return\\n  76\u2502 \\n  77\u2502         job.timer = threading.Timer(job.interval,
+      self._execute_job, args=(job,))\\n  78\u2502         job.timer.daemon = True\\n
+      \ 79\u2502         job.timer.start()\\n  80\u2502 \\n  81\u2502     def _execute_job(self,
+      job: ScheduledJob) -> None:\\n  82\u2502         \\\"\\\"\\\"Execute a scheduled
+      job.\\\"\\\"\\\"\\n  83\u2502         if job.paused:\\n  84\u2502             return\\n
+      \ 85\u2502 \\n  86\u2502         task_id = f\\\"{job.job_id}_{int(time.time()
+      * 1000)}\\\"\\n  87\u2502 \\n  88\u2502         try:\\n  89\u2502             self._queue.add_task(\\n
+      \ 90\u2502                 task_id=task_id,\\n  91\u2502                 func=job.func,\\n
+      \ 92\u2502                 args=job.args,\\n  93\u2502                 kwargs=job.kwargs\\n
+      \ 94\u2502             )\\n  95\u2502         except Exception as e:\\n  96\u2502
+      \            print(f\\\"Failed to enqueue job {job.job_id}: {e}\\\")\\n  97\u2502
+      \\n  98\u2502         if not job.paused:\\n  99\u2502             self._schedule_next_run(job)\\n
+      100\u2502 \\n 101\u2502     def cancel_job(self, job_id: str) -> bool:\\n 102\u2502
+      \        \\\"\\\"\\\"Cancel a scheduled job.\\n 103\u2502 \\n 104\u2502         Args:\\n
+      105\u2502             job_id: The job identifier\\n 106\u2502 \\n 107\u2502
+      \        Returns:\\n 108\u2502             True if job was canceled, False if
+      not found\\n 109\u2502         \\\"\\\"\\\"\\n 110\u2502         with self._lock:\\n
+      111\u2502             job = self._jobs.get(job_id)\\n 112\u2502             if
+      not job:\\n 113\u2502                 return False\\n 114\u2502 \\n 115\u2502
+      \            job.paused = True\\n 116\u2502 \\n 117\u2502             if job.timer:\\n
+      118\u2502                 job.timer.cancel()\\n 119\u2502 \\n 120\u2502             return
+      True\\n 121\u2502 \\n 122\u2502     def resume_job(self, job_id: str) -> bool:\\n
+      123\u2502         \\\"\\\"\\\"Resume a paused job.\\n 124\u2502 \\n 125\u2502
+      \        Args:\\n 126\u2502             job_id: The job identifier\\n 127\u2502
+      \\n 128\u2502         Returns:\\n 129\u2502             True if job was resumed,
+      False if not found\\n 130\u2502         \\\"\\\"\\\"\\n 131\u2502         with
+      self._lock:\\n 132\u2502             job = self._jobs.get(job_id)\\n 133\u2502
+      \            if not job:\\n 134\u2502                 return False\\n 135\u2502
+      \\n 136\u2502             job.paused = False\\n 137\u2502             self._schedule_next_run(job)\\n
+      138\u2502             return True\\n 139\u2502 \\n 140\u2502     def remove_job(self,
+      job_id: str) -> bool:\\n 141\u2502         \\\"\\\"\\\"Permanently remove a
+      job.\\n 142\u2502 \\n 143\u2502         Args:\\n 144\u2502             job_id:
+      The job identifier\\n 145\u2502 \\n 146\u2502         Returns:\\n 147\u2502
+      \            True if job was removed, False if not found\\n 148\u2502         \\\"\\\"\\\"\\n
+      149\u2502         with self._lock:\\n 150\u2502             job = self._jobs.pop(job_id,
+      None)\\n 151\u2502             if not job:\\n 152\u2502                 return
+      False\\n 153\u2502 \\n 154\u2502             if job.timer:\\n 155\u2502                 job.timer.cancel()\\n
+      156\u2502 \\n 157\u2502             return True\\n 158\u2502 \\n 159\u2502     def
+      get_all_jobs(self) -> dict[str, ScheduledJob]:\\n 160\u2502         \\\"\\\"\\\"Get
+      all scheduled jobs.\\\"\\\"\\\"\\n 161\u2502         with self._lock:\\n 162\u2502
+      \            return dict(self._jobs)\\n</file>\\n\\n<file path=\\\"asynctaskqueue/queue.py\\\"
+      relative_path=\\\"asynctaskqueue/queue.py\\\" filename=\\\"queue.py\\\">\\n
+      \  1\u2502 \\\"\\\"\\\"Task queue management.\\n   2\u2502 \\n   3\u2502 This
+      module manages the task queue and task lifecycle.\\n   4\u2502 \\\"\\\"\\\"\\n
+      \  5\u2502 \\n   6\u2502 import asyncio\\n   7\u2502 from collections.abc import
+      Callable\\n   8\u2502 from dataclasses import dataclass\\n   9\u2502 from enum
+      import Enum\\n  10\u2502 \\n  11\u2502 \\n  12\u2502 class TaskStatus(Enum):\\n
+      \ 13\u2502     \\\"\\\"\\\"Task execution status.\\\"\\\"\\\"\\n  14\u2502     PENDING
+      = \\\"pending\\\"\\n  15\u2502     RUNNING = \\\"running\\\"\\n  16\u2502     COMPLETED
+      = \\\"completed\\\"\\n  17\u2502     FAILED = \\\"failed\\\"\\n  18\u2502     CANCELLED
+      = \\\"cancelled\\\"\\n  19\u2502 \\n  20\u2502 \\n  21\u2502 @dataclass\\n  22\u2502
+      class Task:\\n  23\u2502     \\\"\\\"\\\"Represents a task in the queue.\\\"\\\"\\\"\\n
+      \ 24\u2502     task_id: str\\n  25\u2502     func: Callable\\n  26\u2502     args:
+      tuple\\n  27\u2502     kwargs: dict\\n  28\u2502     status: TaskStatus = TaskStatus.PENDING\\n
+      \ 29\u2502 \\n  30\u2502 \\n  31\u2502 class QueueFullError(Exception):\\n  32\u2502
+      \    \\\"\\\"\\\"Raised when attempting to add a task to a full queue.\\\"\\\"\\\"\\n
+      \ 33\u2502     pass\\n  34\u2502 \\n  35\u2502 \\n  36\u2502 class TaskNotFoundError(Exception):\\n
+      \ 37\u2502     \\\"\\\"\\\"Raised when a task is not found in the queue.\\\"\\\"\\\"\\n
+      \ 38\u2502     pass\\n  39\u2502 \\n  40\u2502 \\n  41\u2502 class TaskQueue:\\n
+      \ 42\u2502     \\\"\\\"\\\"Manages a queue of tasks for asynchronous execution.\\\"\\\"\\\"\\n
+      \ 43\u2502 \\n  44\u2502     def __init__(self, max_size: int = 1000):\\n  45\u2502
+      \        self._queue: asyncio.Queue = asyncio.Queue(maxsize=max_size)\\n  46\u2502
+      \        self._tasks: dict[str, Task] = {}\\n  47\u2502         self._lock =
+      asyncio.Lock()\\n  48\u2502         self._max_size = max_size\\n  49\u2502 \\n
+      \ 50\u2502     async def add_task(\\n  51\u2502         self,\\n  52\u2502         task_id:
+      str,\\n  53\u2502         func: Callable,\\n  54\u2502         args: tuple =
+      (),\\n  55\u2502         kwargs: dict = None\\n  56\u2502     ) -> None:\\n
+      \ 57\u2502         \\\"\\\"\\\"Add a task to the queue.\\n  58\u2502 \\n  59\u2502
+      \        Args:\\n  60\u2502             task_id: Unique task identifier\\n  61\u2502
+      \            func: The function to execute\\n  62\u2502             args: Positional
+      arguments for the function\\n  63\u2502             kwargs: Keyword arguments
+      for the function\\n  64\u2502 \\n  65\u2502         Raises:\\n  66\u2502             QueueFullError:
+      If the queue is at maximum capacity\\n  67\u2502         \\\"\\\"\\\"\\n  68\u2502
+      \        async with self._lock:\\n  69\u2502             if len(self._tasks)
+      >= self._max_size:\\n  70\u2502                 raise QueueFullError(f\\\"Queue
+      is full (max size: {self._max_size})\\\")\\n  71\u2502 \\n  72\u2502             task
+      = Task(\\n  73\u2502                 task_id=task_id,\\n  74\u2502                 func=func,\\n
+      \ 75\u2502                 args=args,\\n  76\u2502                 kwargs=kwargs
+      or {}\\n  77\u2502             )\\n  78\u2502             self._tasks[task_id]
+      = task\\n  79\u2502             await self._queue.put(task)\\n  80\u2502 \\n
+      \ 81\u2502     async def get_task(self) -> Task | None:\\n  82\u2502         \\\"\\\"\\\"Get
+      the next task from the queue.\\n  83\u2502 \\n  84\u2502         Returns:\\n
+      \ 85\u2502             The next task, or None if queue is empty (with timeout)\\n
+      \ 86\u2502         \\\"\\\"\\\"\\n  87\u2502         try:\\n  88\u2502             task
+      = await asyncio.wait_for(self._queue.get(), timeout=0.1)\\n  89\u2502             async
+      with self._lock:\\n  90\u2502                 if task.task_id in self._tasks:\\n
+      \ 91\u2502                     self._tasks[task.task_id].status = TaskStatus.RUNNING\\n
+      \ 92\u2502             return task\\n  93\u2502         except TimeoutError:\\n
+      \ 94\u2502             return None\\n  95\u2502 \\n  96\u2502     async def
+      mark_completed(self, task_id: str, success: bool = True) -> None:\\n  97\u2502
+      \        \\\"\\\"\\\"Mark a task as completed or failed.\\n  98\u2502 \\n  99\u2502
+      \        Args:\\n 100\u2502             task_id: The task identifier\\n 101\u2502
+      \            success: Whether the task completed successfully\\n 102\u2502         \\\"\\\"\\\"\\n
+      103\u2502         async with self._lock:\\n 104\u2502             if task_id
+      in self._tasks:\\n 105\u2502                 self._tasks[task_id].status = (\\n
+      106\u2502                     TaskStatus.COMPLETED if success else TaskStatus.FAILED\\n
+      107\u2502                 )\\n 108\u2502 \\n 109\u2502     async def remove_task(self,
+      task_id: str) -> None:\\n 110\u2502         \\\"\\\"\\\"Remove a task from the
+      queue (cancels it).\\n 111\u2502 \\n 112\u2502         Args:\\n 113\u2502             task_id:
+      The task identifier\\n 114\u2502 \\n 115\u2502         Raises:\\n 116\u2502
+      \            TaskNotFoundError: If task is not found\\n 117\u2502         \\\"\\\"\\\"\\n
+      118\u2502         async with self._lock:\\n 119\u2502             if task_id
+      not in self._tasks:\\n 120\u2502                 raise TaskNotFoundError(f\\\"Task
+      {task_id} not found\\\")\\n 121\u2502             self._tasks[task_id].status
+      = TaskStatus.CANCELLED\\n 122\u2502             del self._tasks[task_id]\\n
+      123\u2502 \\n 124\u2502     def get_status(self, task_id: str) -> TaskStatus
+      | None:\\n 125\u2502         \\\"\\\"\\\"Get the status of a task.\\n 126\u2502
+      \\n 127\u2502         Args:\\n 128\u2502             task_id: The task identifier\\n
+      129\u2502 \\n 130\u2502         Returns:\\n 131\u2502             The task status
+      or None if not found\\n 132\u2502         \\\"\\\"\\\"\\n 133\u2502         task
+      = self._tasks.get(task_id)\\n 134\u2502         return task.status if task else
+      None\\n 135\u2502 \\n 136\u2502     def get_pending_count(self) -> int:\\n 137\u2502
+      \        \\\"\\\"\\\"Get the number of pending tasks.\\\"\\\"\\\"\\n 138\u2502
+      \        return sum(1 for t in self._tasks.values() if t.status == TaskStatus.PENDING)\\n
+      139\u2502 \\n 140\u2502     def get_running_count(self) -> int:\\n 141\u2502
+      \        \\\"\\\"\\\"Get the number of running tasks.\\\"\\\"\\\"\\n 142\u2502
+      \        return sum(1 for t in self._tasks.values() if t.status == TaskStatus.RUNNING)\\n</file>\\n\\n<file
+      path=\\\"asynctaskqueue/worker.py\\\" relative_path=\\\"asynctaskqueue/worker.py\\\"
+      filename=\\\"worker.py\\\">\\n   1\u2502 \\\"\\\"\\\"Worker pool for task execution.\\n
+      \  2\u2502 \\n   3\u2502 This module manages a pool of worker threads that execute
+      tasks from the queue.\\n   4\u2502 \\\"\\\"\\\"\\n   5\u2502 \\n   6\u2502 import
+      asyncio\\n   7\u2502 import logging\\n   8\u2502 import threading\\n   9\u2502
+      import time\\n  10\u2502 from concurrent.futures import ThreadPoolExecutor\\n
+      \ 11\u2502 \\n  12\u2502 from .config import Config\\n  13\u2502 from .queue
+      import Task, TaskQueue\\n  14\u2502 from .storage import ResultStorage\\n  15\u2502
+      \\n  16\u2502 logger = logging.getLogger(__name__)\\n  17\u2502 \\n  18\u2502
+      \\n  19\u2502 class WorkerPool:\\n  20\u2502     \\\"\\\"\\\"Pool of worker
+      threads for executing tasks.\\\"\\\"\\\"\\n  21\u2502 \\n  22\u2502     def
+      __init__(\\n  23\u2502         self,\\n  24\u2502         queue: TaskQueue,\\n
+      \ 25\u2502         storage: ResultStorage,\\n  26\u2502         config: Config\\n
+      \ 27\u2502     ):\\n  28\u2502         self._queue = queue\\n  29\u2502         self._storage
+      = storage\\n  30\u2502         self._config = config\\n  31\u2502         self._running
+      = False\\n  32\u2502         self._executor: ThreadPoolExecutor | None = None\\n
+      \ 33\u2502 \\n  34\u2502         if config.max_workers == 0:\\n  35\u2502             self._max_workers
+      = None\\n  36\u2502         else:\\n  37\u2502             self._max_workers
+      = config.max_workers\\n  38\u2502 \\n  39\u2502     def start(self) -> None:\\n
+      \ 40\u2502         \\\"\\\"\\\"Start the worker pool.\\\"\\\"\\\"\\n  41\u2502
+      \        if self._running:\\n  42\u2502             return\\n  43\u2502 \\n
+      \ 44\u2502         self._running = True\\n  45\u2502         self._executor
+      = ThreadPoolExecutor(max_workers=self._max_workers)\\n  46\u2502         threading.Thread(target=self._run_worker_loop,
+      daemon=True).start()\\n  47\u2502 \\n  48\u2502     def stop(self) -> None:\\n
+      \ 49\u2502         \\\"\\\"\\\"Stop the worker pool.\\\"\\\"\\\"\\n  50\u2502
+      \        self._running = False\\n  51\u2502         if self._executor:\\n  52\u2502
+      \            self._executor.shutdown(wait=True)\\n  53\u2502 \\n  54\u2502     def
+      _run_worker_loop(self) -> None:\\n  55\u2502         \\\"\\\"\\\"Main worker
+      loop that processes tasks from the queue.\\\"\\\"\\\"\\n  56\u2502         asyncio.run(self._async_worker_loop())\\n
+      \ 57\u2502 \\n  58\u2502     async def _async_worker_loop(self) -> None:\\n
+      \ 59\u2502         \\\"\\\"\\\"Async worker loop.\\\"\\\"\\\"\\n  60\u2502         while
+      self._running:\\n  61\u2502             task = await self._queue.get_task()\\n
+      \ 62\u2502             if task:\\n  63\u2502                 self._executor.submit(self._execute_task,
+      task)\\n  64\u2502 \\n  65\u2502     def _execute_task(self, task: Task) ->
+      None:\\n  66\u2502         \\\"\\\"\\\"Execute a single task.\\n  67\u2502 \\n
+      \ 68\u2502         Args:\\n  69\u2502             task: The task to execute\\n
+      \ 70\u2502         \\\"\\\"\\\"\\n  71\u2502         try:\\n  72\u2502             timeout_ms
+      = self._config.task_timeout\\n  73\u2502             start_time = time.time()\\n
+      \ 74\u2502 \\n  75\u2502             result = task.func(*task.args, **task.kwargs)\\n
+      \ 76\u2502 \\n  77\u2502             elapsed_ms = (time.time() - start_time)
+      * 1000\\n  78\u2502             if elapsed_ms > timeout_ms:\\n  79\u2502                 logger.warning(f\\\"Task
+      {task.task_id} exceeded timeout\\\")\\n  80\u2502                 asyncio.run(self._queue.mark_completed(task.task_id,
+      success=False))\\n  81\u2502                 return\\n  82\u2502 \\n  83\u2502
+      \            self._storage.store_result(task.task_id, result)\\n  84\u2502             asyncio.run(self._queue.mark_completed(task.task_id,
+      success=True))\\n  85\u2502 \\n  86\u2502         except Exception as e:\\n
+      \ 87\u2502             logger.error(f\\\"Task {task.task_id} failed: {e}\\\")\\n
+      \ 88\u2502 \\n  89\u2502             retry_count = self._storage.increment_retry_count(task.task_id)\\n
+      \ 90\u2502 \\n  91\u2502             if retry_count < self._config.retry_attempts:\\n
+      \ 92\u2502                 logger.info(f\\\"Will retry task {task.task_id} ({retry_count}/{self._config.retry_attempts})\\\")\\n
+      \ 93\u2502             else:\\n  94\u2502                 logger.error(f\\\"Task
+      {task.task_id} failed after {retry_count} attempts\\\")\\n  95\u2502 \\n  96\u2502
+      \            asyncio.run(self._queue.mark_completed(task.task_id, success=False))\\n
+      \ 97\u2502 \\n  98\u2502     def get_active_workers(self) -> int:\\n  99\u2502
+      \        \\\"\\\"\\\"Get the number of active worker threads.\\\"\\\"\\\"\\n
+      100\u2502         if not self._executor:\\n 101\u2502             return 0\\n
+      102\u2502         return self._max_workers or 0\\n</file>\\n\\n</EDITABLE_FILES>\\n\\n<USER_MESSAGE>\\nWe
+      have a critical deadlock in asynctaskqueue between the async scheduler\\nand
+      sync queue operations. What&#x27;s the best approach to fix this?\\n\\nOptions
+      to consider:\\n1. Convert entire codebase to async (queue, workers, scheduler)\\n2.
+      Use run_in_executor() to bridge async/sync boundary\\n3. Separate async scheduler
+      from sync worker pool with thread-safe queue\\n4. Replace asyncio scheduler
+      with threading-based approach\\n\\nConsider: backwards compatibility, performance,
+      complexity, testing effort.\\nProvide a clear recommendation at the end.\\nKeep
+      responses under 3 sentences each.\\n</USER_MESSAGE>\"}],\"model\":\"gpt-5-nano\",\"temperature\":1.0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '21327'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - AsyncOpenAI/Python 2.8.1
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 2.8.1
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '180.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.0
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Expose-Headers:
+      - X-Request-ID
+      CF-RAY:
+      - 9a6d51452d54682f-SEA
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 30 Nov 2025 21:09:04 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=9udaFH6vlaDpQXiIjM8mwH3zE6AXkNQnZ0BMTFusCsI-1764536944-1.0.1.1-m0iOsB5D5uDZXkc68beM28jRD_fCxvBNynVAGfEKcwtuM9_uhZZJanRtdU6QopWOUQ69L.WbxkgjXbpLwGBa10Op69_Kb9R57wSnYgbRnKE;
+        path=/; expires=Sun, 30-Nov-25 21:39:04 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=NlGVdnGlcijGDthkS66ylarbQJkOtrdmPSKbU9uobv0-1764536944995-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '0'
+      openai-organization:
+      - tom-llc
+      openai-processing-ms:
+      - '65981'
+      openai-project:
+      - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
+      openai-version:
+      - '2020-10-01'
+      x-envoy-upstream-service-time:
+      - '65996'
+      x-openai-proxy-wasm:
+      - v0.1
+      x-ratelimit-limit-requests:
+      - '5000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '4999'
+      x-ratelimit-remaining-tokens:
+      - '1994886'
+      x-ratelimit-reset-requests:
+      - 12ms
+      x-ratelimit-reset-tokens:
+      - 153ms
+      x-request-id:
+      - req_a0ed441d63a74b8a860b51a6bd498e80
+    status:
+      code: 200
+      message: OK
+version: 1

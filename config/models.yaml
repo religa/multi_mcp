@@ -109,13 +109,15 @@ models:
     cli_args:
       - "-o"
       - "json"
-      - "--yolo"
+      - "--approval-mode"
+      - "auto_edit"
+      # - "--yolo"  # Most dangerous: auto-approve all tools
     cli_env:
       GEMINI_API_KEY: "${GEMINI_API_KEY}"
     cli_parser: json
     aliases:
-      - gemcli
-    notes: "Gemini CLI with full tool access"
+      - gem-cli
+    notes: "Gemini CLI with auto-edit approval mode"
 
   codex-cli:
     provider: cli
@@ -123,25 +125,31 @@ models:
     cli_args:
       - "exec"
       - "--json"
-      - "--dangerously-bypass-approvals-and-sandbox"
+      - "--full-auto"  # Low-friction sandboxed auto execution (safer than bypass)
+      # - "--dangerously-bypass-approvals-and-sandbox"  # Most dangerous: bypass all approvals
     cli_env: {}
     cli_parser: jsonl
     aliases:
-      - cxcli
-    notes: "Codex CLI with full tool access"
+      - cx-cli
+    notes: "Codex CLI with full-auto mode"
 
   claude-cli:
     provider: cli
     cli_command: claude
     cli_args:
+      - "--print"  # Non-interactive mode
       - "--output-format"
       - "json"
+      - "--permission-mode"
+      - "acceptEdits"  # Auto-approve edits
+      # - "--dangerously-skip-permissions"  # Most dangerous: bypass all permissions
     cli_env:
       ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+      ANTHROPIC_MODEL: "claude-haiku-4-5-20251001"  # Use cheaper Haiku for integration tests
     cli_parser: json
     aliases:
-      - clcli
-    notes: "Claude CLI with full tool access"
+      - cl-cli
+    notes: "Claude CLI with acceptEdits permission mode, using Haiku for cost efficiency"
 
   # ============================================
   # OpenRouter Models

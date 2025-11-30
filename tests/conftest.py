@@ -349,14 +349,21 @@ def filter_query_parameters(response):
     This callback filters sensitive query parameters like ?key=API_KEY.
 
     Args:
-        response: VCR response dict with 'request' key
+        response: VCR interaction dict
 
     Returns:
-        Modified response with filtered query parameters
+        Modified interaction with filtered query parameters
     """
     from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
+    # VCR passes interaction dict with 'request' and 'response' keys
+    if not isinstance(response, dict) or "request" not in response:
+        return response
+
     request = response["request"]
+    if not isinstance(request, dict) or "uri" not in request:
+        return response
+
     uri = request["uri"]
 
     # Parse URL
@@ -371,10 +378,12 @@ def filter_query_parameters(response):
         if param in params:
             params[param] = ["***REDACTED***"]
 
-    # Rebuild URL
+    # Rebuild URL with filtered parameters
     new_query = urlencode(params, doseq=True)
     new_parsed = parsed._replace(query=new_query)
-    request["uri"] = urlunparse(new_parsed)
+
+    # Modify the request URI in place
+    response["request"]["uri"] = urlunparse(new_parsed)
 
     return response
 
@@ -416,7 +425,9 @@ def vcr_config():
             "google-api-key",
         ],
         # Security: Filter sensitive query parameters (e.g., ?key=API_KEY)
+        # Use filter_query_parameters for both request and response URIs
         "before_record_response": filter_query_parameters,
+        "filter_query_parameters": ["key", "api_key", "apikey", "token", "access_token", "auth"],
         # Record mode: "once" means record on first run, replay thereafter
         "record_mode": "once",
         # Cassette storage location

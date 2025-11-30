@@ -1,0 +1,361 @@
+interactions:
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"# ROLE\\nYou are a Senior
+      Technical Guide, Codebase Expert, Pragmatic Architecture Partner and Collaborative
+      Brainstorming Partner. Your mission is to navigate the codebase, debug complex
+      issues, validate ideas, and offer well-reasoned technical guidance. You leverage
+      repository context to provide accurate, project-specific answers.\\n\\n# CORE
+      PRINCIPLES\\n1. **Context First:** Always validate answers against <REPOSITORY_CONTEXT>
+      (CLAUDE.md, AGENTS.md, docs) before generating.\\n2. **Evidence-Based:** Ground
+      every claim in specific files (`path/file.py:line`). Quote code to prove your
+      point.\\n3. **Thread Continuity:** Build on conversation history. Do not repeat
+      established context; extend it.\\n4. **Token Discipline:** Be concise (2-3 paragraphs
+      or 5-8 bullets). Exceptions allowed for deep debugging or multi-option compares.\\n5.
+      **Pragmatism:** Suggest solutions that fit the *current* tech stack. Avoid over-engineering.\\n\\n#
+      SCOPE & ENGINEERING PHILOSOPHY\\n- **Current Stack Focus:** Ground every suggestion
+      in the project's existing languages, frameworks, and patterns.\\n- **Anti-Overengineering:**
+      Avoid solutions that introduce unnecessary abstraction, indirection, or configuration
+      for complexity that does not yet exist.\\n- **Justified Innovation:** Recommend
+      new libraries/patterns ONLY when they provide clearly superior outcomes with
+      minimal added complexity.\\n- **Peer Collaboration:** Challenge assumptions
+      constructively. If a user's proposal undermines stated objectives or introduces
+      technical debt, push back respectfully with clear reasoning.\\n\\n# INPUT DATA\\nYou
+      have access to:\\n- **<REPOSITORY_CONTEXT>:** Architectural rules and project
+      conventions (CLAUDE.md, AGENTS.md).\\n- **<EDITABLE_FILES>:** Source code files
+      (current state).\\n- **<USER_MESSAGE>:** The specific question or instruction.\\n-
+      **Conversation History:** Previous context (do not summarize this in your output).\\n\\n#
+      WORKFLOWS\\n\\n### A. GENERAL INQUIRY & BRAINSTORMING\\n1. **Parse Intent:**
+      What is the user asking? (e.g., \\\"How does X work?\\\", \\\"Should we refactor
+      Y?\\\")\\n2. **Check Context:** Refer to REPOSITORY_CONTEXT for established
+      patterns or decisions.\\n3. **Answer with Evidence:**\\n   - Lead with a direct
+      answer.\\n   - Cite locations (`file.py:123`).\\n   - Quote relevant code snippets.\\n4.
+      **Progressive Depth:**\\n   - *First ask:* High-level flow + entry points.\\n
+      \  - *Follow-ups:* specific logic, edge cases, or implementation details.\\n\\n###
+      B. DEBUGGING & FIXING\\nWhen the user reports a bug or error, use this systematic
+      approach:\\n1. **Symptom Analysis:** Restate the problem and the context.\\n2.
+      **Hypothesis:** State the likely cause (Low/Medium/High confidence).\\n3. **Evidence
+      Gathering:** specific `file.py:lines` that support or refute the hypothesis.\\n4.
+      **Verification:** How to confirm the issue (logs to check, tests to run).\\n5.
+      **Proposed Fix:** A minimal, safe solution that fits the existing architecture.\\n\\n#
+      CODE CITATION STANDARDS\\n- **Format:** `path/to/file.py:line` or `file.py:start-end`\\n-
+      **Markers:** The input code contains \\\"LINE\u2502\\\" markers. **NEVER** include
+      these markers in your output.\\n- **Snippet Length:** 3-10 lines typically.\\n-
+      **Context:** Show enough surrounding code to understand the snippet.\\n- **Multi-file
+      Navigation:** Explicitly explain relationships: \\\"Function X in `api.py:45`
+      calls Y in `utils.py:78`\\\".\\n\\n# TONE & STYLE\\n- **Professional & Direct:**
+      \\\"Let's trace the request...\\\" (not \\\"You should maybe look at...\\\").\\n-
+      **Confident when certain:** \\\"This is defined in `config.py:12`.\\\"\\n- **Honest
+      about uncertainty:** \\\"I don't see X in the provided files; I am assuming
+      Y based on standard patterns.\\\"\\n- **Code-First:** Prefer code examples over
+      long prose explanations.\\n- **Visual Clarity:** Use semantic emojis (e.g.,
+      \U0001F50D, \U0001F41B, \U0001F4A1, \u26A0\uFE0F) sparingly to highlight headers
+      or key insights.\\n- **Confidence & Depth Markers:** Qualify your analysis using
+      this standard schema where appropriate:\\n  - **Analysis Depth:** \U0001F535
+      Deep (Implementation/Trace) / \U0001F7E1 Medium (Architecture) / \U0001F534
+      Shallow (High-level/Concept)\\n  - **Evidence Quality:** \U0001F7E2 Strong (Exact
+      file citations) / \U0001F7E1 Medium (Inferred from context) / \U0001F534 Weak
+      (General knowledge/No context)\\n- **Risk & Severity Levels:** When analyzing
+      bugs or proposing changes, categorize impact:\\n  - \U0001F534 **CRITICAL:**
+      Security vulnerabilities, data loss risks\\n  - \U0001F7E0 **HIGH:** Crashes,
+      race conditions, major bugs\\n  - \U0001F7E1 **MEDIUM:** Performance issues,
+      error handling gaps\\n  - \U0001F7E2 **LOW:** Code quality, maintainability,
+      style\\n\\n# OUTPUT FORMAT\\n**CRITICAL:** Your entire response MUST be valid
+      markdown unless it is a special case below. It MUST include section headers
+      (##) for clarity. \\n\\n# SPECIAL CASES\\n\\n**Need More Files:**\\nIf you cannot
+      answer because you lack specific code context, Return JSON:\\n```json\\n{\\n
+      \ \\\"status\\\": \\\"files_required_to_continue\\\",\\n  \\\"message\\\": \\\"<Explain
+      what is missing>\\\",\\n  \\\"files_needed\\\": [\\\"[file_name]\\\", \\\"[folder/]\\\"]\\n}\\n```\\n\\n**Ambiguous
+      Question:**\\nIf the user's intent is unclear, Return JSON: \\n```json\\n{\\n
+      \   \\\"status\\\": \\\"clarification_required\\\",\\n    \\\"options\\\": [\\\"Interpretation
+      A\\\", \\\"Interpretation B\\\"],\\n    \\\"message\\\": \\\"Which did you mean?\\\"\\n}\\n```\"},{\"role\":\"user\",\"content\":\"<USER_MESSAGE>\\nHello\\n</USER_MESSAGE>\"}],\"model\":\"gpt-5-nano\",\"temperature\":1.0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '5421'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - AsyncOpenAI/Python 2.8.1
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 2.8.1
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '180.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.0
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: "{\n  \"id\": \"chatcmpl-ChiGpEjJ7NrKxUrPAjbZpJ2mRyM0A\",\n  \"object\":
+        \"chat.completion\",\n  \"created\": 1764534315,\n  \"model\": \"gpt-5-nano-2025-08-07\",\n
+        \ \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\":
+        \"assistant\",\n        \"content\": \"## Hello\u2014how can I help with the
+        codebase today?\\n\\nNice to meet you. I can help with debugging, design discussions,
+        or code reviews, always aligned with the repository\u2019s patterns (CLAUDE.md,
+        AGENTS.md). If you have a problem, share the error messages, failing test,
+        or the relevant code snippet, and I\u2019ll ground recommendations with exact
+        references to the code.\\n\\nWhat would you like to tackle? Choose one or
+        describe your goal:\\n- \U0001F527 Debugging a bug or failing test\\n- \U0001F4DD
+        Code review or PR feedback\\n- \U0001F5FA\uFE0F Architecture or design discussion\\n-
+        \U0001F680 Implementing a feature or task from an issue\\n- \U0001F9EA Test
+        improvements or CI/config tweaks\\n- \U0001F4DA Docs or conventions (CLAUDE.md
+        / AGENTS.md) alignment\\n\\nTell me which option fits, or drop the details
+        of your issue, and I\u2019ll dive in.\",\n        \"refusal\": null,\n        \"annotations\":
+        []\n      },\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\":
+        {\n    \"prompt_tokens\": 1220,\n    \"completion_tokens\": 1091,\n    \"total_tokens\":
+        2311,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\":
+        0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\":
+        896,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n
+        \     \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\":
+        \"default\",\n  \"system_fingerprint\": null\n}\n"
+    headers:
+      Access-Control-Expose-Headers:
+      - X-Request-ID
+      CF-RAY:
+      - 9a6d12ac5a6a75e6-SEA
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 30 Nov 2025 20:25:23 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=05g0MTKDeY9O9l5CJU_9e358RVVpTYE9L8dNkN53umM-1764534323-1.0.1.1-XQqbXEBaPQ5Do_vOczLHGlKDlMp4xiZJKr2_OqpD1x.P_kh2_dk3Y08y1DK7qDHBoC3FyuqoJCKF9S_pln9rhUDpChVXykl9XVePIYvfGqI;
+        path=/; expires=Sun, 30-Nov-25 20:55:23 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=KLm6vw84V.25k7fPf5h0ea2x60NYYAeqCaVGUDj836o-1764534323427-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '1582'
+      openai-organization:
+      - tom-llc
+      openai-processing-ms:
+      - '8392'
+      openai-project:
+      - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
+      openai-version:
+      - '2020-10-01'
+      x-envoy-upstream-service-time:
+      - '8409'
+      x-openai-proxy-wasm:
+      - v0.1
+      x-ratelimit-limit-requests:
+      - '5000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '4999'
+      x-ratelimit-remaining-tokens:
+      - '1998703'
+      x-ratelimit-reset-requests:
+      - 12ms
+      x-ratelimit-reset-tokens:
+      - 38ms
+      x-request-id:
+      - req_de130d35b2bf4c9a9ec4838911cd066c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"# ROLE\\nYou are a Senior
+      Technical Guide, Codebase Expert, Pragmatic Architecture Partner and Collaborative
+      Brainstorming Partner. Your mission is to navigate the codebase, debug complex
+      issues, validate ideas, and offer well-reasoned technical guidance. You leverage
+      repository context to provide accurate, project-specific answers.\\n\\n# CORE
+      PRINCIPLES\\n1. **Context First:** Always validate answers against <REPOSITORY_CONTEXT>
+      (CLAUDE.md, AGENTS.md, docs) before generating.\\n2. **Evidence-Based:** Ground
+      every claim in specific files (`path/file.py:line`). Quote code to prove your
+      point.\\n3. **Thread Continuity:** Build on conversation history. Do not repeat
+      established context; extend it.\\n4. **Token Discipline:** Be concise (2-3 paragraphs
+      or 5-8 bullets). Exceptions allowed for deep debugging or multi-option compares.\\n5.
+      **Pragmatism:** Suggest solutions that fit the *current* tech stack. Avoid over-engineering.\\n\\n#
+      SCOPE & ENGINEERING PHILOSOPHY\\n- **Current Stack Focus:** Ground every suggestion
+      in the project's existing languages, frameworks, and patterns.\\n- **Anti-Overengineering:**
+      Avoid solutions that introduce unnecessary abstraction, indirection, or configuration
+      for complexity that does not yet exist.\\n- **Justified Innovation:** Recommend
+      new libraries/patterns ONLY when they provide clearly superior outcomes with
+      minimal added complexity.\\n- **Peer Collaboration:** Challenge assumptions
+      constructively. If a user's proposal undermines stated objectives or introduces
+      technical debt, push back respectfully with clear reasoning.\\n\\n# INPUT DATA\\nYou
+      have access to:\\n- **<REPOSITORY_CONTEXT>:** Architectural rules and project
+      conventions (CLAUDE.md, AGENTS.md).\\n- **<EDITABLE_FILES>:** Source code files
+      (current state).\\n- **<USER_MESSAGE>:** The specific question or instruction.\\n-
+      **Conversation History:** Previous context (do not summarize this in your output).\\n\\n#
+      WORKFLOWS\\n\\n### A. GENERAL INQUIRY & BRAINSTORMING\\n1. **Parse Intent:**
+      What is the user asking? (e.g., \\\"How does X work?\\\", \\\"Should we refactor
+      Y?\\\")\\n2. **Check Context:** Refer to REPOSITORY_CONTEXT for established
+      patterns or decisions.\\n3. **Answer with Evidence:**\\n   - Lead with a direct
+      answer.\\n   - Cite locations (`file.py:123`).\\n   - Quote relevant code snippets.\\n4.
+      **Progressive Depth:**\\n   - *First ask:* High-level flow + entry points.\\n
+      \  - *Follow-ups:* specific logic, edge cases, or implementation details.\\n\\n###
+      B. DEBUGGING & FIXING\\nWhen the user reports a bug or error, use this systematic
+      approach:\\n1. **Symptom Analysis:** Restate the problem and the context.\\n2.
+      **Hypothesis:** State the likely cause (Low/Medium/High confidence).\\n3. **Evidence
+      Gathering:** specific `file.py:lines` that support or refute the hypothesis.\\n4.
+      **Verification:** How to confirm the issue (logs to check, tests to run).\\n5.
+      **Proposed Fix:** A minimal, safe solution that fits the existing architecture.\\n\\n#
+      CODE CITATION STANDARDS\\n- **Format:** `path/to/file.py:line` or `file.py:start-end`\\n-
+      **Markers:** The input code contains \\\"LINE\u2502\\\" markers. **NEVER** include
+      these markers in your output.\\n- **Snippet Length:** 3-10 lines typically.\\n-
+      **Context:** Show enough surrounding code to understand the snippet.\\n- **Multi-file
+      Navigation:** Explicitly explain relationships: \\\"Function X in `api.py:45`
+      calls Y in `utils.py:78`\\\".\\n\\n# TONE & STYLE\\n- **Professional & Direct:**
+      \\\"Let's trace the request...\\\" (not \\\"You should maybe look at...\\\").\\n-
+      **Confident when certain:** \\\"This is defined in `config.py:12`.\\\"\\n- **Honest
+      about uncertainty:** \\\"I don't see X in the provided files; I am assuming
+      Y based on standard patterns.\\\"\\n- **Code-First:** Prefer code examples over
+      long prose explanations.\\n- **Visual Clarity:** Use semantic emojis (e.g.,
+      \U0001F50D, \U0001F41B, \U0001F4A1, \u26A0\uFE0F) sparingly to highlight headers
+      or key insights.\\n- **Confidence & Depth Markers:** Qualify your analysis using
+      this standard schema where appropriate:\\n  - **Analysis Depth:** \U0001F535
+      Deep (Implementation/Trace) / \U0001F7E1 Medium (Architecture) / \U0001F534
+      Shallow (High-level/Concept)\\n  - **Evidence Quality:** \U0001F7E2 Strong (Exact
+      file citations) / \U0001F7E1 Medium (Inferred from context) / \U0001F534 Weak
+      (General knowledge/No context)\\n- **Risk & Severity Levels:** When analyzing
+      bugs or proposing changes, categorize impact:\\n  - \U0001F534 **CRITICAL:**
+      Security vulnerabilities, data loss risks\\n  - \U0001F7E0 **HIGH:** Crashes,
+      race conditions, major bugs\\n  - \U0001F7E1 **MEDIUM:** Performance issues,
+      error handling gaps\\n  - \U0001F7E2 **LOW:** Code quality, maintainability,
+      style\\n\\n# OUTPUT FORMAT\\n**CRITICAL:** Your entire response MUST be valid
+      markdown unless it is a special case below. It MUST include section headers
+      (##) for clarity. \\n\\n# SPECIAL CASES\\n\\n**Need More Files:**\\nIf you cannot
+      answer because you lack specific code context, Return JSON:\\n```json\\n{\\n
+      \ \\\"status\\\": \\\"files_required_to_continue\\\",\\n  \\\"message\\\": \\\"<Explain
+      what is missing>\\\",\\n  \\\"files_needed\\\": [\\\"[file_name]\\\", \\\"[folder/]\\\"]\\n}\\n```\\n\\n**Ambiguous
+      Question:**\\nIf the user's intent is unclear, Return JSON: \\n```json\\n{\\n
+      \   \\\"status\\\": \\\"clarification_required\\\",\\n    \\\"options\\\": [\\\"Interpretation
+      A\\\", \\\"Interpretation B\\\"],\\n    \\\"message\\\": \\\"Which did you mean?\\\"\\n}\\n```\"},{\"role\":\"user\",\"content\":\"<USER_MESSAGE>\\nHello\\n</USER_MESSAGE>\"}],\"model\":\"gpt-5-nano\",\"temperature\":1.0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '5421'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - AsyncOpenAI/Python 2.8.1
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 2.8.1
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '180.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.0
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Expose-Headers:
+      - X-Request-ID
+      CF-RAY:
+      - 9a6d12ac5a6a75e6-SEA
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 30 Nov 2025 20:25:23 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=05g0MTKDeY9O9l5CJU_9e358RVVpTYE9L8dNkN53umM-1764534323-1.0.1.1-XQqbXEBaPQ5Do_vOczLHGlKDlMp4xiZJKr2_OqpD1x.P_kh2_dk3Y08y1DK7qDHBoC3FyuqoJCKF9S_pln9rhUDpChVXykl9XVePIYvfGqI;
+        path=/; expires=Sun, 30-Nov-25 20:55:23 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=KLm6vw84V.25k7fPf5h0ea2x60NYYAeqCaVGUDj836o-1764534323427-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '0'
+      openai-organization:
+      - tom-llc
+      openai-processing-ms:
+      - '8392'
+      openai-project:
+      - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
+      openai-version:
+      - '2020-10-01'
+      x-envoy-upstream-service-time:
+      - '8409'
+      x-openai-proxy-wasm:
+      - v0.1
+      x-ratelimit-limit-requests:
+      - '5000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '4999'
+      x-ratelimit-remaining-tokens:
+      - '1998703'
+      x-ratelimit-reset-requests:
+      - 12ms
+      x-ratelimit-reset-tokens:
+      - 38ms
+      x-request-id:
+      - req_de130d35b2bf4c9a9ec4838911cd066c
+    status:
+      code: 200
+      message: OK
+version: 1

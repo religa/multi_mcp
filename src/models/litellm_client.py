@@ -191,8 +191,24 @@ class LiteLLMClient:
 
         # Prepare environment
         env = os.environ.copy()
+
+        # Inject API keys from settings into environment for expansion
+        # This allows ${ANTHROPIC_API_KEY} etc. to work even if not in os.environ
+        if settings.anthropic_api_key:
+            env["ANTHROPIC_API_KEY"] = settings.anthropic_api_key
+        if settings.openai_api_key:
+            env["OPENAI_API_KEY"] = settings.openai_api_key
+        if settings.gemini_api_key:
+            env["GEMINI_API_KEY"] = settings.gemini_api_key
+        if settings.openrouter_api_key:
+            env["OPENROUTER_API_KEY"] = settings.openrouter_api_key
+
+        # Now expand variables in cli_env (e.g., ${ANTHROPIC_API_KEY})
         for key, value in config.cli_env.items():
-            env[key] = os.path.expandvars(value)  # Expand ${VAR}
+            expanded = os.path.expandvars(value)
+            # Only set if expansion worked (not still "${VAR}")
+            if expanded != value or not value.startswith("${"):
+                env[key] = expanded
 
         # Use config timeout or fall back to settings
         timeout = settings.model_timeout_seconds
@@ -222,10 +238,16 @@ class LiteLLMClient:
 
             if process.returncode != 0:
                 stderr = stderr_bytes.decode("utf-8", errors="replace")
-                error_preview = stderr[:500] if stderr else "(no stderr)"
+                stdout = stdout_bytes.decode("utf-8", errors="replace")
+
+                # Use stderr if available, otherwise use stdout (some CLIs write errors to stdout)
+                error_output = stderr if stderr else stdout
+                error_preview = error_output[:500] if error_output else "(no output)"
+
                 install_hint = self._get_cli_install_hint(cli_command)
                 logger.error(f"[CLI_CALL] {canonical_name} failed with exit code {process.returncode}")
                 logger.debug(f"[CLI_CALL] stderr: {stderr[:1000]}")
+                logger.debug(f"[CLI_CALL] stdout: {stdout[:1000]}")
                 return ModelResponse.error_response(
                     error=f"CLI '{cli_command}' failed with exit code {process.returncode}. "
                     f"Error: {error_preview}\n\n"
