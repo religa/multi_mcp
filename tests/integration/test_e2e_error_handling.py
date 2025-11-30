@@ -8,6 +8,7 @@ import pytest
 pytestmark = pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="Integration tests require RUN_E2E=1 and API keys")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(60)
 async def test_codereview_with_nonexistent_files(integration_test_model, tmp_path):
@@ -42,6 +43,7 @@ async def test_codereview_with_nonexistent_files(integration_test_model, tmp_pat
     print(f"✓ Status: {response['status']}")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(60)
 async def test_codereview_with_empty_files_list(integration_test_model, tmp_path):
@@ -76,6 +78,7 @@ async def test_codereview_with_empty_files_list(integration_test_model, tmp_path
     print(f"✓ Message: {response['content'][:100]}...")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(60)
 async def test_codereview_exceeds_file_limit(integration_test_model, tmp_path):
@@ -116,6 +119,7 @@ async def test_codereview_exceeds_file_limit(integration_test_model, tmp_path):
     print(f"✓ Correctly rejected {len(files)} files")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
 async def test_compare_with_invalid_model(integration_test_model):
@@ -155,6 +159,7 @@ async def test_compare_with_invalid_model(integration_test_model):
     print(f"✓ Successes: {len(successes)}, Errors: {len(errors)}")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
 async def test_debate_with_all_invalid_models(integration_test_model):
@@ -192,6 +197,7 @@ async def test_debate_with_all_invalid_models(integration_test_model):
     print("✓ All models failed as expected")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
 async def test_chat_with_binary_file(integration_test_model, tmp_path):

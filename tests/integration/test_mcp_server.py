@@ -194,6 +194,7 @@ class TestToolDescriptions:
 class TestToolInvocation:
     """Test that tools can be invoked successfully."""
 
+    @pytest.mark.vcr
     @pytest.mark.asyncio
     async def test_models_tool_invocation(self):
         """Models tool should be invocable and return results."""
@@ -205,6 +206,7 @@ class TestToolInvocation:
         assert isinstance(result, dict)
         assert "models" in result or "status" in result
 
+    @pytest.mark.vcr
     @pytest.mark.asyncio
     async def test_version_tool_invocation(self):
         """Version tool should be invocable and return results."""
@@ -221,6 +223,7 @@ class TestToolInvocation:
         assert isinstance(result, dict)
         assert "version" in result or "name" in result
 
+    @pytest.mark.vcr
     @pytest.mark.asyncio
     async def test_chat_tool_basic_invocation(self, integration_test_model):
         """Chat tool should accept valid parameters."""

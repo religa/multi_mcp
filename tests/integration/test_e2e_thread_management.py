@@ -10,6 +10,7 @@ import pytest
 pytestmark = pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="Integration tests require RUN_E2E=1 and API keys")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(180)
 async def test_thread_isolation_between_reviews(integration_test_model, tmp_path):
@@ -69,6 +70,7 @@ async def test_thread_isolation_between_reviews(integration_test_model, tmp_path
     print(f"✓ Thread 2: {thread_id_2}")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(300)
 async def test_concurrent_threads(integration_test_model, tmp_path):

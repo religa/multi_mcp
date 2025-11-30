@@ -9,6 +9,7 @@ import pytest
 pytestmark = pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="Integration tests require RUN_E2E=1 and API keys")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(180)
 async def test_codereview_multi_step_refinement(integration_test_model, tmp_path):
@@ -101,6 +102,7 @@ ALLOWED_HOSTS = ["*"]
     print(f"✓ Step 3: {response3['status']}")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(300)
 async def test_chat_long_conversation(integration_test_model, tmp_path):
@@ -197,6 +199,7 @@ def subtract(a, b):
     print("✓ Context preserved across all turns")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(180)
 async def test_compare_continuation(compare_models, tmp_path):

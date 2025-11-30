@@ -14,6 +14,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_debate_real_api_minimal(debate_models):
     """Test debate with real API call using minimal cost (2 cheap models)."""
@@ -52,6 +53,7 @@ async def test_debate_real_api_minimal(debate_models):
             assert len(debate_content) > 0, "Debate response should not be empty"
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_debate_asynctaskqueue_deadlock_fix(debate_models):
     """Test debate on fixing async/sync deadlock in asynctaskqueue."""

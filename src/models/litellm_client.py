@@ -201,6 +201,7 @@ class LiteLLMClient:
         logger.debug(f"[CLI_CALL] full_command={' '.join(command)}")
 
         start_time = time.perf_counter()
+        process: asyncio.subprocess.Process | None = None
 
         try:
             # Execute CLI subprocess
@@ -264,6 +265,15 @@ class LiteLLMClient:
 
         except TimeoutError:
             latency_ms = int((time.perf_counter() - start_time) * 1000)
+
+            # Clean up timed-out subprocess
+            if process and process.returncode is None:
+                process.kill()
+                try:
+                    await process.communicate()  # Drain pipes to prevent resource leak
+                except Exception:
+                    logger.debug("[CLI_CALL] Error while cleaning up timed-out CLI process", exc_info=True)
+
             logger.error(f"[CLI_CALL] {canonical_name} timed out after {timeout}s")
             return ModelResponse.error_response(
                 error=f"CLI '{cli_command}' timed out after {timeout}s. "
@@ -284,6 +294,15 @@ class LiteLLMClient:
 
         except Exception as e:
             latency_ms = int((time.perf_counter() - start_time) * 1000)
+
+            # Clean up failed subprocess
+            if process and process.returncode is None:
+                process.kill()
+                try:
+                    await process.communicate()  # Drain pipes to prevent resource leak
+                except Exception:
+                    logger.debug("[CLI_CALL] Error while cleaning up failed CLI process", exc_info=True)
+
             logger.error(f"[CLI_CALL] {canonical_name} failed with exception: {type(e).__name__}: {e}")
             logger.debug("[CLI_CALL] Full error details", exc_info=True)
             return ModelResponse.error_response(

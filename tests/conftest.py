@@ -333,3 +333,79 @@ def mock_cli_failure(mocker):
             raise ValueError(f"Unknown error_type: {error_type}")
 
     return _setup
+
+
+# ============================================================================
+# VCR Configuration (Record/Replay Pattern - Testing Strategy V2)
+# ============================================================================
+
+
+@pytest.fixture(scope="module")
+def vcr_config():
+    """VCR configuration for recording API interactions.
+
+    This fixture configures pytest-recording to:
+    - Filter out sensitive headers (API keys, auth tokens)
+    - Record cassettes once and replay on subsequent runs
+    - Store cassettes in tests/cassettes/ directory
+    - Match requests by URI, method, and body
+
+    Usage:
+        @pytest.mark.vcr  # Uses default config
+        async def test_something():
+            # Real API call is recorded on first run
+            # Replayed from cassette on subsequent runs
+
+    Record modes:
+        - "once": Record once, replay thereafter (default)
+        - "new_episodes": Record new, replay existing
+        - "all": Always record (overwrites cassettes)
+        - "none": Never record (always replay)
+
+    To re-record cassettes:
+        rm -rf tests/cassettes && RUN_E2E=1 pytest tests/integration/
+    """
+    return {
+        # Security: Filter sensitive headers
+        "filter_headers": [
+            "authorization",
+            "api-key",
+            "x-api-key",
+            "openai-api-key",
+            "anthropic-api-key",
+            "google-api-key",
+        ],
+        # Record mode: "once" means record on first run, replay thereafter
+        "record_mode": "once",
+        # Cassette storage location
+        "cassette_library_dir": "tests/cassettes",
+        # Match requests by URI, method, and body
+        "match_on": ["uri", "method", "body"],
+        # Decode compressed responses for readability
+        "decode_compressed_response": True,
+        # Ignore localhost (for local server tests)
+        "ignore_localhost": True,
+    }
+
+
+@pytest.fixture
+def vcr_cassette_name(request):
+    """Generate unique cassette name from test module and function name.
+
+    Generates cassette filenames like:
+        test_e2e_codereview__test_basic_codereview.yaml
+        test_e2e_chat__test_chat_with_repository_context.yaml
+
+    This ensures each test gets its own cassette file for isolation.
+
+    Usage:
+        Automatic - pytest-recording uses this fixture by default
+    """
+    # Extract module name (e.g., "test_e2e_codereview")
+    module = request.node.module.__name__.split(".")[-1]
+
+    # Extract test function name (e.g., "test_basic_codereview")
+    name = request.node.name
+
+    # Return cassette name (e.g., "test_e2e_codereview__test_basic_codereview")
+    return f"{module}__{name}"

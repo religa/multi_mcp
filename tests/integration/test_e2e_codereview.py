@@ -21,6 +21,7 @@ def auth_file_path(test_repo_path):
     return str(Path(test_repo_path) / "auth.py")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
 async def test_codereview_finds_sql_injection(integration_test_model, test_repo_path, auth_file_path):
@@ -79,6 +80,7 @@ async def test_codereview_finds_sql_injection(integration_test_model, test_repo_
     print(f"✓ Response length: {len(message)} chars")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(180)
 async def test_codereview_continuation(integration_test_model, test_repo_path, auth_file_path):
@@ -137,6 +139,7 @@ async def test_codereview_continuation(integration_test_model, test_repo_path, a
     print(f"✓ Step 2: {response2['status']}")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
 async def test_models(integration_test_model):
@@ -169,6 +172,7 @@ async def test_models(integration_test_model):
     print(f"✓ Models: {', '.join(model_names)}")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
 async def test_codereview_token_budget(integration_test_model, test_repo_path, auth_file_path):
@@ -212,6 +216,7 @@ async def test_codereview_token_budget(integration_test_model, test_repo_path, a
     print(f"✓ Response length: {len(response2['content'])} chars")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
 async def test_codereview_repository_context(integration_test_model, auth_file_path, tmp_path):

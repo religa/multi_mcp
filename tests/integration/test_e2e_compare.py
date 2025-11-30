@@ -9,6 +9,7 @@ import pytest
 from src.tools.compare import compare_impl
 
 
+@pytest.mark.vcr
 @pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="E2E tests require RUN_E2E=1")
 @pytest.mark.asyncio
 async def test_compare_with_real_files(compare_models):

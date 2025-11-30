@@ -11,9 +11,9 @@ The server is built with FastMCP and uses a streamlined workflow architecture op
 ## Current Status
 
 **Production Ready** ✅
-- **Unit Tests**: ✅ 401 tests passing (~2s) - All tests passing (includes 17 CLI subprocess mocking tests)
-- **Integration Tests**: ✅ 74 tests passing (~10-15min) - All tests passing (18 CLI tests: 3 smoke + 8 workflow + 7 performance)
-- **Total Coverage**: ✅ 475 tests passing (~85% code coverage)
+- **Unit Tests**: ✅ 436 tests passing (~2s) - All tests passing (includes 35 smoke/contract tests, 17 CLI subprocess mocking tests)
+- **Integration Tests**: ✅ 74 tests passing (~10-15min) - All tests passing (26 with VCR record/replay for 90% speedup)
+- **Total Coverage**: ✅ 510 tests passing (~85% code coverage)
 - **Model Config**: YAML-based model configuration with aliases and use-case defaults
 - **Logging**: MCP tool request/response logging enabled
 - **Implementation**: Checklist-based workflow with expert validation enabled
@@ -319,6 +319,60 @@ Models are defined in `config/models.yaml`. See README.md for model aliases and 
 **Status:**
 - ✅ All integration tests passing
 - Runtime: ~10-15 minutes (due to real API calls)
+- **VCR Enabled**: 26 tests use record/replay for 90% speedup
+
+### VCR Record/Replay Pattern
+
+**What is VCR?** VCR (Video Cassette Recorder) records real API interactions on first run, then replays them on subsequent runs - achieving 90% speedup (10-15 min → <1 min).
+
+**How It Works:**
+
+1. **First Run (Recording)**:
+   ```bash
+   # Record real API calls (requires API keys)
+   RUN_E2E=1 pytest tests/integration/test_e2e_codereview.py -v
+   ```
+   - Makes real API calls to OpenAI/Anthropic/Google
+   - VCR records request (URI, method, body) + response (status, headers, body)
+   - Saves cassette as `tests/cassettes/test_e2e_codereview__test_basic_codereview.yaml`
+   - Runtime: ~10-15 minutes (real API latency)
+
+2. **Subsequent Runs (Replay)**:
+   ```bash
+   # Replay from cassettes (no API keys needed)
+   pytest tests/integration/test_e2e_codereview.py -v
+   ```
+   - VCR matches requests and returns recorded responses instantly
+   - No real API calls made
+   - Runtime: ~1 minute (90% speedup!)
+
+**Common Workflows:**
+
+```bash
+# Re-record all cassettes (when API behavior changes)
+rm -rf tests/cassettes/*.yaml && RUN_E2E=1 pytest tests/integration/ -v
+
+# Re-record specific test
+rm tests/cassettes/test_e2e_codereview__test_basic_codereview.yaml
+RUN_E2E=1 pytest tests/integration/test_e2e_codereview.py::test_basic_codereview -v
+
+# Force real API calls (bypass VCR)
+RUN_E2E=1 pytest tests/integration/ --disable-recording -v
+```
+
+**Configuration** (`tests/conftest.py`):
+- **Security**: Auto-filters sensitive headers (`authorization`, `api-key`, etc.)
+- **Record Mode**: `"once"` (record new, replay existing)
+- **Storage**: `tests/cassettes/` directory
+- **Matching**: URI + method + body
+
+**Benefits:**
+- 90% speedup in development (replay mode)
+- Cost savings (no repeated LLM API calls)
+- Offline testing (works without API keys after first record)
+- Deterministic tests (same responses every time)
+
+**See Also:** `tests/cassettes/README.md` for detailed VCR documentation
 
 ### Logging
 

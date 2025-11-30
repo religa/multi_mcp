@@ -1,4 +1,4 @@
-uPHONY: help install verify test test-integration test-all clean lint format typecheck check server
+.PHONY: help install verify test test-integration test-all clean lint format format-check typecheck check pre-commit server
 
 # Load .env file if it exists
 ifneq (,$(wildcard .env))
@@ -16,6 +16,7 @@ help:
 	@echo "Development:"
 	@echo "  make server              Run the MCP server"
 	@echo "  make check               Run all code quality checks (format, typecheck, lint)"
+	@echo "  make pre-commit          Run pre-commit checks (format-check, lint, typecheck, test)"
 	@echo ""
 	@echo "Testing:"
 	@echo "  make test                Run unit tests only (fast)"
@@ -23,7 +24,8 @@ help:
 	@echo "  make test-all            Run all tests (unit + integration)"
 	@echo ""
 	@echo "Code Quality (individual):"
-	@echo "  make format              Format code with ruff"
+	@echo "  make format              Format code with ruff (fixes in place)"
+	@echo "  make format-check        Check formatting without modifying files"
 	@echo "  make typecheck           Run pyright type checker"
 	@echo "  make lint                Run ruff linter"
 	@echo ""
@@ -61,6 +63,13 @@ server:
 
 check: format typecheck lint
 	@echo "✓ All code quality checks passed!"
+
+pre-commit: format-check lint typecheck test
+	@echo "✓ All pre-commit checks passed!"
+
+format-check:
+	@echo "Checking code formatting with ruff..."
+	@uv run ruff format --check .
 
 test:
 	@echo "Running unit tests..."

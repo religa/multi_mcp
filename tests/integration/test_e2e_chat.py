@@ -8,6 +8,7 @@ import pytest
 pytestmark = pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="Integration tests require RUN_E2E=1 and API keys")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
 async def test_chat_basic_conversation(integration_test_model):
@@ -41,6 +42,7 @@ async def test_chat_basic_conversation(integration_test_model):
     print(f"✓ Response: {response['content'][:100]}...")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(180)
 async def test_chat_with_conversation_history(integration_test_model):
@@ -89,6 +91,7 @@ async def test_chat_with_conversation_history(integration_test_model):
     print(f"✓ Step 2: {response2['content'][:50]}...")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
 async def test_chat_with_files(integration_test_model, tmp_path):
@@ -129,6 +132,7 @@ async def test_chat_with_files(integration_test_model, tmp_path):
     print(f"✓ Response: {response['content'][:100]}...")
 
 
+@pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)
 async def test_chat_repository_context(integration_test_model, tmp_path):
