@@ -3,8 +3,31 @@ Configuration management using Pydantic Settings.
 Loads from environment variables and .env file.
 """
 
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import json
+from typing import Any
+
+from pydantic import Field, model_validator
+from pydantic_settings import BaseSettings, DotEnvSettingsSource, EnvSettingsSource, PydanticBaseSettingsSource, SettingsConfigDict
+
+
+class CustomEnvSettingsSource(EnvSettingsSource):
+    """Custom environment settings source that handles comma-separated lists."""
+
+    def prepare_field_value(self, field_name: str, field: Any, value: Any, value_is_complex: bool) -> Any:
+        """Override to handle DEFAULT_MODEL_LIST as comma-separated."""
+        if field_name == "default_model_list" and isinstance(value, str):
+            return value
+        return super().prepare_field_value(field_name, field, value, value_is_complex)
+
+
+class CustomDotEnvSettingsSource(DotEnvSettingsSource):
+    """Custom .env file settings source that handles comma-separated lists."""
+
+    def prepare_field_value(self, field_name: str, field: Any, value: Any, value_is_complex: bool) -> Any:
+        """Override to handle DEFAULT_MODEL_LIST as comma-separated."""
+        if field_name == "default_model_list" and isinstance(value, str):
+            return value
+        return super().prepare_field_value(field_name, field, value, value_is_complex)
 
 
 class Settings(BaseSettings):
@@ -31,6 +54,49 @@ class Settings(BaseSettings):
         description="Default models for multi-model compare (minimum 2)",
     )
     default_temperature: float = Field(default=0.2, alias="DEFAULT_TEMPERATURE")
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        """Customize settings sources to use our custom sources."""
+        # Replace the default sources with our custom ones that handle comma-separated lists
+        return (
+            init_settings,
+            CustomEnvSettingsSource(settings_cls),
+            CustomDotEnvSettingsSource(settings_cls, env_file=".env", env_file_encoding="utf-8"),
+            file_secret_settings,
+        )
+
+    @model_validator(mode="before")
+    @classmethod
+    def parse_model_list_from_env(cls, data: dict[str, Any]) -> dict[str, Any]:
+        """Parse DEFAULT_MODEL_LIST from JSON array or comma-separated string."""
+        # Check both the field name and alias
+        for key in ["default_model_list", "DEFAULT_MODEL_LIST"]:
+            if key in data and isinstance(data[key], str):
+                value = data[key].strip()
+
+                # Try JSON parsing first (for array format like '["mini","flash"]')
+                if value.startswith("[") and value.endswith("]"):
+                    try:
+                        parsed = json.loads(value)
+                        if isinstance(parsed, list):
+                            data[key] = parsed
+                            continue
+                    except json.JSONDecodeError:
+                        pass  # Fall through to comma-separated parsing
+
+                # Parse as comma-separated string
+                models = [model.strip() for model in value.split(",") if model.strip()]
+                # Update the data dict with parsed list (or default if empty)
+                data[key] = models if models else ["gpt-5-mini", "gemini-2.5-flash"]
+        return data
 
     # Server settings
     server_name: str = Field(default="Multi")
