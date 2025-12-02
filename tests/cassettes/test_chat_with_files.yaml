@@ -68,7 +68,7 @@ interactions:
       Question:**\\nIf the user's intent is unclear, Return JSON: \\n```json\\n{\\n
       \   \\\"status\\\": \\\"clarification_required\\\",\\n    \\\"options\\\": [\\\"Interpretation
       A\\\", \\\"Interpretation B\\\"],\\n    \\\"message\\\": \\\"Which did you mean?\\\"\\n}\\n```\"},{\"role\":\"user\",\"content\":\"<EDITABLE_FILES>\\n<file
-      path=\\\"/private/var/folders/qm/hr5rpls95qv1xs45tr21dhf80000gn/T/pytest-of-tomek/pytest-694/test_chat_with_files0/example.py\\\"
+      path=\\\"/private/var/folders/qm/hr5rpls95qv1xs45tr21dhf80000gn/T/pytest-of-tomek/pytest-767/test_chat_with_files0/example.py\\\"
       relative_path=\\\"example.py\\\" filename=\\\"example.py\\\">\\n   1\u2502 def
       calculate_area(radius):\\n   2\u2502     '''Calculate circle area.'''\\n   3\u2502
       \    return 3.14159 * radius * radius\\n</file>\\n\\n</EDITABLE_FILES>\\n\\n<USER_MESSAGE>\\nWhat
@@ -112,38 +112,38 @@ interactions:
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
-      string: "{\n  \"id\": \"chatcmpl-ChgAYflYAR5koLJH4fU007a5conSR\",\n  \"object\":
-        \"chat.completion\",\n  \"created\": 1764526238,\n  \"model\": \"gpt-5-nano-2025-08-07\",\n
+      string: "{\n  \"id\": \"chatcmpl-CiEey74tV96LmtotrAtxsVs0siAgh\",\n  \"object\":
+        \"chat.completion\",\n  \"created\": 1764658820,\n  \"model\": \"gpt-5-nano-2025-08-07\",\n
         \ \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\":
-        \"assistant\",\n        \"content\": \"## Answer\\nIt computes the area of
-        a circle from its radius using \u03C0 approximated as 3.14159.\\n\\n### Evidence\\nexample.py:1-3\\n```\\ndef
-        calculate_area(radius):\\n    '''Calculate circle area.'''\\n    return 3.14159
-        * radius * radius\\n```\",\n        \"refusal\": null,\n        \"annotations\":
-        []\n      },\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\":
-        {\n    \"prompt_tokens\": 1339,\n    \"completion_tokens\": 1670,\n    \"total_tokens\":
-        3009,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 1152,\n
-        \     \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n
-        \     \"reasoning_tokens\": 1600,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\":
+        \"assistant\",\n        \"content\": \"## CRITICAL\\n\\nIt computes the area
+        of a circle from a given radius by returning \u03C0r^2, using \u03C0 \u2248
+        3.14159.\\n\\nEvidence:\\n```python\\ndef calculate_area(radius):\\n    '''Calculate
+        circle area.'''\\n    return 3.14159 * radius * radius\\n```\\nexample.py:1-3\",\n
+        \       \"refusal\": null,\n        \"annotations\": []\n      },\n      \"finish_reason\":
+        \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 1339,\n    \"completion_tokens\":
+        1358,\n    \"total_tokens\": 2697,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\":
+        0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\":
+        {\n      \"reasoning_tokens\": 1280,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\":
         0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\":
         \"default\",\n  \"system_fingerprint\": null\n}\n"
     headers:
       Access-Control-Expose-Headers:
       - X-Request-ID
       CF-RAY:
-      - 9a6c4d796976c3a0-SEA
+      - 9a78f25ddc17db8c-SEA
       Connection:
       - keep-alive
       Content-Type:
       - application/json
       Date:
-      - Sun, 30 Nov 2025 18:10:51 GMT
+      - Tue, 02 Dec 2025 07:00:33 GMT
       Server:
       - cloudflare
       Set-Cookie:
-      - __cf_bm=Q.A7HftqiLrMLpZfE3pbO_.BaY.2pdHt6oNvLt7ussQ-1764526251-1.0.1.1-8ZCdsF8RA29msaNxz78Z9ajPf.LlTNIIYkSYRiv16C4MFgcHzoYJ4bGdVTMPV16k._pYAmQD8quIZttxV2N_Rb4dZ6W7EEVYk7hSk2pSChs;
-        path=/; expires=Sun, 30-Nov-25 18:40:51 GMT; domain=.api.openai.com; HttpOnly;
+      - __cf_bm=jxXNSgZvNkeBniIrA7uhsk7iJpvdMaKtbCDKNGPHvD0-1764658833-1.0.1.1-cfpJVglurkzeBJwq9s6.80qAroE_0IDZgC7YWdD4MDgXj58sLMesSAG8r_dFXisqub0ljtFc2fYPYLonouc4hH2NfsM4f3YbM7sEShUMKTg;
+        path=/; expires=Tue, 02-Dec-25 07:30:33 GMT; domain=.api.openai.com; HttpOnly;
         Secure; SameSite=None
-      - _cfuvid=1jb3Ush7hzJkWTh0IbLygyNgtK.8ST34Pe8YPw5jL3o-1764526251270-0.0.1.1-604800000;
+      - _cfuvid=ElDRKLvt48jNncYXlu4wETtjDrqhmGw4FaaRD3N9dK8-1764658833019-0.0.1.1-604800000;
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
@@ -156,17 +156,17 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       content-length:
-      - '1019'
+      - '1035'
       openai-organization:
       - tom-llc
       openai-processing-ms:
-      - '12666'
+      - '12117'
       openai-project:
       - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
       openai-version:
       - '2020-10-01'
       x-envoy-upstream-service-time:
-      - '12860'
+      - '12147'
       x-openai-proxy-wasm:
       - v0.1
       x-ratelimit-limit-requests:
@@ -182,7 +182,7 @@ interactions:
       x-ratelimit-reset-tokens:
       - 41ms
       x-request-id:
-      - req_12010954812741bcb77bb9d22f46ea54
+      - req_fd29d7ee903045eca4123e1c708b3ba9
     status:
       code: 200
       message: OK
@@ -255,7 +255,7 @@ interactions:
       Question:**\\nIf the user's intent is unclear, Return JSON: \\n```json\\n{\\n
       \   \\\"status\\\": \\\"clarification_required\\\",\\n    \\\"options\\\": [\\\"Interpretation
       A\\\", \\\"Interpretation B\\\"],\\n    \\\"message\\\": \\\"Which did you mean?\\\"\\n}\\n```\"},{\"role\":\"user\",\"content\":\"<EDITABLE_FILES>\\n<file
-      path=\\\"/private/var/folders/qm/hr5rpls95qv1xs45tr21dhf80000gn/T/pytest-of-tomek/pytest-694/test_chat_with_files0/example.py\\\"
+      path=\\\"/private/var/folders/qm/hr5rpls95qv1xs45tr21dhf80000gn/T/pytest-of-tomek/pytest-767/test_chat_with_files0/example.py\\\"
       relative_path=\\\"example.py\\\" filename=\\\"example.py\\\">\\n   1\u2502 def
       calculate_area(radius):\\n   2\u2502     '''Calculate circle area.'''\\n   3\u2502
       \    return 3.14159 * radius * radius\\n</file>\\n\\n</EDITABLE_FILES>\\n\\n<USER_MESSAGE>\\nWhat
@@ -304,20 +304,20 @@ interactions:
       Access-Control-Expose-Headers:
       - X-Request-ID
       CF-RAY:
-      - 9a6c4d796976c3a0-SEA
+      - 9a78f25ddc17db8c-SEA
       Connection:
       - keep-alive
       Content-Type:
       - application/json
       Date:
-      - Sun, 30 Nov 2025 18:10:51 GMT
+      - Tue, 02 Dec 2025 07:00:33 GMT
       Server:
       - cloudflare
       Set-Cookie:
-      - __cf_bm=Q.A7HftqiLrMLpZfE3pbO_.BaY.2pdHt6oNvLt7ussQ-1764526251-1.0.1.1-8ZCdsF8RA29msaNxz78Z9ajPf.LlTNIIYkSYRiv16C4MFgcHzoYJ4bGdVTMPV16k._pYAmQD8quIZttxV2N_Rb4dZ6W7EEVYk7hSk2pSChs;
-        path=/; expires=Sun, 30-Nov-25 18:40:51 GMT; domain=.api.openai.com; HttpOnly;
+      - __cf_bm=jxXNSgZvNkeBniIrA7uhsk7iJpvdMaKtbCDKNGPHvD0-1764658833-1.0.1.1-cfpJVglurkzeBJwq9s6.80qAroE_0IDZgC7YWdD4MDgXj58sLMesSAG8r_dFXisqub0ljtFc2fYPYLonouc4hH2NfsM4f3YbM7sEShUMKTg;
+        path=/; expires=Tue, 02-Dec-25 07:30:33 GMT; domain=.api.openai.com; HttpOnly;
         Secure; SameSite=None
-      - _cfuvid=1jb3Ush7hzJkWTh0IbLygyNgtK.8ST34Pe8YPw5jL3o-1764526251270-0.0.1.1-604800000;
+      - _cfuvid=ElDRKLvt48jNncYXlu4wETtjDrqhmGw4FaaRD3N9dK8-1764658833019-0.0.1.1-604800000;
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
@@ -334,13 +334,13 @@ interactions:
       openai-organization:
       - tom-llc
       openai-processing-ms:
-      - '12666'
+      - '12117'
       openai-project:
       - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
       openai-version:
       - '2020-10-01'
       x-envoy-upstream-service-time:
-      - '12860'
+      - '12147'
       x-openai-proxy-wasm:
       - v0.1
       x-ratelimit-limit-requests:
@@ -356,7 +356,7 @@ interactions:
       x-ratelimit-reset-tokens:
       - 41ms
       x-request-id:
-      - req_12010954812741bcb77bb9d22f46ea54
+      - req_fd29d7ee903045eca4123e1c708b3ba9
     status:
       code: 200
       message: OK

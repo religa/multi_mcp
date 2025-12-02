@@ -108,41 +108,43 @@ interactions:
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
-      string: "{\n  \"id\": \"chatcmpl-ChgARZOgtUGBMMscmqhmbyKiFGXND\",\n  \"object\":
-        \"chat.completion\",\n  \"created\": 1764526231,\n  \"model\": \"gpt-5-nano-2025-08-07\",\n
+      string: "{\n  \"id\": \"chatcmpl-CiEepnRU8byYuhNG7salN1cfKyIJ7\",\n  \"object\":
+        \"chat.completion\",\n  \"created\": 1764658811,\n  \"model\": \"gpt-5-nano-2025-08-07\",\n
         \ \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\":
-        \"assistant\",\n        \"content\": \"## Acknowledgement\\n- Noted: your
-        favorite color is blue. I\u2019ll keep it in this chat session and can reference
-        it when relevant.\\n\\n## Next steps\\n- I can use this preference for examples
-        or responses in this conversation. If you want me to apply it in specific
-        tasks (e.g., UI notes, color-themed suggestions), tell me how you\u2019d like
-        it used.\\n- If you need memory across sessions, let me know and we can discuss
-        enabling a memory feature or storing preferences in a separate context.\",\n
-        \       \"refusal\": null,\n        \"annotations\": []\n      },\n      \"finish_reason\":
-        \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 1227,\n    \"completion_tokens\":
-        818,\n    \"total_tokens\": 2045,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\":
+        \"assistant\",\n        \"content\": \"## Memory Confirmation\\n- Got it:
+        your favorite color is blue. I\u2019ll remember this for the current conversation.\\n-
+        Note: I don\u2019t have long-term memory across sessions unless a persistence
+        feature is provided in your environment. If you want, I can show how to persist
+        this in your app (example patterns below).\\n\\nExample patterns you might
+        use to store it:\\n- In-session memory (generic):\\n  - session_memory = {\\\"favorite_color\\\":
+        \\\"blue\\\"}\\n- User profile (persistent, per user):\\n  - user_profile
+        = {\\\"favorite_color\\\": \\\"blue\\\"}\\n\\nWould you like me to remember
+        any other details or preferences for this chat?\",\n        \"refusal\": null,\n
+        \       \"annotations\": []\n      },\n      \"finish_reason\": \"stop\"\n
+        \   }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 1227,\n    \"completion_tokens\":
+        1033,\n    \"total_tokens\": 2260,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\":
         1152,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\":
-        {\n      \"reasoning_tokens\": 704,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\":
+        {\n      \"reasoning_tokens\": 896,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\":
         0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\":
         \"default\",\n  \"system_fingerprint\": null\n}\n"
     headers:
       Access-Control-Expose-Headers:
       - X-Request-ID
       CF-RAY:
-      - 9a6c4d4fd82db5ed-SEA
+      - 9a78f22539a6b3e2-SEA
       Connection:
       - keep-alive
       Content-Type:
       - application/json
       Date:
-      - Sun, 30 Nov 2025 18:10:37 GMT
+      - Tue, 02 Dec 2025 07:00:20 GMT
       Server:
       - cloudflare
       Set-Cookie:
-      - __cf_bm=u1Px4lBpq.pCtEOdKwNBzbY_y2cp_mlsoseCVZFK_EM-1764526237-1.0.1.1-CoZX64Ye4CBI4kWRsSpZXbbrqUuda.08EotVK0qDfbjfa4kVNDHvqDx3x6PIwHCONN48rbAoDLWXANAPvP.BBFB14FjoQk_6d27jut2itGM;
-        path=/; expires=Sun, 30-Nov-25 18:40:37 GMT; domain=.api.openai.com; HttpOnly;
+      - __cf_bm=xt8UkajhN6MNFSfhtcUDCMm2NfPiQy13RTvkd1qf0x0-1764658820-1.0.1.1-71YyVvX_oGRwBCqlfP12n0qJLNg951FWahLsuQXkxIKM70B1Mttk9wFnQ6R.UW3MCecDi2g8HB9cQiJY6pCcu7FFVOHx_r5azfY7DDvn66I;
+        path=/; expires=Tue, 02-Dec-25 07:30:20 GMT; domain=.api.openai.com; HttpOnly;
         Secure; SameSite=None
-      - _cfuvid=OJc7COSVpps_zjPtkWF7rt.vqs4RpspJAAUwUT3pl2s-1764526237480-0.0.1.1-604800000;
+      - _cfuvid=TN6L2zIYUCFt9aP9JwQEpYt.wiHeQ0TYyBqf6aiNTqE-1764658820613-0.0.1.1-604800000;
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
@@ -155,17 +157,17 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       content-length:
-      - '1269'
+      - '1400'
       openai-organization:
       - tom-llc
       openai-processing-ms:
-      - '6372'
+      - '8786'
       openai-project:
       - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
       openai-version:
       - '2020-10-01'
       x-envoy-upstream-service-time:
-      - '6389'
+      - '8805'
       x-openai-proxy-wasm:
       - v0.1
       x-ratelimit-limit-requests:
@@ -181,7 +183,7 @@ interactions:
       x-ratelimit-reset-tokens:
       - 39ms
       x-request-id:
-      - req_b78aecb4a219455283b552ec6fabbdde
+      - req_9a849163fee44ca39d0bf2ffcb35728a
     status:
       code: 200
       message: OK
@@ -299,20 +301,20 @@ interactions:
       Access-Control-Expose-Headers:
       - X-Request-ID
       CF-RAY:
-      - 9a6c4d4fd82db5ed-SEA
+      - 9a78f22539a6b3e2-SEA
       Connection:
       - keep-alive
       Content-Type:
       - application/json
       Date:
-      - Sun, 30 Nov 2025 18:10:37 GMT
+      - Tue, 02 Dec 2025 07:00:20 GMT
       Server:
       - cloudflare
       Set-Cookie:
-      - __cf_bm=u1Px4lBpq.pCtEOdKwNBzbY_y2cp_mlsoseCVZFK_EM-1764526237-1.0.1.1-CoZX64Ye4CBI4kWRsSpZXbbrqUuda.08EotVK0qDfbjfa4kVNDHvqDx3x6PIwHCONN48rbAoDLWXANAPvP.BBFB14FjoQk_6d27jut2itGM;
-        path=/; expires=Sun, 30-Nov-25 18:40:37 GMT; domain=.api.openai.com; HttpOnly;
+      - __cf_bm=xt8UkajhN6MNFSfhtcUDCMm2NfPiQy13RTvkd1qf0x0-1764658820-1.0.1.1-71YyVvX_oGRwBCqlfP12n0qJLNg951FWahLsuQXkxIKM70B1Mttk9wFnQ6R.UW3MCecDi2g8HB9cQiJY6pCcu7FFVOHx_r5azfY7DDvn66I;
+        path=/; expires=Tue, 02-Dec-25 07:30:20 GMT; domain=.api.openai.com; HttpOnly;
         Secure; SameSite=None
-      - _cfuvid=OJc7COSVpps_zjPtkWF7rt.vqs4RpspJAAUwUT3pl2s-1764526237480-0.0.1.1-604800000;
+      - _cfuvid=TN6L2zIYUCFt9aP9JwQEpYt.wiHeQ0TYyBqf6aiNTqE-1764658820613-0.0.1.1-604800000;
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
@@ -329,13 +331,13 @@ interactions:
       openai-organization:
       - tom-llc
       openai-processing-ms:
-      - '6372'
+      - '8786'
       openai-project:
       - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
       openai-version:
       - '2020-10-01'
       x-envoy-upstream-service-time:
-      - '6389'
+      - '8805'
       x-openai-proxy-wasm:
       - v0.1
       x-ratelimit-limit-requests:
@@ -351,7 +353,7 @@ interactions:
       x-ratelimit-reset-tokens:
       - 39ms
       x-request-id:
-      - req_b78aecb4a219455283b552ec6fabbdde
+      - req_9a849163fee44ca39d0bf2ffcb35728a
     status:
       code: 200
       message: OK

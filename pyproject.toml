@@ -54,12 +54,14 @@ exclude = ["tests*", "docs*", "ref*"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 pythonpath = ["."]
+norecursedirs = ["tmp", "ref", "docs", ".git", ".venv"]
 addopts = [
     "--strict-markers",
     "--strict-config",
     "-ra",
     "--tb=short",
     "--color=yes",
+    "--disable-recording",  # Disable VCR due to httpx/litellm compatibility issues
 ]
 markers = [
     "e2e: End-to-end tests using Claude CLI (deselect with '-m \"not e2e\"')",

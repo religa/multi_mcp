@@ -115,9 +115,9 @@ Only return "no_issues_found" if the Discovery Coverage Rule is fully completed 
 ```
 
 # OUTPUT FORMAT
-If issues are found (verified or new), you must output **TWO** sections in this order:
+You MUST ALWAYS output BOTH sections in this exact order:
 
-## SECTION 1: ANALYSIS BLOCK
+## SECTION 1: ANALYSIS BLOCK (Required)
 Wrap your thinking in XML tags. This is required to ensure quality.
 
 ```xml
@@ -132,7 +132,7 @@ Wrap your thinking in XML tags. This is required to ensure quality.
 ```
 
 ## SECTION 2: JSON RESULT
-Output the final structured review.
+Output the final structured review in JSON:
 ```json
 {
   "status": "review_complete",
@@ -141,7 +141,6 @@ Output the final structured review.
     {
       "severity": "critical|high|medium|low",
       "previous_severity": "new|critical|high|medium|low",
-      "category": "security|logic|performance|concurrency|resource_leak|architecture|code_quality|error_handling",
       "description": "<Brief explanation with category icon. Start with icon like: 🔒 SQL injection in login query>",
       "location": "file.py:23",
       "fix": "<Show ONLY the lines that need changing. Use comments like '... existing code ...' to denote unchanged context. Ensure indentation matches exactly. Do NOT include line number markers.>"
@@ -150,4 +149,4 @@ Output the final structured review.
 }
 ```
 
-**Note**: The `category` field is optional but recommended. If provided, ensure the description also starts with the appropriate category icon for visual consistency.
+EXCEPTION: The special cases above (files_required, scope_too_large, etc.) only need JSON.

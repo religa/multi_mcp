@@ -108,35 +108,35 @@ interactions:
     uri: https://api.openai.com/v1/chat/completions
   response:
     body:
-      string: "{\n  \"id\": \"chatcmpl-ChgALuHf0JOWHOV9lBMnFRDxV9mSF\",\n  \"object\":
-        \"chat.completion\",\n  \"created\": 1764526225,\n  \"model\": \"gpt-5-nano-2025-08-07\",\n
+      string: "{\n  \"id\": \"chatcmpl-CiEejey3Se8lKJkPcv1qxFGc46YuD\",\n  \"object\":
+        \"chat.completion\",\n  \"created\": 1764658805,\n  \"model\": \"gpt-5-nano-2025-08-07\",\n
         \ \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\":
-        \"assistant\",\n        \"content\": \"## Answer\\n2 + 2 = 4.\",\n        \"refusal\":
+        \"assistant\",\n        \"content\": \"## Answer\\n2 + 2 equals 4.\",\n        \"refusal\":
         null,\n        \"annotations\": []\n      },\n      \"finish_reason\": \"stop\"\n
         \   }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 1231,\n    \"completion_tokens\":
-        532,\n    \"total_tokens\": 1763,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\":
-        0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\":
-        {\n      \"reasoning_tokens\": 512,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\":
+        468,\n    \"total_tokens\": 1699,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\":
+        1152,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\":
+        {\n      \"reasoning_tokens\": 448,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\":
         0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\":
         \"default\",\n  \"system_fingerprint\": null\n}\n"
     headers:
       Access-Control-Expose-Headers:
       - X-Request-ID
       CF-RAY:
-      - 9a6c4d2f0d97755b-SEA
+      - 9a78f1fdd9fda34e-SEA
       Connection:
       - keep-alive
       Content-Type:
       - application/json
       Date:
-      - Sun, 30 Nov 2025 18:10:30 GMT
+      - Tue, 02 Dec 2025 07:00:11 GMT
       Server:
       - cloudflare
       Set-Cookie:
-      - __cf_bm=J2by4MGsO8mld6JhpVrlkm7jD22TZMliBzK3WvXNO3Q-1764526230-1.0.1.1-jLqJEsFGoSs_WFQFIr8hAtLrsj0fL.XX3mCNq3oIXZ2cMZzaoTM.lUe65zykD9xMjXBlIVijpVBRv7utm_vL_8G7rQ5iaFfVVddovQJf9Zw;
-        path=/; expires=Sun, 30-Nov-25 18:40:30 GMT; domain=.api.openai.com; HttpOnly;
+      - __cf_bm=Eo6BX968eBgVx9iU4b_aY3mFjD9Cn1s_CqcI7Z2r6oU-1764658811-1.0.1.1-lbm77sA0dq3xNO8tTYBatqVYqzseo3xXV4iAub8t3uHaREhNSyFGClktweM2KpWslRppFHt1u.RjPYkRUXfH0rotkrj4F_27LiJ3i7mIJgo;
+        path=/; expires=Tue, 02-Dec-25 07:30:11 GMT; domain=.api.openai.com; HttpOnly;
         Secure; SameSite=None
-      - _cfuvid=kzDS_0sRTpsnTPe0db7Iv6IdKLq9xMds6n2WWWqgqiE-1764526230405-0.0.1.1-604800000;
+      - _cfuvid=EVncmCbJ93CFEYaPWhftMa85dnuwRDdLAi9RA8LP7vM-1764658811212-0.0.1.1-604800000;
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
@@ -149,17 +149,17 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       content-length:
-      - '799'
+      - '807'
       openai-organization:
       - tom-llc
       openai-processing-ms:
-      - '4528'
+      - '5520'
       openai-project:
       - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
       openai-version:
       - '2020-10-01'
       x-envoy-upstream-service-time:
-      - '4546'
+      - '5689'
       x-openai-proxy-wasm:
       - v0.1
       x-ratelimit-limit-requests:
@@ -175,7 +175,7 @@ interactions:
       x-ratelimit-reset-tokens:
       - 39ms
       x-request-id:
-      - req_2d054770ffb0465abe6b661464c246fd
+      - req_af33e48d432a48e4a5bbef2349f8432b
     status:
       code: 200
       message: OK
@@ -293,20 +293,20 @@ interactions:
       Access-Control-Expose-Headers:
       - X-Request-ID
       CF-RAY:
-      - 9a6c4d2f0d97755b-SEA
+      - 9a78f1fdd9fda34e-SEA
       Connection:
       - keep-alive
       Content-Type:
       - application/json
       Date:
-      - Sun, 30 Nov 2025 18:10:30 GMT
+      - Tue, 02 Dec 2025 07:00:11 GMT
       Server:
       - cloudflare
       Set-Cookie:
-      - __cf_bm=J2by4MGsO8mld6JhpVrlkm7jD22TZMliBzK3WvXNO3Q-1764526230-1.0.1.1-jLqJEsFGoSs_WFQFIr8hAtLrsj0fL.XX3mCNq3oIXZ2cMZzaoTM.lUe65zykD9xMjXBlIVijpVBRv7utm_vL_8G7rQ5iaFfVVddovQJf9Zw;
-        path=/; expires=Sun, 30-Nov-25 18:40:30 GMT; domain=.api.openai.com; HttpOnly;
+      - __cf_bm=Eo6BX968eBgVx9iU4b_aY3mFjD9Cn1s_CqcI7Z2r6oU-1764658811-1.0.1.1-lbm77sA0dq3xNO8tTYBatqVYqzseo3xXV4iAub8t3uHaREhNSyFGClktweM2KpWslRppFHt1u.RjPYkRUXfH0rotkrj4F_27LiJ3i7mIJgo;
+        path=/; expires=Tue, 02-Dec-25 07:30:11 GMT; domain=.api.openai.com; HttpOnly;
         Secure; SameSite=None
-      - _cfuvid=kzDS_0sRTpsnTPe0db7Iv6IdKLq9xMds6n2WWWqgqiE-1764526230405-0.0.1.1-604800000;
+      - _cfuvid=EVncmCbJ93CFEYaPWhftMa85dnuwRDdLAi9RA8LP7vM-1764658811212-0.0.1.1-604800000;
         path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains; preload
@@ -323,13 +323,13 @@ interactions:
       openai-organization:
       - tom-llc
       openai-processing-ms:
-      - '4528'
+      - '5520'
       openai-project:
       - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
       openai-version:
       - '2020-10-01'
       x-envoy-upstream-service-time:
-      - '4546'
+      - '5689'
       x-openai-proxy-wasm:
       - v0.1
       x-ratelimit-limit-requests:
@@ -345,7 +345,7 @@ interactions:
       x-ratelimit-reset-tokens:
       - 39ms
       x-request-id:
-      - req_2d054770ffb0465abe6b661464c246fd
+      - req_af33e48d432a48e4a5bbef2349f8432b
     status:
       code: 200
       message: OK

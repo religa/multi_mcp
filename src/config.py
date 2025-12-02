@@ -100,7 +100,7 @@ class Settings(BaseSettings):
     # Retry and timeout configuration
     max_retries: int = Field(default=3, alias="MAX_RETRIES")
     model_timeout_seconds: float = Field(
-        default=180.0, alias="MODEL_TIMEOUT_SECONDS", description="Timeout in seconds for individual model calls"
+        default=300.0, alias="MODEL_TIMEOUT_SECONDS", description="Timeout in seconds for individual model calls"
     )
 
     # File processing limits
