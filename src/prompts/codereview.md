@@ -76,7 +76,7 @@ Follow this sequence strictly:
 
 
 # STRUCTURED RESPONSES FOR SPECIAL CASES
-Check these FIRST. If met, respond ONLY with the specific JSON object (no analysis block needed).
+Check these FIRST. If met, respond ONLY with the specific JSON object.
 
 1. IF MORE INFORMATION IS NEEDED:
 ```json
@@ -115,24 +115,7 @@ Only return "no_issues_found" if the Discovery Coverage Rule is fully completed 
 ```
 
 # OUTPUT FORMAT
-You MUST ALWAYS output BOTH sections in this exact order:
-
-## SECTION 1: ANALYSIS BLOCK (Required)
-Wrap your thinking in XML tags. This is required to ensure quality.
-
-```xml
-<analysis>
-1. VERIFICATION:
-   - Issue "X": Confirmed or discarded with evidence. Fix required.
-   - Issue "Y": False positive. The code actually handles this in line 45. Discarding.
-2. DISCOVERY:
-   - Found potential race condition in file.py:12.
-   - Found missing import in utils.py.
-</analysis>
-```
-
-## SECTION 2: JSON RESULT
-Output the final structured review in JSON:
+You MUST ALWAYS output in JSON:
 ```json
 {
   "status": "review_complete",
@@ -148,5 +131,3 @@ Output the final structured review in JSON:
   ]
 }
 ```
-
-EXCEPTION: The special cases above (files_required, scope_too_large, etc.) only need JSON.
