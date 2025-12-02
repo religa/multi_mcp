@@ -89,7 +89,7 @@ See README.md for CLI usage examples. Note: CLI is experimental.
 
 **`src/config.py`**: Environment-based configuration using Pydantic Settings
 - API keys, model defaults (`default_model`, `default_model_list`), server settings
-- `default_model_list`: Default models for multi-model compare (comma-separated in .env)
+- `default_model_list`: Default models for multi-model compare (comma-separated or JSON array in .env)
 - Loads from `.env` file
 
 **`src/schemas/`**: Pydantic models for request validation

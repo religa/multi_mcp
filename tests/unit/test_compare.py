@@ -35,15 +35,15 @@ def mock_model_response(content="Response", model="test-model", error=None):
 class TestCompareSchemas:
     """Test compare schema validation."""
 
-    def test_multi_tool_request_requires_min_2_models(self):
-        """MultiToolRequest requires at least 2 models."""
-        with pytest.raises(ValueError, match="at least 2"):
+    def test_multi_tool_request_requires_min_1_model(self):
+        """MultiToolRequest requires at least 1 model."""
+        with pytest.raises(ValueError, match="at least 1"):
             MultiToolRequest(
                 name="test",
                 content="test content",
                 step_number=1,
                 next_action="stop",
-                models=["gpt-5-mini"],  # Only 1 model
+                models=[],  # Empty list not allowed
                 base_path="/tmp",
             )
 
@@ -223,8 +223,8 @@ class TestCompareImpl:
             assert result["thread_id"] == "my-custom-thread"
 
     @pytest.mark.asyncio
-    async def test_validation_error_with_one_model(self):
-        """Test that validation fails with only one model."""
+    async def test_compare_requires_min_2_models(self):
+        """Test that Compare tool requires at least 2 models (even though base allows 1)."""
         with pytest.raises(ValidationError):
             CompareRequest(name="test", content="test", step_number=1, next_action="stop", models=["only-one"], base_path="/tmp")
 

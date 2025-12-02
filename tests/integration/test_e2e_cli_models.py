@@ -229,7 +229,7 @@ def multiply(x, y):
             step_number=1,
             next_action="stop",
             base_path=tmpdir,
-            model="gemini-cli",
+            models=["gemini-cli"],
             thread_id=thread_id,
             relevant_files=[str(test_file)],
             issues_found=None,
@@ -237,13 +237,13 @@ def multiply(x, y):
 
         assert response["status"] in ["success", "in_progress"]
         assert response["thread_id"] == thread_id
-        assert "content" in response
-        assert len(response["content"]) > 0
+        assert "summary" in response
+        assert len(response["summary"]) > 0
 
         print("\n✓ CLI model in codereview test passed (P1)")
         print(f"✓ Status: {response['status']}")
-        print(f"✓ Response length: {len(response['content'])} chars")
-        print(f"✓ Response preview: {response['content'][:200]}...")
+        print(f"✓ Response length: {len(response['summary'])} chars")
+        print(f"✓ Response preview: {response['summary'][:200]}...")
 
 
 @pytest.mark.asyncio

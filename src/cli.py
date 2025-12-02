@@ -98,7 +98,7 @@ async def run_review(files: list[str], model: str, base_path: str) -> dict:
         content="Review the provided files for issues",
         step_number=2,  # Skip checklist, go straight to review
         next_action="stop",
-        model=model,
+        models=[model],
         base_path=base_path,
         thread_id=str(uuid.uuid4()),  # Generate thread ID for CLI
         relevant_files=files,
@@ -162,12 +162,18 @@ def main() -> int:
     # Check for error status
     if result.get("status") == "error":
         if args.json_output:
-            print(json.dumps({"error": result.get("content", "Unknown error"), "status": "error"}, indent=2))
+            print(json.dumps({"error": result.get("summary", "Unknown error"), "status": "error"}, indent=2))
         else:
-            logger.error(result.get("content", "Unknown error"))
+            logger.error(result.get("summary", "Unknown error"))
         return 2
 
-    issues_found = result.get("issues_found", [])
+    issues = []
+    if "results" in result and result["results"]:
+        for model_result in result["results"]:
+            if model_result.get("issues_found"):
+                issues.extend(model_result["issues_found"])
+    elif "issues_found" in result:
+        issues = result.get("issues_found") or []
 
     # JSON output mode
     if args.json_output:
@@ -175,19 +181,19 @@ def main() -> int:
             "status": result.get("status", "complete"),
             "files_reviewed": len(files),
             "model": args.model,
-            "content": result.get("content", ""),
-            "issues_count": len(issues_found) if issues_found else 0,
-            "issues": issues_found or [],
+            "summary": result.get("summary", ""),
+            "issues_count": len(issues),
+            "issues": issues,
         }
         print(json.dumps(output, indent=2))
-        return 3 if issues_found else 0
+        return 3 if issues else 0
 
     # Human-readable text output
-    print(result.get("content", "No output"))
+    print(result.get("summary", "No output"))
 
-    if issues_found:
+    if issues:
         print("\n## Issues Found:")
-        for issue in issues_found:
+        for issue in issues:
             severity = issue.get("severity", "unknown").upper()
             col = (
                 "🔴"

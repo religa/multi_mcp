@@ -30,7 +30,7 @@ async def test_thread_isolation_between_reviews(integration_test_model, tmp_path
         next_action="stop",
         relevant_files=[str(test_file)],
         base_path=str(tmp_path),
-        model=integration_test_model,
+        models=[integration_test_model],
         thread_id=thread_id_1,
         issues_found=[
             {
@@ -53,7 +53,7 @@ async def test_thread_isolation_between_reviews(integration_test_model, tmp_path
         next_action="stop",
         relevant_files=[str(test_file)],
         base_path=str(tmp_path),
-        model=integration_test_model,
+        models=[integration_test_model],
         thread_id=thread_id_2,
     )
 
@@ -100,7 +100,7 @@ async def test_concurrent_threads(integration_test_model, tmp_path):
             next_action="stop",
             relevant_files=[str(file_path)],
             base_path=str(tmp_path),
-            model=integration_test_model,
+            models=[integration_test_model],
             thread_id=thread_id,
         )
 
@@ -112,7 +112,7 @@ async def test_concurrent_threads(integration_test_model, tmp_path):
     for i, response in enumerate(responses):
         assert response["status"] in ["success", "in_progress"]
         assert response["thread_id"] == thread_ids[i]
-        assert "content" in response
+        assert "summary" in response
         print(f"✓ Review {i + 1} completed: {thread_ids[i]}")
 
     # Verify all thread IDs are unique

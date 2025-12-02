@@ -29,7 +29,7 @@ async def test_codereview_with_nonexistent_files(integration_test_model, tmp_pat
         next_action="stop",
         relevant_files=[fake_file],
         base_path=str(tmp_path),
-        model=integration_test_model,
+        models=[integration_test_model],
         thread_id=thread_id,
     )
 
@@ -37,7 +37,7 @@ async def test_codereview_with_nonexistent_files(integration_test_model, tmp_pat
     # or success with message about missing files
     assert response["status"] in ["in_progress", "success"]
     assert response["thread_id"] == thread_id
-    assert "content" in response
+    assert "summary" in response
 
     print(f"\n✓ Non-existent files test completed: {thread_id}")
     print(f"✓ Status: {response['status']}")
@@ -61,21 +61,21 @@ async def test_codereview_with_empty_files_list(integration_test_model, tmp_path
         next_action="stop",
         relevant_files=[],
         base_path=str(tmp_path),
-        model=integration_test_model,
+        models=[integration_test_model],
         thread_id=thread_id,
     )
 
     # Should return in_progress status asking for files
     assert response["status"] == "in_progress"
     assert response["thread_id"] == thread_id
-    assert "content" in response
+    assert "summary" in response
 
-    # Content should indicate files are needed
-    content = response["content"].lower()
-    assert "file" in content or "code" in content, f"Expected message about needing files, got: {content}"
+    # Summary should indicate files are needed
+    summary = response["summary"].lower()
+    assert "file" in summary or "code" in summary, f"Expected message about needing files, got: {summary}"
 
     print(f"\n✓ Empty files list test completed: {thread_id}")
-    print(f"✓ Message: {response['content'][:100]}...")
+    print(f"✓ Message: {response['summary'][:100]}...")
 
 
 @pytest.mark.vcr

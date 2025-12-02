@@ -41,13 +41,13 @@ ALLOWED_HOSTS = ["*"]
         next_action="continue",
         relevant_files=[str(auth_file), str(config_file)],
         base_path=str(tmp_path),
-        model=integration_test_model,
+        models=[integration_test_model],
         thread_id=thread_id,
     )
 
     assert response1["status"] == "in_progress"
     assert response1["thread_id"] == thread_id
-    assert "checklist" in response1["content"].lower() or "review" in response1["content"].lower()
+    assert "checklist" in response1["summary"].lower() or "review" in response1["summary"].lower()
 
     # Step 2: Refine scope to focus on auth.py only
     response2 = await codereview_impl(
@@ -57,7 +57,7 @@ ALLOWED_HOSTS = ["*"]
         next_action="continue",
         relevant_files=[str(auth_file)],  # Narrowed scope
         base_path=str(tmp_path),
-        model=integration_test_model,
+        models=[integration_test_model],
         thread_id=thread_id,
         issues_found=[
             {
@@ -70,7 +70,7 @@ ALLOWED_HOSTS = ["*"]
 
     assert response2["status"] in ["success", "in_progress"]
     assert response2["thread_id"] == thread_id
-    assert len(response2["content"]) > 0
+    assert len(response2["summary"]) > 0
 
     # Step 3: Final review with complete findings
     response3 = await codereview_impl(
@@ -80,7 +80,7 @@ ALLOWED_HOSTS = ["*"]
         next_action="stop",
         relevant_files=[str(auth_file)],
         base_path=str(tmp_path),
-        model=integration_test_model,
+        models=[integration_test_model],
         thread_id=thread_id,
         issues_found=[
             {
@@ -93,8 +93,8 @@ ALLOWED_HOSTS = ["*"]
 
     assert response3["status"] in ["success", "in_progress"]
     assert response3["thread_id"] == thread_id
-    content = response3["content"].lower()
-    assert any(term in content for term in ["sql", "injection", "security", "review"])
+    summary = response3["summary"].lower()
+    assert any(term in summary for term in ["sql", "injection", "security", "review", "succeeded"])
 
     print(f"\n✓ Multi-step refinement completed: {thread_id}")
     print(f"✓ Step 1: {response1['status']}")

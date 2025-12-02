@@ -4,7 +4,6 @@ Loads from environment variables and .env file.
 """
 
 import json
-import os
 from typing import Any
 
 from dotenv import load_dotenv
@@ -62,8 +61,7 @@ class Settings(BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
-        """Customize settings sources to use our custom sources.
-        """
+        """Customize settings sources to use our custom sources."""
         return (
             init_settings,
             CustomEnvSettingsSource(settings_cls),  # Reads from os.environ (populated by load_dotenv)

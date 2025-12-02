@@ -2,13 +2,18 @@
 
 from pydantic import Field
 
+from src.config import settings
 from src.schemas.base import ModelResponse, MultiToolRequest, MultiToolResponse
 
 
 class DebateRequest(MultiToolRequest):
     """Debate request - runs models in two steps: independent answers + debate."""
 
-    pass  # Inherits models: list[str] from MultiToolRequest
+    models: list[str] = Field(
+        default_factory=lambda: settings.default_model_list,
+        min_length=2,
+        description=f"List of LLM models to run in parallel (minimum 2) (will use default models ({settings.default_model_list}) if not specified)",
+    )
 
 
 class DebateResponse(MultiToolResponse):

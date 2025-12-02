@@ -216,28 +216,55 @@ class TestCodeReviewResponse:
     """Tests for CodeReviewResponse model."""
 
     def test_valid_codereview_response(self):
-        """Test creating a valid CodeReviewResponse."""
+        """Test creating a valid CodeReviewResponse with model results."""
+        from src.schemas.base import ModelResponseMetadata
+        from src.schemas.codereview import CodeReviewModelResult
+
         response = CodeReviewResponse(
             thread_id="test-123",
-            content="Found 2 issues",
             status="success",
-            metadata=ModelResponseMetadata(model="gpt-5-mini"),
-            issues_found=[
-                {"file": "test.py", "line": 10, "severity": "high", "title": "Issue 1", "description": "Desc 1"},
-                {"file": "test.py", "line": 20, "severity": "medium", "title": "Issue 2", "description": "Desc 2"},
+            summary="1/1 models succeeded. Found 2 issues: 1 high, 1 medium. See `results` for details.",
+            results=[
+                CodeReviewModelResult(
+                    content="Review complete",
+                    status="success",
+                    metadata=ModelResponseMetadata(model="gpt-5-mini"),
+                    issues_found=[
+                        {
+                            "file": "test.py",
+                            "line": 10,
+                            "severity": "high",
+                            "title": "Issue 1",
+                            "description": "Desc 1",
+                            "model": "gpt-5-mini",
+                        },
+                        {
+                            "file": "test.py",
+                            "line": 20,
+                            "severity": "medium",
+                            "title": "Issue 2",
+                            "description": "Desc 2",
+                            "model": "gpt-5-mini",
+                        },
+                    ],
+                )
             ],
         )
 
-        assert len(response.issues_found) == 2
+        assert len(response.results) == 1
+        assert len(response.results[0].issues_found) == 2
         assert response.status == "success"
+        assert response.summary == "1/1 models succeeded. Found 2 issues: 1 high, 1 medium. See `results` for details."
 
     def test_default_empty_lists(self):
-        """Test that issues default to None."""
+        """Test that results defaults to empty list."""
         response = CodeReviewResponse(
-            thread_id="test-123", content="No issues found", status="success", metadata=ModelResponseMetadata(model="gpt-5-mini")
+            thread_id="test-123",
+            status="success",
+            summary="No issues found",
         )
 
-        assert response.issues_found is None
+        assert response.results == []
 
 
 class TestModelResponseMetadata:

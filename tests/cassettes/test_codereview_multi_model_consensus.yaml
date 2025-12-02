@@ -1,0 +1,1395 @@
+interactions:
+- request:
+    body: "{\"model\":\"claude-haiku-4-5-20251001\",\"messages\":[{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"<REPOSITORY_CONTEXT>\\n<PROJECT_INSTRUCTIONS
+      source=\\\"CLAUDE.md\\\">\\n# Test Repository\\n\\n## Security Standards\\n-
+      Always use parameterized queries\\n- Never store passwords in plain text\\n-
+      Follow OWASP Top 10 guidelines\\n</PROJECT_INSTRUCTIONS>\\n</REPOSITORY_CONTEXT>\\n\\n<EDITABLE_FILES>\\n<file
+      path=\\\"/Users/tomek/src/multi_mcp/tests/data/repos/sql_injection/sql_injection/auth.py\\\"
+      relative_path=\\\"auth.py\\\" filename=\\\"auth.py\\\">\\n   1\u2502 \\\"\\\"\\\"Authentication
+      module with security vulnerabilities.\\\"\\\"\\\"\\n   2\u2502 \\n   3\u2502
+      import sqlite3\\n   4\u2502 \\n   5\u2502 \\n   6\u2502 def authenticate_user(username:
+      str, password: str) -> bool:\\n   7\u2502     \\\"\\\"\\\"Authenticate user
+      against database.\\n   8\u2502 \\n   9\u2502     SECURITY ISSUE: SQL Injection
+      vulnerability!\\n  10\u2502     User input is directly concatenated into SQL
+      query.\\n  11\u2502     \\\"\\\"\\\"\\n  12\u2502     conn = sqlite3.connect('users.db')\\n
+      \ 13\u2502     cursor = conn.cursor()\\n  14\u2502 \\n  15\u2502     # VULNERABILITY:
+      SQL Injection\\n  16\u2502     query = f\\\"SELECT * FROM users WHERE username
+      = '{username}' AND password = '{password}'\\\"\\n  17\u2502     cursor.execute(query)\\n
+      \ 18\u2502 \\n  19\u2502     result = cursor.fetchone()\\n  20\u2502     conn.close()\\n
+      \ 21\u2502 \\n  22\u2502     return result is not None\\n  23\u2502 \\n  24\u2502
+      \\n  25\u2502 def create_user(username: str, password: str) -> bool:\\n  26\u2502
+      \    \\\"\\\"\\\"Create new user account.\\n  27\u2502 \\n  28\u2502     SECURITY
+      ISSUES:\\n  29\u2502     1. Password stored in plain text (no hashing)\\n  30\u2502
+      \    2. SQL Injection vulnerability\\n  31\u2502     \\\"\\\"\\\"\\n  32\u2502
+      \    conn = sqlite3.connect('users.db')\\n  33\u2502     cursor = conn.cursor()\\n
+      \ 34\u2502 \\n  35\u2502     # VULNERABILITY: Plain text password storage\\n
+      \ 36\u2502     # VULNERABILITY: SQL Injection\\n  37\u2502     query = f\\\"INSERT
+      INTO users (username, password) VALUES ('{username}', '{password}')\\\"\\n  38\u2502
+      \\n  39\u2502     try:\\n  40\u2502         cursor.execute(query)\\n  41\u2502
+      \        conn.commit()\\n  42\u2502         conn.close()\\n  43\u2502         return
+      True\\n  44\u2502     except Exception:\\n  45\u2502         conn.close()\\n
+      \ 46\u2502         return False\\n  47\u2502 \\n  48\u2502 \\n  49\u2502 def
+      get_user_data(user_id: int):\\n  50\u2502     \\\"\\\"\\\"Get user data by ID.\\n
+      \ 51\u2502 \\n  52\u2502     SECURITY ISSUE: Using SELECT * exposes all columns\\n
+      \ 53\u2502     \\\"\\\"\\\"\\n  54\u2502     conn = sqlite3.connect('users.db')\\n
+      \ 55\u2502     cursor = conn.cursor()\\n  56\u2502 \\n  57\u2502     # VULNERABILITY:
+      SELECT * can expose sensitive data\\n  58\u2502     cursor.execute(f\\\"SELECT
+      * FROM users WHERE id = {user_id}\\\")\\n  59\u2502 \\n  60\u2502     result
+      = cursor.fetchone()\\n  61\u2502     conn.close()\\n  62\u2502 \\n  63\u2502
+      \    return result\\n  64\u2502 \\n  65\u2502 \\n  66\u2502 def check_password_strength(password:
+      str) -> bool:\\n  67\u2502     \\\"\\\"\\\"Check if password meets minimum requirements.\\n
+      \ 68\u2502 \\n  69\u2502     SECURITY ISSUE: Weak password policy\\n  70\u2502
+      \    \\\"\\\"\\\"\\n  71\u2502     # VULNERABILITY: Too permissive password
+      policy\\n  72\u2502     return len(password) >= 4  # Should be at least 12 characters!\\n</file>\\n\\n</EDITABLE_FILES>\\n\\n<USER_MESSAGE>\\n<CODE_REVIEW_REQUEST>\\nReview
+      authentication code\\n</CODE_REVIEW_REQUEST>\\n\\n<ISSUES_IDENTIFIED>\\nNo issues
+      identified yet.\\n</ISSUES_IDENTIFIED>\\n\\n<TASK>\\nAs the Principal Engineer
+      acting as a Quality Gate, perform the following strictly ordered workflow:\\n\\n1.
+      **CONTEXTUALIZATION**:\\n    - Read <REPOSITORY_CONTEXT> to understand the codebase
+      if available\\n    - Review <CODE_REVIEW_REQUEST> to understand objectives and
+      scope\\n\\n2. **VERIFICATION**: Iterate through <ISSUES_IDENTIFIED>\\n   - For
+      each issue: validate with precise code references\\n   - Confirm real issues,
+      adjust severity if needed\\n   - Discard false positives with evidence\\n\\n3.
+      **DISCOVERY**: Deep static analysis of <EDITABLE_FILES> for missed issues:\\n
+      \  - Concurrency: race conditions, deadlocks, atomicity violations\\n   - Security:
+      injection, hardcoded secrets, weak hashing, improper auth\\n   - Error Handling:
+      swallowed exceptions, leaking stack traces\\n   - Type Safety: missing imports,
+      type mismatches\\n   - Resource Management: unclosed files/sessions/connections\\n
+      \  - Cross-File Integrity: verify signatures match, handle failure modes\\n
+      \  - Architecture: over-engineering, bottlenecks, missing abstractions\\n   -
+      Stress Simulations: null/empty, wrong type, extreme size, attacker input\\n\\n4.
+      **REMEDIATION**: For every confirmed issue, provide minimal safe fix\\n\\n5.
+      **OUTPUT**: Provide analysis block, then JSON result\\n</TASK>\\n</USER_MESSAGE>\"}]}],\"temperature\":0.2,\"system\":[{\"type\":\"text\",\"text\":\"#
+      ROLE\\nYou are a Principal Engineer serving as a strict Quality Gate. Your responsibility
+      is to evaluate code with architectural depth and static analysis precision.
+      You must verify reported issues, uncover hidden defects, and identify all correctness,
+      safety, reliability, and design risks. Your approach is systematic, evidence-driven,
+      and comprehensive.\\n\\n# CRITICAL GUIDING PRINCIPLES\\n- **User-Centric Analysis:**
+      Align reviews with the project's specific architecture and goals.\\n- **Scoped
+      & Actionable:** Focus strictly on the provided code. Fixes must be copy-pasteable
+      and preserve existing style.\\n- **Pragmatic & Safe:** Do not suggest major
+      refactors unless the code is fundamentally broken or insecure. Avoid over-engineering.\\n-
+      **Discovery Coverage Rule:** For every file, ensure all categories (Concurrency,
+      Security, Error Handling, Type Safety, Resource Management, Cross-File Integrity,
+      Architectural Check, Per-Function Stress Simulations) are fully analyzed.\\n-
+      **Evidence-Based Decisions:** Every confirmed or discarded issue must be backed
+      by precise code references.\\n- **Severity Discipline:** Use defined severity
+      levels accurately. Do not inflate or deflate issue severity.\\n- **The \\\"Adversarial\\\"
+      Mindset:** Treat each function as if it were written by a malicious actor trying
+      to hide bugs.\\n- **Verification First:** You are the filter. If a reported
+      issue is false, discard it. If a reported issue is real, fix it.\\n- **Security
+      First:** When time-constrained, focus analysis order: Security \u2192 Concurrency
+      \u2192 Logic \u2192 Code Quality.\\n- **Impact Quantification:** For every issue,
+      estimate: \\\"How many users affected? What's the blast radius?\\\"\\n- **Linting
+      Silence:** Do NOT report syntax errors, missing imports, type annotation issues,
+      or formatting problems. These are handled by linters in CI. Your attention must
+      be 100% on LOGIC and SECURITY bugs that linters cannot catch. Every import error
+      you report is an architectural bug you didn't find.\\n- **Tone:** Professional,
+      objective, and concise.\\n\\n# SEVERITY DEFINITIONS\\nUse these definitions
+      to assign severity. Do not inflate severity.\\n- [\U0001F534 CRITICAL]: Data
+      corruption, race conditions in critical paths, security exploits, broken auth
+      or permission checks, execution paths leading to crash or denial of service.\\n-
+      [\U0001F7E0 HIGH]: Logic Bugs that cause incorrect business behavior, unhandled
+      runtime exceptions, resource leaks (memory/connections), or severe performance
+      or scaling failures.\\n- [\U0001F7E1 MEDIUM]: Missing validation, type mismatches,
+      unsafe defaults, edge cases, configuration issues, incorrect fallback behavior,
+      non-critical performance bottlenecks, or maintainability/code smells.\\n- [\U0001F7E2
+      LOW]: Typos, style violations, docstring errors, missing comments, or minor
+      maintainability issues.\\n\\n# ISSUE CATEGORY ICONS\\nUse these category icons
+      in addition to severity to quickly identify issue types:\\n- \U0001F512 **Security**:
+      Injection vulnerabilities, hardcoded secrets, weak hashing, auth issues\\n-
+      \U0001F41B **Logic Bug**: Incorrect business logic, wrong calculations, broken
+      control flow\\n- \u26A1 **Performance**: Bottlenecks, N+1 queries, inefficient
+      algorithms, scaling issues\\n- \U0001F504 **Concurrency**: Race conditions,
+      deadlocks, atomicity violations, thread safety\\n- \U0001F4BE **Resource Leak**:
+      Unclosed files/connections/sessions, memory leaks\\n- \U0001F3D7\uFE0F **Architecture**:
+      Design issues, over-engineering, missing abstractions, tight coupling\\n- \U0001F3A8
+      **Code Quality**: Maintainability, readability, style (non-critical)\\n- \u26A0\uFE0F
+      **Error Handling**: Swallowed exceptions, missing validation, improper error
+      propagation\\n\\n# INPUT FORMAT\\nYou will receive:\\n- **<REPOSITORY_CONTEXT>**:
+      Project instructions and architecture docs.\\n- **<EDITABLE_FILES>**: Source
+      code to review.\\n- **<ISSUES_IDENTIFIED>**: A list of potential issues found
+      by previous steps.\\n\\n# CRITICAL LINE NUMBER INSTRUCTIONS\\n- Code is provided
+      with markers like \\\"   1\u2502\\\". These are for reference ONLY.\\n- **NEVER**
+      include line number markers in your generated code/fixes.\\n- **ALWAYS** reference
+      specific line numbers in your text/analysis to locate issues.\\n\\n# REVIEW
+      WORKFLOW\\nFollow this sequence strictly:\\n\\n1. **CONTEXTUALIZATION**: \\n
+      \   - Read <REPOSITORY_CONTEXT> to understand the codebase if available:\\n
+      \      - Identify key architectural patterns, coding standards, and project
+      goals.\\n       - Note any specific areas of concern or focus mentioned.\\n
+      \   - Thoroughly review the <CODE_REVIEW_REQUEST> to understand the objectives
+      and scope.\\n\\n2. **VERIFICATION**: Iterate through <ISSUES_IDENTIFIED>\\n
+      \  - For each issue:\\n     - Validate the claim with precise code references.\\n
+      \    - If it is real, confirm and adjust severity if needed.\\n     - If it
+      is false, discard it.\\n     - Show your evidence for every decision.\\n\\n3.
+      **DISCOVERY**: Perform a deep static analysis of <EDITABLE_FILES> for missed
+      issues:\\n   - **Concurrency:** Race conditions, deadlocks, atomicity violations,
+      incorrect async usage. \\n   - **Security:** Injection, hardcoded secrets, weak
+      hashing, improper auth checks.\\n   - **Error Handling:** Swallowed exceptions,
+      leaking stack traces to API clients.\\n   - **Type Safety:** Missing imports,
+      type mismatches, incorrect optional handling.\\n   - **Resource Management:**
+      Unclosed files/sessions/connections.\\n   - **Cross-File Integrity:** Verify
+      function / API signatures match across files. Check that shared external resources
+      do not collide. Does the \\\"Consumer\\\" handle the \\\"Producer's\\\" failure
+      modes?\\n   - **Architectural Check:** Look for over-engineering, performance
+      bottlenecks, or missing abstractions that will cause immediate pain.\\n   -
+      **Stress Simulations:** For each method/entrypoint, simulate null/empty, wrong
+      type, extreme size, attacker input, dependency returning unexpected type, and
+      timeout/failure. Report any break.\\n\\n4. **REMEDIATION**: For every confirmed
+      issue:\\n   - Provide a minimal, safe fix.\\n   - Fix the Root Cause, not just
+      the symptom.\\n\\n\\n# STRUCTURED RESPONSES FOR SPECIAL CASES\\nCheck these
+      FIRST. If met, respond ONLY with the specific JSON object (no analysis block
+      needed).\\n\\n1. IF MORE INFORMATION IS NEEDED:\\n```json\\n{\\n  \\\"status\\\":
+      \\\"files_required_to_continue\\\",\\n  \\\"message\\\": \\\"<Explain what is
+      missing>\\\",\\n  \\\"files_needed\\\": [\\\"[file_name]\\\", \\\"[folder/]\\\"]\\n}\\n```\\n\\n2.
+      IF SCOPE IS TOO LARGE:\\n```json\\n{\\n  \\\"status\\\": \\\"focused_review_required\\\",\\n
+      \ \\\"message\\\": \\\"<Explain why scope is too large>\\\",\\n  \\\"suggestion\\\":
+      \\\"<e.g., 'Review auth module first'>\\\"\\n}\\n```\\n\\n3. IF CONTENT IS UNREVIEWABLE:\\n```json\\n{\\n
+      \ \\\"status\\\": \\\"unreviewable_content\\\",\\n  \\\"message\\\": \\\"<e.g.,
+      Binary file, Minified code>\\\"\\n}\\n```\\n\\n4. IF NO ISSUES FOUND (Code is
+      perfect):\\nOnly return \\\"no_issues_found\\\" if the Discovery Coverage Rule
+      is fully completed for all files and categories.\\n\\n```json\\n{\\n  \\\"status\\\":
+      \\\"no_issues_found\\\",\\n  \\\"message\\\": \\\"<One sentence praising specific
+      patterns found>\\\"\\n}\\n```\\n\\n# OUTPUT FORMAT\\nIf issues are found (verified
+      or new), you must output **TWO** sections in this order:\\n\\n## SECTION 1:
+      ANALYSIS BLOCK\\nWrap your thinking in XML tags. This is required to ensure
+      quality.\\n\\n```xml\\n<analysis>\\n1. VERIFICATION:\\n   - Issue \\\"X\\\":
+      Confirmed or discarded with evidence. Fix required.\\n   - Issue \\\"Y\\\":
+      False positive. The code actually handles this in line 45. Discarding.\\n2.
+      DISCOVERY:\\n   - Found potential race condition in file.py:12.\\n   - Found
+      missing import in utils.py.\\n</analysis>\\n```\\n\\n## SECTION 2: JSON RESULT\\nOutput
+      the final structured review.\\n```json\\n{\\n  \\\"status\\\": \\\"review_complete\\\",\\n
+      \ \\\"message\\\": \\\"This field MUST be valid markdown.\\\\nIt should have
+      sections like:\\\\n## **Priority Matrix**\\\\n| \U0001F534 Critical | \U0001F7E0
+      High | \U0001F7E1 Medium | \U0001F7E2 Low |\\\\n|---|---|---|---|\\\\n| N |
+      N | N | N |\\\\n\\\\n## **Overall Code Quality Summary:** (one short paragraph)\\\\n\\\\n##
+      **Top 3 Priority Fixes:** (quick bullets with category icons)\\\\n- \U0001F512
+      [Issue description]\\\\n- \U0001F41B [Issue description]\\\\n\\\\n## **Positive
+      Aspects:** (what was done well with examples)\\\\n| Pattern | Location | Impact
+      |\\\\n|---|---|---|\\\\n| \u2705 Good practice | `file.py:line` | Description
+      |\\\\n\\\\n## **Potential Review Gaps:** (what was not covered or needs further
+      review)\\\",\\n  \\\"issues_found\\\": [\\n    {\\n      \\\"severity\\\": \\\"critical|high|medium|low\\\",\\n
+      \     \\\"previous_severity\\\": \\\"new|critical|high|medium|low\\\",\\n      \\\"category\\\":
+      \\\"security|logic|performance|concurrency|resource_leak|architecture|code_quality|error_handling\\\",\\n
+      \     \\\"description\\\": \\\"<Brief explanation with category icon. Start
+      with icon like: \U0001F512 SQL injection in login query>\\\",\\n      \\\"location\\\":
+      \\\"file.py:23\\\",\\n      \\\"fix\\\": \\\"<Show ONLY the lines that need
+      changing. Use comments like '... existing code ...' to denote unchanged context.
+      Ensure indentation matches exactly. Do NOT include line number markers.>\\\"\\n
+      \   }\\n  ]\\n}\\n```\\n\\n**Note**: The `category` field is optional but recommended.
+      If provided, ensure the description also starts with the appropriate category
+      icon for visual consistency.\"}],\"max_tokens\":4096}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      anthropic-version:
+      - '2023-06-01'
+      connection:
+      - keep-alive
+      content-length:
+      - '13760'
+      content-type:
+      - application/json
+      host:
+      - api.anthropic.com
+      user-agent:
+      - litellm/1.80.0
+    method: POST
+    uri: https://api.anthropic.com/v1/messages
+  response:
+    body:
+      string: "{\"model\":\"claude-haiku-4-5-20251001\",\"id\":\"msg_01NJfHW3kKdnNNf6r45yMApp\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"```xml\\n<analysis>\\n1.
+        CONTEXTUALIZATION:\\n   - Project: Test Repository with security standards
+        requiring parameterized queries, no plain-text passwords, and OWASP Top 10
+        compliance.\\n   - Code Review Request: Review authentication code in auth.py\\n
+        \  - Scope: Single file (auth.py) containing 4 functions with documented security
+        vulnerabilities.\\n\\n2. VERIFICATION:\\n   - No issues were pre-identified
+        in <ISSUES_IDENTIFIED>, so no false positives to discard.\\n\\n3. DISCOVERY
+        - COMPREHENSIVE STATIC ANALYSIS:\\n\\n   **SECURITY ANALYSIS:**\\n   \\n   a)
+        SQL Injection in authenticate_user() [Line 16]:\\n      - CONFIRMED: Direct
+        string concatenation with user input into SQL query.\\n      - Evidence: `query
+        = f\\\"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'\\\"`\\n
+        \     - Attack vector: `username = \\\"' OR '1'='1\\\"` bypasses authentication.\\n
+        \     - Violates project standard: \\\"Always use parameterized queries\\\"\\n
+        \     - Severity: CRITICAL (breaks authentication, data breach, privilege
+        escalation)\\n\\n   b) SQL Injection in create_user() [Line 37]:\\n      -
+        CONFIRMED: Direct string concatenation with user input into INSERT query.\\n
+        \     - Evidence: `query = f\\\"INSERT INTO users (username, password) VALUES
+        ('{username}', '{password}')\\\"`\\n      - Attack vector: `username = \\\"admin',
+        'hashed'); DROP TABLE users; --\\\"` causes data destruction.\\n      - Violates
+        project standard: \\\"Always use parameterized queries\\\"\\n      - Severity:
+        CRITICAL (data destruction, privilege escalation)\\n\\n   c) Plain-text Password
+        Storage in create_user() [Line 37]:\\n      - CONFIRMED: Passwords inserted
+        directly without hashing.\\n      - Evidence: No hashing function called;
+        password stored as-is in database.\\n      - Violates project standard: \\\"Never
+        store passwords in plain text\\\"\\n      - Violates OWASP A02:2021 \u2013
+        Cryptographic Failures\\n      - Severity: CRITICAL (credential compromise,
+        mass breach if DB leaked)\\n\\n   d) SQL Injection in get_user_data() [Line
+        58]:\\n      - CONFIRMED: Direct string concatenation with user_id into SQL
+        query.\\n      - Evidence: `cursor.execute(f\\\"SELECT * FROM users WHERE
+        id = {user_id}\\\")`\\n      - Attack vector: `user_id = \\\"1 OR 1=1\\\"`
+        returns all users.\\n      - Violates project standard: \\\"Always use parameterized
+        queries\\\"\\n      - Severity: CRITICAL (unauthorized data access, information
+        disclosure)\\n\\n   e) Weak Password Policy in check_password_strength() [Line
+        72]:\\n      - CONFIRMED: Minimum length of 4 characters is insufficient.\\n
+        \     - Evidence: `return len(password) >= 4  # Should be at least 12 characters!`\\n
+        \     - OWASP recommendation: Minimum 12 characters for user-created passwords.\\n
+        \     - Severity: HIGH (weak credentials, brute-force vulnerability)\\n\\n
+        \  **ERROR HANDLING ANALYSIS:**\\n\\n   f) Swallowed Exception in create_user()
+        [Line 44]:\\n      - CONFIRMED: Bare `except Exception:` catches all exceptions
+        without logging or propagation.\\n      - Evidence: `except Exception: conn.close();
+        return False`\\n      - Impact: Silent failures hide SQL errors, injection
+        attempts, or database issues.\\n      - Severity: HIGH (debugging difficulty,
+        security issues masked)\\n\\n   **RESOURCE MANAGEMENT ANALYSIS:**\\n\\n   g)
+        Potential Resource Leak in authenticate_user() [Line 12-20]:\\n      - CONFIRMED:
+        If cursor.execute() raises an exception before line 20, conn.close() is never
+        called.\\n      - Evidence: No try-finally block; exception between lines
+        16-19 leaves connection open.\\n      - Impact: Connection pool exhaustion,
+        database unavailability.\\n      - Severity: HIGH (denial of service, resource
+        exhaustion)\\n\\n   h) Potential Resource Leak in get_user_data() [Line 54-61]:\\n
+        \     - CONFIRMED: Same pattern as authenticate_user(); exception before close()
+        leaves connection open.\\n      - Evidence: No try-finally block; exception
+        between lines 58-60 leaves connection open.\\n      - Severity: HIGH (denial
+        of service, resource exhaustion)\\n\\n   **TYPE SAFETY ANALYSIS:**\\n\\n   i)
+        Type Mismatch in get_user_data() [Line 49]:\\n      - CONFIRMED: Parameter
+        `user_id: int` but used directly in f-string without validation.\\n      -
+        Evidence: `cursor.execute(f\\\"SELECT * FROM users WHERE id = {user_id}\\\")`\\n
+        \     - Risk: If attacker passes string via type coercion, SQL injection possible.\\n
+        \     - Severity: MEDIUM (type safety, injection risk)\\n\\n   **CONCURRENCY
+        ANALYSIS:**\\n\\n   j) Race Condition in create_user() [Lines 40-41]:\\n      -
+        CONFIRMED: No transaction isolation; concurrent inserts with same username
+        can both succeed.\\n      - Evidence: No UNIQUE constraint check before INSERT;
+        commit happens after execute.\\n      - Impact: Duplicate users created, authentication
+        logic broken.\\n      - Severity: MEDIUM (data integrity, authentication bypass)\\n\\n
+        \  **ARCHITECTURE ANALYSIS:**\\n\\n   k) Missing Input Validation:\\n      -
+        CONFIRMED: No validation of username/password format, length, or encoding.\\n
+        \     - Evidence: Functions accept raw user input without sanitization.\\n
+        \     - Impact: Enables injection, buffer overflows, encoding attacks.\\n
+        \     - Severity: HIGH (security perimeter broken)\\n\\n   l) Hardcoded Database
+        Path:\\n      - CONFIRMED: Database path 'users.db' is hardcoded in all functions.\\n
+        \     - Evidence: Lines 12, 32, 54 all use `sqlite3.connect('users.db')`\\n
+        \     - Impact: No environment configuration, path traversal risk, testing
+        difficulty.\\n      - Severity: MEDIUM (configuration management, testing)\\n\\n4.
+        REMEDIATION - FIXES PROVIDED BELOW\\n\\n</analysis>\\n```\\n\\n```json\\n{\\n
+        \ \\\"status\\\": \\\"review_complete\\\",\\n  \\\"message\\\": \\\"## **Priority
+        Matrix**\\\\n| \U0001F534 Critical | \U0001F7E0 High | \U0001F7E1 Medium |
+        \U0001F7E2 Low |\\\\n|---|---|---|---|\\\\n| 4 | 4 | 3 | 0 |\\\\n\\\\n## **Overall
+        Code Quality Summary:**\\\\nThe authentication module contains **11 confirmed
+        security and reliability issues**, with **4 critical vulnerabilities** that
+        violate project security standards and OWASP guidelines. All SQL queries use
+        unsafe string concatenation instead of parameterized queries, passwords are
+        stored in plain text, and resource management lacks proper exception handling.
+        This code is **not production-ready** and poses immediate security and operational
+        risks.\\\\n\\\\n## **Top 3 Priority Fixes:**\\\\n- \U0001F512 **SQL Injection
+        in authenticate_user() [Line 16]**: Replace f-string with parameterized query
+        using `?` placeholders and cursor.execute(query, (username, password))`\\\\n-
+        \U0001F512 **Plain-text Password Storage [Line 37]**: Implement password hashing
+        using `hashlib.pbkdf2_hmac()` or `bcrypt` before database insertion\\\\n-
+        \U0001F512 **SQL Injection in create_user() [Line 37]**: Replace f-string
+        with parameterized query using `?` placeholders\\\\n\\\\n## **Positive Aspects:**\\\\n|
+        Pattern | Location | Impact |\\\\n|---|---|---|\\\\n| \u2705 Documented vulnerabilities
+        | Lines 9-10, 28-30, 52-53, 69-70 | Code author was aware of issues; aids
+        remediation |\\\\n| \u2705 Proper connection closure attempt | Lines 20, 42,
+        45, 61 | Shows intent for resource cleanup (though incomplete) |\\\\n| \u2705
+        Return type clarity | Lines 22, 46, 63 | Functions have clear success/failure
+        semantics |\\\\n\\\\n## **Potential Review Gaps:**\\\\nNo additional files
+        reviewed (e.g., database schema, user input validation layer, password hashing
+        utilities). Cross-file integrity cannot be fully verified without seeing:\\\\n-
+        Database initialization/schema definition\\\\n- Any middleware or input validation
+        layer\\\\n- Password hashing utility imports/implementations\\\\n- Configuration
+        management for database path\\\",\\n  \\\"issues_found\\\": [\\n    {\\n      \\\"severity\\\":
+        \\\"critical\\\",\\n      \\\"previous_severity\\\": \\\"new\\\",\\n      \\\"category\\\":
+        \\\"security\\\",\\n      \\\"description\\\": \\\"\U0001F512 SQL Injection
+        in authenticate_user(): User input directly concatenated into SQL query without
+        parameterization. Attack vector: `username = \\\\\\\"' OR '1'='1\\\\\\\"`
+        bypasses authentication. Violates project standard 'Always use parameterized
+        queries' and OWASP A03:2021.\\\",\\n      \\\"location\\\": \\\"auth.py:16\\\",\\n
+        \     \\\"fix\\\": \\\"def authenticate_user(username: str, password: str)
+        -> bool:\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"Authenticate user against database.\\\\n\\\\n
+        \   SECURITY ISSUE: SQL Injection vulnerability!\\\\n    User input is directly
+        concatenated into SQL query.\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"\\\\n    conn
+        = sqlite3.connect('users.db')\\\\n    cursor = conn.cursor()\\\\n\\\\n    #
+        FIXED: Use parameterized query\\\\n    query = \\\\\\\"SELECT * FROM users
+        WHERE username = ? AND password = ?\\\\\\\"\\\\n    cursor.execute(query,
+        (username, password))\\\\n\\\\n    result = cursor.fetchone()\\\\n    conn.close()\\\\n\\\\n
+        \   return result is not None\\\"\\n    },\\n    {\\n      \\\"severity\\\":
+        \\\"critical\\\",\\n      \\\"previous_severity\\\": \\\"new\\\",\\n      \\\"category\\\":
+        \\\"security\\\",\\n      \\\"description\\\": \\\"\U0001F512 SQL Injection
+        in create_user(): User input directly concatenated into INSERT query. Attack
+        vector: `username = \\\\\\\"admin', 'hashed'); DROP TABLE users; --\\\\\\\"`
+        causes data destruction. Violates project standard 'Always use parameterized
+        queries'.\\\",\\n      \\\"location\\\": \\\"auth.py:37\\\",\\n      \\\"fix\\\":
+        \\\"def create_user(username: str, password: str) -> bool:\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"Create
+        new user account.\\\\n\\\\n    SECURITY ISSUES:\\\\n    1. Password stored
+        in plain text (no hashing)\\\\n    2. SQL Injection vulnerability\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"\\\\n
+        \   conn = sqlite3.connect('users.db')\\\\n    cursor = conn.cursor()\\\\n\\\\n
+        \   # FIXED: Use parameterized query\\\\n    query = \\\\\\\"INSERT INTO users
+        (username, password) VALUES (?, ?)\\\\\\\"\\\\n\\\\n    try:\\\\n        cursor.execute(query,
+        (username, password))\\\\n        conn.commit()\\\\n        conn.close()\\\\n
+        \       return True\\\\n    except Exception:\\\\n        conn.close()\\\\n
+        \       return False\\\"\\n    },\\n    {\\n      \\\"severity\\\": \\\"critical\\\",\\n
+        \     \\\"previous_severity\\\": \\\"new\\\",\\n      \\\"category\\\": \\\"security\\\",\\n
+        \     \\\"description\\\": \\\"\U0001F512 Plain-text Password Storage in create_user():
+        Passwords inserted without hashing. Violates project standard 'Never store
+        passwords in plain text' and OWASP A02:2021 \u2013 Cryptographic Failures.
+        If database is compromised, all user credentials are exposed.\\\",\\n      \\\"location\\\":
+        \\\"auth.py:37\\\",\\n      \\\"fix\\\": \\\"import hashlib\\\\nimport os\\\\n\\\\ndef
+        _hash_password(password: str) -> str:\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"Hash
+        password using PBKDF2.\\\\\\\"\\\\\\\"\\\\\\\"\\\\n    salt = os.urandom(32)\\\\n
+        \   hashed = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)\\\\n
+        \   return salt.hex() + ':' + hashed.hex()\\\\n\\\\ndef create_user(username:
+        str, password: str) -> bool:\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"Create new user
+        account.\\\\n\\\\n    SECURITY ISSUES:\\\\n    1. Password stored in plain
+        text (no hashing)\\\\n    2. SQL Injection vulnerability\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"\\\\n
+        \   conn = sqlite3.connect('users.db')\\\\n    cursor = conn.cursor()\\\\n\\\\n
+        \   # FIXED: Hash password before storage\\\\n    hashed_password = _hash_password(password)\\\\n
+        \   query = \\\\\\\"INSERT INTO users (username, password) VALUES (?, ?)\\\\\\\"\\\\n\\\\n
+        \   try:\\\\n        cursor.execute(query, (username, hashed_password))\\\\n
+        \       conn.commit()\\\\n        conn.close()\\\\n        return True\\\\n
+        \   except Exception:\\\\n        conn.close()\\\\n        return False\\\"\\n
+        \   },\\n    {\\n      \\\"severity\\\": \\\"critical\\\",\\n      \\\"previous_severity\\\":
+        \\\"new\\\",\\n      \\\"category\\\": \\\"security\\\",\\n      \\\"description\\\":
+        \\\"\U0001F512 SQL Injection in get_user_data(): User input directly concatenated
+        into SELECT query. Attack vector: `user_id = \\\\\\\"1 OR 1=1\\\\\\\"` returns
+        all users. Violates project standard 'Always use parameterized queries'.\\\",\\n
+        \     \\\"location\\\": \\\"auth.py:58\\\",\\n      \\\"fix\\\": \\\"def get_user_data(user_id:
+        int):\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"Get user data by ID.\\\\n\\\\n    SECURITY
+        ISSUE: Using SELECT * exposes all columns\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"\\\\n
+        \   conn = sqlite3.connect('users.db')\\\\n    cursor = conn.cursor()\\\\n\\\\n
+        \   # FIXED: Use parameterized query\\\\n    cursor.execute(\\\\\\\"SELECT
+        * FROM users WHERE id = ?\\\\\\\", (user_id,))\\\\n\\\\n    result = cursor.fetchone()\\\\n
+        \   conn.close()\\\\n\\\\n    return result\\\"\\n    },\\n    {\\n      \\\"severity\\\":
+        \\\"high\\\",\\n      \\\"previous_severity\\\": \\\"new\\\",\\n      \\\"category\\\":
+        \\\"security\\\",\\n      \\\"description\\\": \\\"\U0001F512 Weak Password
+        Policy in check_password_strength(): Minimum length of 4 characters is insufficient.
+        OWASP recommends minimum 12 characters. Enables brute-force attacks and weak
+        credential compromise.\\\",\\n      \\\"location\\\": \\\"auth.py:72\\\",\\n
+        \     \\\"fix\\\": \\\"def check_password_strength(password: str) -> bool:\\\\n
+        \   \\\\\\\"\\\\\\\"\\\\\\\"Check if password meets minimum requirements.\\\\n\\\\n
+        \   SECURITY ISSUE: Weak password policy\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"\\\\n
+        \   # FIXED: Enforce OWASP-compliant minimum length\\\\n    return len(password)
+        >= 12  # OWASP minimum for user-created passwords\\\"\\n    },\\n    {\\n
+        \     \\\"severity\\\": \\\"high\\\",\\n      \\\"previous_severity\\\": \\\"new\\\",\\n
+        \     \\\"category\\\": \\\"error_handling\\\",\\n      \\\"description\\\":
+        \\\"\u26A0\uFE0F Swallowed Exception in create_user(): Bare `except Exception:`
+        catches all exceptions without logging. Silent failures hide SQL errors, injection
+        attempts, or database issues, making debugging and security monitoring impossible.\\\",\\n
+        \     \\\"location\\\": \\\"auth.py:44\\\",\\n      \\\"fix\\\": \\\"import
+        logging\\\\n\\\\nlogger = logging.getLogger(__name__)\\\\n\\\\ndef create_user(username:
+        str, password: str) -> bool:\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"Create new user
+        account.\\\\n\\\\n    SECURITY ISSUES:\\\\n    1. Password stored in plain
+        text (no hashing)\\\\n    2. SQL Injection vulnerability\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"\\\\n
+        \   conn = sqlite3.connect('users.db')\\\\n    cursor = conn.cursor()\\\\n\\\\n
+        \   # FIXED: Use parameterized query\\\\n    query = \\\\\\\"INSERT INTO users
+        (username, password) VALUES (?, ?)\\\\\\\"\\\\n\\\\n    try:\\\\n        cursor.execute(query,
+        (username, password))\\\\n        conn.commit()\\\\n        conn.close()\\\\n
+        \       return True\\\\n    except Exception as e:\\\\n        logger.error(f\\\\\\\"Failed
+        to create user {username}: {e}\\\\\\\")\\\\n        conn.close()\\\\n        return
+        False\\\"\\n    },\\n    {\\n      \\\"severity\\\": \\\"high\\\",\\n      \\\"previous_severity\\\":
+        \\\"new\\\",\\n      \\\"category\\\": \\\"resource_leak\\\",\\n      \\\"description\\\":
+        \\\"\U0001F4BE Resource Leak in authenticate_user(): If cursor.execute() raises
+        an exception before line 20, conn.close() is never called. No try-finally
+        block. Causes connection pool exhaustion and database unavailability.\\\",\\n
+        \     \\\"location\\\": \\\"auth.py:12-20\\\",\\n      \\\"fix\\\": \\\"def
+        authenticate_user(username: str, password: str) -> bool:\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"Authenticate
+        user against database.\\\\n\\\\n    SECURITY ISSUE: SQL Injection vulnerability!\\\\n
+        \   User input is directly concatenated into SQL query.\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"\\\\n
+        \   conn = sqlite3.connect('users.db')\\\\n    try:\\\\n        cursor = conn.cursor()\\\\n\\\\n
+        \       # FIXED: Use parameterized query\\\\n        query = \\\\\\\"SELECT
+        * FROM users WHERE username = ? AND password = ?\\\\\\\"\\\\n        cursor.execute(query,
+        (username, password))\\\\n\\\\n        result = cursor.fetchone()\\\\n        return
+        result is not None\\\\n    finally:\\\\n        conn.close()\\\"\\n    },\\n
+        \   {\\n      \\\"severity\\\": \\\"high\\\",\\n      \\\"previous_severity\\\":
+        \\\"new\\\",\\n      \\\"category\\\": \\\"resource_leak\\\",\\n      \\\"description\\\":
+        \\\"\U0001F4BE Resource Leak in get_user_data(): If cursor.execute() raises
+        an exception before line 61, conn.close() is never called. No try-finally
+        block. Causes connection pool exhaustion and database unavailability.\\\",\\n
+        \     \\\"location\\\": \\\"auth.py:54-\"}],\"stop_reason\":\"max_tokens\",\"stop_sequence\":null,\"usage\":{\"input_tokens\":3620,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":0,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":0},\"output_tokens\":4096,\"service_tier\":\"standard\"}}"
+    headers:
+      CF-RAY:
+      - 9a77d35bafffb233-SEA
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 02 Dec 2025 03:44:53 GMT
+      Retry-After:
+      - '37'
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Robots-Tag:
+      - none
+      anthropic-organization-id:
+      - 806d7d97-32bf-4246-87a7-ec960ee58829
+      anthropic-ratelimit-input-tokens-limit:
+      - '450000'
+      anthropic-ratelimit-input-tokens-remaining:
+      - '448000'
+      anthropic-ratelimit-input-tokens-reset:
+      - '2025-12-02T03:44:25Z'
+      anthropic-ratelimit-output-tokens-limit:
+      - '90000'
+      anthropic-ratelimit-output-tokens-remaining:
+      - '86000'
+      anthropic-ratelimit-output-tokens-reset:
+      - '2025-12-02T03:44:56Z'
+      anthropic-ratelimit-requests-limit:
+      - '1000'
+      anthropic-ratelimit-requests-remaining:
+      - '999'
+      anthropic-ratelimit-requests-reset:
+      - '2025-12-02T03:44:25Z'
+      anthropic-ratelimit-tokens-limit:
+      - '540000'
+      anthropic-ratelimit-tokens-remaining:
+      - '534000'
+      anthropic-ratelimit-tokens-reset:
+      - '2025-12-02T03:44:25Z'
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '15745'
+      request-id:
+      - req_011CVhAuEdMu1jpVvriTCNvs
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-envoy-upstream-service-time:
+      - '28978'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"claude-haiku-4-5-20251001\",\"messages\":[{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"<REPOSITORY_CONTEXT>\\n<PROJECT_INSTRUCTIONS
+      source=\\\"CLAUDE.md\\\">\\n# Test Repository\\n\\n## Security Standards\\n-
+      Always use parameterized queries\\n- Never store passwords in plain text\\n-
+      Follow OWASP Top 10 guidelines\\n</PROJECT_INSTRUCTIONS>\\n</REPOSITORY_CONTEXT>\\n\\n<EDITABLE_FILES>\\n<file
+      path=\\\"/Users/tomek/src/multi_mcp/tests/data/repos/sql_injection/sql_injection/auth.py\\\"
+      relative_path=\\\"auth.py\\\" filename=\\\"auth.py\\\">\\n   1\u2502 \\\"\\\"\\\"Authentication
+      module with security vulnerabilities.\\\"\\\"\\\"\\n   2\u2502 \\n   3\u2502
+      import sqlite3\\n   4\u2502 \\n   5\u2502 \\n   6\u2502 def authenticate_user(username:
+      str, password: str) -> bool:\\n   7\u2502     \\\"\\\"\\\"Authenticate user
+      against database.\\n   8\u2502 \\n   9\u2502     SECURITY ISSUE: SQL Injection
+      vulnerability!\\n  10\u2502     User input is directly concatenated into SQL
+      query.\\n  11\u2502     \\\"\\\"\\\"\\n  12\u2502     conn = sqlite3.connect('users.db')\\n
+      \ 13\u2502     cursor = conn.cursor()\\n  14\u2502 \\n  15\u2502     # VULNERABILITY:
+      SQL Injection\\n  16\u2502     query = f\\\"SELECT * FROM users WHERE username
+      = '{username}' AND password = '{password}'\\\"\\n  17\u2502     cursor.execute(query)\\n
+      \ 18\u2502 \\n  19\u2502     result = cursor.fetchone()\\n  20\u2502     conn.close()\\n
+      \ 21\u2502 \\n  22\u2502     return result is not None\\n  23\u2502 \\n  24\u2502
+      \\n  25\u2502 def create_user(username: str, password: str) -> bool:\\n  26\u2502
+      \    \\\"\\\"\\\"Create new user account.\\n  27\u2502 \\n  28\u2502     SECURITY
+      ISSUES:\\n  29\u2502     1. Password stored in plain text (no hashing)\\n  30\u2502
+      \    2. SQL Injection vulnerability\\n  31\u2502     \\\"\\\"\\\"\\n  32\u2502
+      \    conn = sqlite3.connect('users.db')\\n  33\u2502     cursor = conn.cursor()\\n
+      \ 34\u2502 \\n  35\u2502     # VULNERABILITY: Plain text password storage\\n
+      \ 36\u2502     # VULNERABILITY: SQL Injection\\n  37\u2502     query = f\\\"INSERT
+      INTO users (username, password) VALUES ('{username}', '{password}')\\\"\\n  38\u2502
+      \\n  39\u2502     try:\\n  40\u2502         cursor.execute(query)\\n  41\u2502
+      \        conn.commit()\\n  42\u2502         conn.close()\\n  43\u2502         return
+      True\\n  44\u2502     except Exception:\\n  45\u2502         conn.close()\\n
+      \ 46\u2502         return False\\n  47\u2502 \\n  48\u2502 \\n  49\u2502 def
+      get_user_data(user_id: int):\\n  50\u2502     \\\"\\\"\\\"Get user data by ID.\\n
+      \ 51\u2502 \\n  52\u2502     SECURITY ISSUE: Using SELECT * exposes all columns\\n
+      \ 53\u2502     \\\"\\\"\\\"\\n  54\u2502     conn = sqlite3.connect('users.db')\\n
+      \ 55\u2502     cursor = conn.cursor()\\n  56\u2502 \\n  57\u2502     # VULNERABILITY:
+      SELECT * can expose sensitive data\\n  58\u2502     cursor.execute(f\\\"SELECT
+      * FROM users WHERE id = {user_id}\\\")\\n  59\u2502 \\n  60\u2502     result
+      = cursor.fetchone()\\n  61\u2502     conn.close()\\n  62\u2502 \\n  63\u2502
+      \    return result\\n  64\u2502 \\n  65\u2502 \\n  66\u2502 def check_password_strength(password:
+      str) -> bool:\\n  67\u2502     \\\"\\\"\\\"Check if password meets minimum requirements.\\n
+      \ 68\u2502 \\n  69\u2502     SECURITY ISSUE: Weak password policy\\n  70\u2502
+      \    \\\"\\\"\\\"\\n  71\u2502     # VULNERABILITY: Too permissive password
+      policy\\n  72\u2502     return len(password) >= 4  # Should be at least 12 characters!\\n</file>\\n\\n</EDITABLE_FILES>\\n\\n<USER_MESSAGE>\\n<CODE_REVIEW_REQUEST>\\nReview
+      authentication code\\n</CODE_REVIEW_REQUEST>\\n\\n<ISSUES_IDENTIFIED>\\nNo issues
+      identified yet.\\n</ISSUES_IDENTIFIED>\\n\\n<TASK>\\nAs the Principal Engineer
+      acting as a Quality Gate, perform the following strictly ordered workflow:\\n\\n1.
+      **CONTEXTUALIZATION**:\\n    - Read <REPOSITORY_CONTEXT> to understand the codebase
+      if available\\n    - Review <CODE_REVIEW_REQUEST> to understand objectives and
+      scope\\n\\n2. **VERIFICATION**: Iterate through <ISSUES_IDENTIFIED>\\n   - For
+      each issue: validate with precise code references\\n   - Confirm real issues,
+      adjust severity if needed\\n   - Discard false positives with evidence\\n\\n3.
+      **DISCOVERY**: Deep static analysis of <EDITABLE_FILES> for missed issues:\\n
+      \  - Concurrency: race conditions, deadlocks, atomicity violations\\n   - Security:
+      injection, hardcoded secrets, weak hashing, improper auth\\n   - Error Handling:
+      swallowed exceptions, leaking stack traces\\n   - Type Safety: missing imports,
+      type mismatches\\n   - Resource Management: unclosed files/sessions/connections\\n
+      \  - Cross-File Integrity: verify signatures match, handle failure modes\\n
+      \  - Architecture: over-engineering, bottlenecks, missing abstractions\\n   -
+      Stress Simulations: null/empty, wrong type, extreme size, attacker input\\n\\n4.
+      **REMEDIATION**: For every confirmed issue, provide minimal safe fix\\n\\n5.
+      **OUTPUT**: Provide analysis block, then JSON result\\n</TASK>\\n</USER_MESSAGE>\"}]}],\"temperature\":0.2,\"system\":[{\"type\":\"text\",\"text\":\"#
+      ROLE\\nYou are a Principal Engineer serving as a strict Quality Gate. Your responsibility
+      is to evaluate code with architectural depth and static analysis precision.
+      You must verify reported issues, uncover hidden defects, and identify all correctness,
+      safety, reliability, and design risks. Your approach is systematic, evidence-driven,
+      and comprehensive.\\n\\n# CRITICAL GUIDING PRINCIPLES\\n- **User-Centric Analysis:**
+      Align reviews with the project's specific architecture and goals.\\n- **Scoped
+      & Actionable:** Focus strictly on the provided code. Fixes must be copy-pasteable
+      and preserve existing style.\\n- **Pragmatic & Safe:** Do not suggest major
+      refactors unless the code is fundamentally broken or insecure. Avoid over-engineering.\\n-
+      **Discovery Coverage Rule:** For every file, ensure all categories (Concurrency,
+      Security, Error Handling, Type Safety, Resource Management, Cross-File Integrity,
+      Architectural Check, Per-Function Stress Simulations) are fully analyzed.\\n-
+      **Evidence-Based Decisions:** Every confirmed or discarded issue must be backed
+      by precise code references.\\n- **Severity Discipline:** Use defined severity
+      levels accurately. Do not inflate or deflate issue severity.\\n- **The \\\"Adversarial\\\"
+      Mindset:** Treat each function as if it were written by a malicious actor trying
+      to hide bugs.\\n- **Verification First:** You are the filter. If a reported
+      issue is false, discard it. If a reported issue is real, fix it.\\n- **Security
+      First:** When time-constrained, focus analysis order: Security \u2192 Concurrency
+      \u2192 Logic \u2192 Code Quality.\\n- **Impact Quantification:** For every issue,
+      estimate: \\\"How many users affected? What's the blast radius?\\\"\\n- **Linting
+      Silence:** Do NOT report syntax errors, missing imports, type annotation issues,
+      or formatting problems. These are handled by linters in CI. Your attention must
+      be 100% on LOGIC and SECURITY bugs that linters cannot catch. Every import error
+      you report is an architectural bug you didn't find.\\n- **Tone:** Professional,
+      objective, and concise.\\n\\n# SEVERITY DEFINITIONS\\nUse these definitions
+      to assign severity. Do not inflate severity.\\n- [\U0001F534 CRITICAL]: Data
+      corruption, race conditions in critical paths, security exploits, broken auth
+      or permission checks, execution paths leading to crash or denial of service.\\n-
+      [\U0001F7E0 HIGH]: Logic Bugs that cause incorrect business behavior, unhandled
+      runtime exceptions, resource leaks (memory/connections), or severe performance
+      or scaling failures.\\n- [\U0001F7E1 MEDIUM]: Missing validation, type mismatches,
+      unsafe defaults, edge cases, configuration issues, incorrect fallback behavior,
+      non-critical performance bottlenecks, or maintainability/code smells.\\n- [\U0001F7E2
+      LOW]: Typos, style violations, docstring errors, missing comments, or minor
+      maintainability issues.\\n\\n# ISSUE CATEGORY ICONS\\nUse these category icons
+      in addition to severity to quickly identify issue types:\\n- \U0001F512 **Security**:
+      Injection vulnerabilities, hardcoded secrets, weak hashing, auth issues\\n-
+      \U0001F41B **Logic Bug**: Incorrect business logic, wrong calculations, broken
+      control flow\\n- \u26A1 **Performance**: Bottlenecks, N+1 queries, inefficient
+      algorithms, scaling issues\\n- \U0001F504 **Concurrency**: Race conditions,
+      deadlocks, atomicity violations, thread safety\\n- \U0001F4BE **Resource Leak**:
+      Unclosed files/connections/sessions, memory leaks\\n- \U0001F3D7\uFE0F **Architecture**:
+      Design issues, over-engineering, missing abstractions, tight coupling\\n- \U0001F3A8
+      **Code Quality**: Maintainability, readability, style (non-critical)\\n- \u26A0\uFE0F
+      **Error Handling**: Swallowed exceptions, missing validation, improper error
+      propagation\\n\\n# INPUT FORMAT\\nYou will receive:\\n- **<REPOSITORY_CONTEXT>**:
+      Project instructions and architecture docs.\\n- **<EDITABLE_FILES>**: Source
+      code to review.\\n- **<ISSUES_IDENTIFIED>**: A list of potential issues found
+      by previous steps.\\n\\n# CRITICAL LINE NUMBER INSTRUCTIONS\\n- Code is provided
+      with markers like \\\"   1\u2502\\\". These are for reference ONLY.\\n- **NEVER**
+      include line number markers in your generated code/fixes.\\n- **ALWAYS** reference
+      specific line numbers in your text/analysis to locate issues.\\n\\n# REVIEW
+      WORKFLOW\\nFollow this sequence strictly:\\n\\n1. **CONTEXTUALIZATION**: \\n
+      \   - Read <REPOSITORY_CONTEXT> to understand the codebase if available:\\n
+      \      - Identify key architectural patterns, coding standards, and project
+      goals.\\n       - Note any specific areas of concern or focus mentioned.\\n
+      \   - Thoroughly review the <CODE_REVIEW_REQUEST> to understand the objectives
+      and scope.\\n\\n2. **VERIFICATION**: Iterate through <ISSUES_IDENTIFIED>\\n
+      \  - For each issue:\\n     - Validate the claim with precise code references.\\n
+      \    - If it is real, confirm and adjust severity if needed.\\n     - If it
+      is false, discard it.\\n     - Show your evidence for every decision.\\n\\n3.
+      **DISCOVERY**: Perform a deep static analysis of <EDITABLE_FILES> for missed
+      issues:\\n   - **Concurrency:** Race conditions, deadlocks, atomicity violations,
+      incorrect async usage. \\n   - **Security:** Injection, hardcoded secrets, weak
+      hashing, improper auth checks.\\n   - **Error Handling:** Swallowed exceptions,
+      leaking stack traces to API clients.\\n   - **Type Safety:** Missing imports,
+      type mismatches, incorrect optional handling.\\n   - **Resource Management:**
+      Unclosed files/sessions/connections.\\n   - **Cross-File Integrity:** Verify
+      function / API signatures match across files. Check that shared external resources
+      do not collide. Does the \\\"Consumer\\\" handle the \\\"Producer's\\\" failure
+      modes?\\n   - **Architectural Check:** Look for over-engineering, performance
+      bottlenecks, or missing abstractions that will cause immediate pain.\\n   -
+      **Stress Simulations:** For each method/entrypoint, simulate null/empty, wrong
+      type, extreme size, attacker input, dependency returning unexpected type, and
+      timeout/failure. Report any break.\\n\\n4. **REMEDIATION**: For every confirmed
+      issue:\\n   - Provide a minimal, safe fix.\\n   - Fix the Root Cause, not just
+      the symptom.\\n\\n\\n# STRUCTURED RESPONSES FOR SPECIAL CASES\\nCheck these
+      FIRST. If met, respond ONLY with the specific JSON object (no analysis block
+      needed).\\n\\n1. IF MORE INFORMATION IS NEEDED:\\n```json\\n{\\n  \\\"status\\\":
+      \\\"files_required_to_continue\\\",\\n  \\\"message\\\": \\\"<Explain what is
+      missing>\\\",\\n  \\\"files_needed\\\": [\\\"[file_name]\\\", \\\"[folder/]\\\"]\\n}\\n```\\n\\n2.
+      IF SCOPE IS TOO LARGE:\\n```json\\n{\\n  \\\"status\\\": \\\"focused_review_required\\\",\\n
+      \ \\\"message\\\": \\\"<Explain why scope is too large>\\\",\\n  \\\"suggestion\\\":
+      \\\"<e.g., 'Review auth module first'>\\\"\\n}\\n```\\n\\n3. IF CONTENT IS UNREVIEWABLE:\\n```json\\n{\\n
+      \ \\\"status\\\": \\\"unreviewable_content\\\",\\n  \\\"message\\\": \\\"<e.g.,
+      Binary file, Minified code>\\\"\\n}\\n```\\n\\n4. IF NO ISSUES FOUND (Code is
+      perfect):\\nOnly return \\\"no_issues_found\\\" if the Discovery Coverage Rule
+      is fully completed for all files and categories.\\n\\n```json\\n{\\n  \\\"status\\\":
+      \\\"no_issues_found\\\",\\n  \\\"message\\\": \\\"<One sentence praising specific
+      patterns found>\\\"\\n}\\n```\\n\\n# OUTPUT FORMAT\\nIf issues are found (verified
+      or new), you must output **TWO** sections in this order:\\n\\n## SECTION 1:
+      ANALYSIS BLOCK\\nWrap your thinking in XML tags. This is required to ensure
+      quality.\\n\\n```xml\\n<analysis>\\n1. VERIFICATION:\\n   - Issue \\\"X\\\":
+      Confirmed or discarded with evidence. Fix required.\\n   - Issue \\\"Y\\\":
+      False positive. The code actually handles this in line 45. Discarding.\\n2.
+      DISCOVERY:\\n   - Found potential race condition in file.py:12.\\n   - Found
+      missing import in utils.py.\\n</analysis>\\n```\\n\\n## SECTION 2: JSON RESULT\\nOutput
+      the final structured review.\\n```json\\n{\\n  \\\"status\\\": \\\"review_complete\\\",\\n
+      \ \\\"message\\\": \\\"This field MUST be valid markdown.\\\\nIt should have
+      sections like:\\\\n## **Priority Matrix**\\\\n| \U0001F534 Critical | \U0001F7E0
+      High | \U0001F7E1 Medium | \U0001F7E2 Low |\\\\n|---|---|---|---|\\\\n| N |
+      N | N | N |\\\\n\\\\n## **Overall Code Quality Summary:** (one short paragraph)\\\\n\\\\n##
+      **Top 3 Priority Fixes:** (quick bullets with category icons)\\\\n- \U0001F512
+      [Issue description]\\\\n- \U0001F41B [Issue description]\\\\n\\\\n## **Positive
+      Aspects:** (what was done well with examples)\\\\n| Pattern | Location | Impact
+      |\\\\n|---|---|---|\\\\n| \u2705 Good practice | `file.py:line` | Description
+      |\\\\n\\\\n## **Potential Review Gaps:** (what was not covered or needs further
+      review)\\\",\\n  \\\"issues_found\\\": [\\n    {\\n      \\\"severity\\\": \\\"critical|high|medium|low\\\",\\n
+      \     \\\"previous_severity\\\": \\\"new|critical|high|medium|low\\\",\\n      \\\"category\\\":
+      \\\"security|logic|performance|concurrency|resource_leak|architecture|code_quality|error_handling\\\",\\n
+      \     \\\"description\\\": \\\"<Brief explanation with category icon. Start
+      with icon like: \U0001F512 SQL injection in login query>\\\",\\n      \\\"location\\\":
+      \\\"file.py:23\\\",\\n      \\\"fix\\\": \\\"<Show ONLY the lines that need
+      changing. Use comments like '... existing code ...' to denote unchanged context.
+      Ensure indentation matches exactly. Do NOT include line number markers.>\\\"\\n
+      \   }\\n  ]\\n}\\n```\\n\\n**Note**: The `category` field is optional but recommended.
+      If provided, ensure the description also starts with the appropriate category
+      icon for visual consistency.\"}],\"max_tokens\":4096}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      anthropic-version:
+      - '2023-06-01'
+      connection:
+      - keep-alive
+      content-length:
+      - '13760'
+      content-type:
+      - application/json
+      host:
+      - api.anthropic.com
+      user-agent:
+      - litellm/1.80.0
+    method: POST
+    uri: https://api.anthropic.com/v1/messages
+  response:
+    body:
+      string: ''
+    headers:
+      CF-RAY:
+      - 9a77d35bafffb233-SEA
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 02 Dec 2025 03:44:53 GMT
+      Retry-After:
+      - '37'
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Robots-Tag:
+      - none
+      anthropic-organization-id:
+      - 806d7d97-32bf-4246-87a7-ec960ee58829
+      anthropic-ratelimit-input-tokens-limit:
+      - '450000'
+      anthropic-ratelimit-input-tokens-remaining:
+      - '448000'
+      anthropic-ratelimit-input-tokens-reset:
+      - '2025-12-02T03:44:25Z'
+      anthropic-ratelimit-output-tokens-limit:
+      - '90000'
+      anthropic-ratelimit-output-tokens-remaining:
+      - '86000'
+      anthropic-ratelimit-output-tokens-reset:
+      - '2025-12-02T03:44:56Z'
+      anthropic-ratelimit-requests-limit:
+      - '1000'
+      anthropic-ratelimit-requests-remaining:
+      - '999'
+      anthropic-ratelimit-requests-reset:
+      - '2025-12-02T03:44:25Z'
+      anthropic-ratelimit-tokens-limit:
+      - '540000'
+      anthropic-ratelimit-tokens-remaining:
+      - '534000'
+      anthropic-ratelimit-tokens-reset:
+      - '2025-12-02T03:44:25Z'
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '0'
+      request-id:
+      - req_011CVhAuEdMu1jpVvriTCNvs
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-envoy-upstream-service-time:
+      - '28978'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"# ROLE\\nYou are a Principal
+      Engineer serving as a strict Quality Gate. Your responsibility is to evaluate
+      code with architectural depth and static analysis precision. You must verify
+      reported issues, uncover hidden defects, and identify all correctness, safety,
+      reliability, and design risks. Your approach is systematic, evidence-driven,
+      and comprehensive.\\n\\n# CRITICAL GUIDING PRINCIPLES\\n- **User-Centric Analysis:**
+      Align reviews with the project's specific architecture and goals.\\n- **Scoped
+      & Actionable:** Focus strictly on the provided code. Fixes must be copy-pasteable
+      and preserve existing style.\\n- **Pragmatic & Safe:** Do not suggest major
+      refactors unless the code is fundamentally broken or insecure. Avoid over-engineering.\\n-
+      **Discovery Coverage Rule:** For every file, ensure all categories (Concurrency,
+      Security, Error Handling, Type Safety, Resource Management, Cross-File Integrity,
+      Architectural Check, Per-Function Stress Simulations) are fully analyzed.\\n-
+      **Evidence-Based Decisions:** Every confirmed or discarded issue must be backed
+      by precise code references.\\n- **Severity Discipline:** Use defined severity
+      levels accurately. Do not inflate or deflate issue severity.\\n- **The \\\"Adversarial\\\"
+      Mindset:** Treat each function as if it were written by a malicious actor trying
+      to hide bugs.\\n- **Verification First:** You are the filter. If a reported
+      issue is false, discard it. If a reported issue is real, fix it.\\n- **Security
+      First:** When time-constrained, focus analysis order: Security \u2192 Concurrency
+      \u2192 Logic \u2192 Code Quality.\\n- **Impact Quantification:** For every issue,
+      estimate: \\\"How many users affected? What's the blast radius?\\\"\\n- **Linting
+      Silence:** Do NOT report syntax errors, missing imports, type annotation issues,
+      or formatting problems. These are handled by linters in CI. Your attention must
+      be 100% on LOGIC and SECURITY bugs that linters cannot catch. Every import error
+      you report is an architectural bug you didn't find.\\n- **Tone:** Professional,
+      objective, and concise.\\n\\n# SEVERITY DEFINITIONS\\nUse these definitions
+      to assign severity. Do not inflate severity.\\n- [\U0001F534 CRITICAL]: Data
+      corruption, race conditions in critical paths, security exploits, broken auth
+      or permission checks, execution paths leading to crash or denial of service.\\n-
+      [\U0001F7E0 HIGH]: Logic Bugs that cause incorrect business behavior, unhandled
+      runtime exceptions, resource leaks (memory/connections), or severe performance
+      or scaling failures.\\n- [\U0001F7E1 MEDIUM]: Missing validation, type mismatches,
+      unsafe defaults, edge cases, configuration issues, incorrect fallback behavior,
+      non-critical performance bottlenecks, or maintainability/code smells.\\n- [\U0001F7E2
+      LOW]: Typos, style violations, docstring errors, missing comments, or minor
+      maintainability issues.\\n\\n# ISSUE CATEGORY ICONS\\nUse these category icons
+      in addition to severity to quickly identify issue types:\\n- \U0001F512 **Security**:
+      Injection vulnerabilities, hardcoded secrets, weak hashing, auth issues\\n-
+      \U0001F41B **Logic Bug**: Incorrect business logic, wrong calculations, broken
+      control flow\\n- \u26A1 **Performance**: Bottlenecks, N+1 queries, inefficient
+      algorithms, scaling issues\\n- \U0001F504 **Concurrency**: Race conditions,
+      deadlocks, atomicity violations, thread safety\\n- \U0001F4BE **Resource Leak**:
+      Unclosed files/connections/sessions, memory leaks\\n- \U0001F3D7\uFE0F **Architecture**:
+      Design issues, over-engineering, missing abstractions, tight coupling\\n- \U0001F3A8
+      **Code Quality**: Maintainability, readability, style (non-critical)\\n- \u26A0\uFE0F
+      **Error Handling**: Swallowed exceptions, missing validation, improper error
+      propagation\\n\\n# INPUT FORMAT\\nYou will receive:\\n- **<REPOSITORY_CONTEXT>**:
+      Project instructions and architecture docs.\\n- **<EDITABLE_FILES>**: Source
+      code to review.\\n- **<ISSUES_IDENTIFIED>**: A list of potential issues found
+      by previous steps.\\n\\n# CRITICAL LINE NUMBER INSTRUCTIONS\\n- Code is provided
+      with markers like \\\"   1\u2502\\\". These are for reference ONLY.\\n- **NEVER**
+      include line number markers in your generated code/fixes.\\n- **ALWAYS** reference
+      specific line numbers in your text/analysis to locate issues.\\n\\n# REVIEW
+      WORKFLOW\\nFollow this sequence strictly:\\n\\n1. **CONTEXTUALIZATION**: \\n
+      \   - Read <REPOSITORY_CONTEXT> to understand the codebase if available:\\n
+      \      - Identify key architectural patterns, coding standards, and project
+      goals.\\n       - Note any specific areas of concern or focus mentioned.\\n
+      \   - Thoroughly review the <CODE_REVIEW_REQUEST> to understand the objectives
+      and scope.\\n\\n2. **VERIFICATION**: Iterate through <ISSUES_IDENTIFIED>\\n
+      \  - For each issue:\\n     - Validate the claim with precise code references.\\n
+      \    - If it is real, confirm and adjust severity if needed.\\n     - If it
+      is false, discard it.\\n     - Show your evidence for every decision.\\n\\n3.
+      **DISCOVERY**: Perform a deep static analysis of <EDITABLE_FILES> for missed
+      issues:\\n   - **Concurrency:** Race conditions, deadlocks, atomicity violations,
+      incorrect async usage. \\n   - **Security:** Injection, hardcoded secrets, weak
+      hashing, improper auth checks.\\n   - **Error Handling:** Swallowed exceptions,
+      leaking stack traces to API clients.\\n   - **Type Safety:** Missing imports,
+      type mismatches, incorrect optional handling.\\n   - **Resource Management:**
+      Unclosed files/sessions/connections.\\n   - **Cross-File Integrity:** Verify
+      function / API signatures match across files. Check that shared external resources
+      do not collide. Does the \\\"Consumer\\\" handle the \\\"Producer's\\\" failure
+      modes?\\n   - **Architectural Check:** Look for over-engineering, performance
+      bottlenecks, or missing abstractions that will cause immediate pain.\\n   -
+      **Stress Simulations:** For each method/entrypoint, simulate null/empty, wrong
+      type, extreme size, attacker input, dependency returning unexpected type, and
+      timeout/failure. Report any break.\\n\\n4. **REMEDIATION**: For every confirmed
+      issue:\\n   - Provide a minimal, safe fix.\\n   - Fix the Root Cause, not just
+      the symptom.\\n\\n\\n# STRUCTURED RESPONSES FOR SPECIAL CASES\\nCheck these
+      FIRST. If met, respond ONLY with the specific JSON object (no analysis block
+      needed).\\n\\n1. IF MORE INFORMATION IS NEEDED:\\n```json\\n{\\n  \\\"status\\\":
+      \\\"files_required_to_continue\\\",\\n  \\\"message\\\": \\\"<Explain what is
+      missing>\\\",\\n  \\\"files_needed\\\": [\\\"[file_name]\\\", \\\"[folder/]\\\"]\\n}\\n```\\n\\n2.
+      IF SCOPE IS TOO LARGE:\\n```json\\n{\\n  \\\"status\\\": \\\"focused_review_required\\\",\\n
+      \ \\\"message\\\": \\\"<Explain why scope is too large>\\\",\\n  \\\"suggestion\\\":
+      \\\"<e.g., 'Review auth module first'>\\\"\\n}\\n```\\n\\n3. IF CONTENT IS UNREVIEWABLE:\\n```json\\n{\\n
+      \ \\\"status\\\": \\\"unreviewable_content\\\",\\n  \\\"message\\\": \\\"<e.g.,
+      Binary file, Minified code>\\\"\\n}\\n```\\n\\n4. IF NO ISSUES FOUND (Code is
+      perfect):\\nOnly return \\\"no_issues_found\\\" if the Discovery Coverage Rule
+      is fully completed for all files and categories.\\n\\n```json\\n{\\n  \\\"status\\\":
+      \\\"no_issues_found\\\",\\n  \\\"message\\\": \\\"<One sentence praising specific
+      patterns found>\\\"\\n}\\n```\\n\\n# OUTPUT FORMAT\\nIf issues are found (verified
+      or new), you must output **TWO** sections in this order:\\n\\n## SECTION 1:
+      ANALYSIS BLOCK\\nWrap your thinking in XML tags. This is required to ensure
+      quality.\\n\\n```xml\\n<analysis>\\n1. VERIFICATION:\\n   - Issue \\\"X\\\":
+      Confirmed or discarded with evidence. Fix required.\\n   - Issue \\\"Y\\\":
+      False positive. The code actually handles this in line 45. Discarding.\\n2.
+      DISCOVERY:\\n   - Found potential race condition in file.py:12.\\n   - Found
+      missing import in utils.py.\\n</analysis>\\n```\\n\\n## SECTION 2: JSON RESULT\\nOutput
+      the final structured review.\\n```json\\n{\\n  \\\"status\\\": \\\"review_complete\\\",\\n
+      \ \\\"message\\\": \\\"This field MUST be valid markdown.\\\\nIt should have
+      sections like:\\\\n## **Priority Matrix**\\\\n| \U0001F534 Critical | \U0001F7E0
+      High | \U0001F7E1 Medium | \U0001F7E2 Low |\\\\n|---|---|---|---|\\\\n| N |
+      N | N | N |\\\\n\\\\n## **Overall Code Quality Summary:** (one short paragraph)\\\\n\\\\n##
+      **Top 3 Priority Fixes:** (quick bullets with category icons)\\\\n- \U0001F512
+      [Issue description]\\\\n- \U0001F41B [Issue description]\\\\n\\\\n## **Positive
+      Aspects:** (what was done well with examples)\\\\n| Pattern | Location | Impact
+      |\\\\n|---|---|---|\\\\n| \u2705 Good practice | `file.py:line` | Description
+      |\\\\n\\\\n## **Potential Review Gaps:** (what was not covered or needs further
+      review)\\\",\\n  \\\"issues_found\\\": [\\n    {\\n      \\\"severity\\\": \\\"critical|high|medium|low\\\",\\n
+      \     \\\"previous_severity\\\": \\\"new|critical|high|medium|low\\\",\\n      \\\"category\\\":
+      \\\"security|logic|performance|concurrency|resource_leak|architecture|code_quality|error_handling\\\",\\n
+      \     \\\"description\\\": \\\"<Brief explanation with category icon. Start
+      with icon like: \U0001F512 SQL injection in login query>\\\",\\n      \\\"location\\\":
+      \\\"file.py:23\\\",\\n      \\\"fix\\\": \\\"<Show ONLY the lines that need
+      changing. Use comments like '... existing code ...' to denote unchanged context.
+      Ensure indentation matches exactly. Do NOT include line number markers.>\\\"\\n
+      \   }\\n  ]\\n}\\n```\\n\\n**Note**: The `category` field is optional but recommended.
+      If provided, ensure the description also starts with the appropriate category
+      icon for visual consistency.\"},{\"role\":\"user\",\"content\":\"<REPOSITORY_CONTEXT>\\n<PROJECT_INSTRUCTIONS
+      source=\\\"CLAUDE.md\\\">\\n# Test Repository\\n\\n## Security Standards\\n-
+      Always use parameterized queries\\n- Never store passwords in plain text\\n-
+      Follow OWASP Top 10 guidelines\\n</PROJECT_INSTRUCTIONS>\\n</REPOSITORY_CONTEXT>\\n\\n<EDITABLE_FILES>\\n<file
+      path=\\\"/Users/tomek/src/multi_mcp/tests/data/repos/sql_injection/sql_injection/auth.py\\\"
+      relative_path=\\\"auth.py\\\" filename=\\\"auth.py\\\">\\n   1\u2502 \\\"\\\"\\\"Authentication
+      module with security vulnerabilities.\\\"\\\"\\\"\\n   2\u2502 \\n   3\u2502
+      import sqlite3\\n   4\u2502 \\n   5\u2502 \\n   6\u2502 def authenticate_user(username:
+      str, password: str) -> bool:\\n   7\u2502     \\\"\\\"\\\"Authenticate user
+      against database.\\n   8\u2502 \\n   9\u2502     SECURITY ISSUE: SQL Injection
+      vulnerability!\\n  10\u2502     User input is directly concatenated into SQL
+      query.\\n  11\u2502     \\\"\\\"\\\"\\n  12\u2502     conn = sqlite3.connect('users.db')\\n
+      \ 13\u2502     cursor = conn.cursor()\\n  14\u2502 \\n  15\u2502     # VULNERABILITY:
+      SQL Injection\\n  16\u2502     query = f\\\"SELECT * FROM users WHERE username
+      = '{username}' AND password = '{password}'\\\"\\n  17\u2502     cursor.execute(query)\\n
+      \ 18\u2502 \\n  19\u2502     result = cursor.fetchone()\\n  20\u2502     conn.close()\\n
+      \ 21\u2502 \\n  22\u2502     return result is not None\\n  23\u2502 \\n  24\u2502
+      \\n  25\u2502 def create_user(username: str, password: str) -> bool:\\n  26\u2502
+      \    \\\"\\\"\\\"Create new user account.\\n  27\u2502 \\n  28\u2502     SECURITY
+      ISSUES:\\n  29\u2502     1. Password stored in plain text (no hashing)\\n  30\u2502
+      \    2. SQL Injection vulnerability\\n  31\u2502     \\\"\\\"\\\"\\n  32\u2502
+      \    conn = sqlite3.connect('users.db')\\n  33\u2502     cursor = conn.cursor()\\n
+      \ 34\u2502 \\n  35\u2502     # VULNERABILITY: Plain text password storage\\n
+      \ 36\u2502     # VULNERABILITY: SQL Injection\\n  37\u2502     query = f\\\"INSERT
+      INTO users (username, password) VALUES ('{username}', '{password}')\\\"\\n  38\u2502
+      \\n  39\u2502     try:\\n  40\u2502         cursor.execute(query)\\n  41\u2502
+      \        conn.commit()\\n  42\u2502         conn.close()\\n  43\u2502         return
+      True\\n  44\u2502     except Exception:\\n  45\u2502         conn.close()\\n
+      \ 46\u2502         return False\\n  47\u2502 \\n  48\u2502 \\n  49\u2502 def
+      get_user_data(user_id: int):\\n  50\u2502     \\\"\\\"\\\"Get user data by ID.\\n
+      \ 51\u2502 \\n  52\u2502     SECURITY ISSUE: Using SELECT * exposes all columns\\n
+      \ 53\u2502     \\\"\\\"\\\"\\n  54\u2502     conn = sqlite3.connect('users.db')\\n
+      \ 55\u2502     cursor = conn.cursor()\\n  56\u2502 \\n  57\u2502     # VULNERABILITY:
+      SELECT * can expose sensitive data\\n  58\u2502     cursor.execute(f\\\"SELECT
+      * FROM users WHERE id = {user_id}\\\")\\n  59\u2502 \\n  60\u2502     result
+      = cursor.fetchone()\\n  61\u2502     conn.close()\\n  62\u2502 \\n  63\u2502
+      \    return result\\n  64\u2502 \\n  65\u2502 \\n  66\u2502 def check_password_strength(password:
+      str) -> bool:\\n  67\u2502     \\\"\\\"\\\"Check if password meets minimum requirements.\\n
+      \ 68\u2502 \\n  69\u2502     SECURITY ISSUE: Weak password policy\\n  70\u2502
+      \    \\\"\\\"\\\"\\n  71\u2502     # VULNERABILITY: Too permissive password
+      policy\\n  72\u2502     return len(password) >= 4  # Should be at least 12 characters!\\n</file>\\n\\n</EDITABLE_FILES>\\n\\n<USER_MESSAGE>\\n<CODE_REVIEW_REQUEST>\\nReview
+      authentication code\\n</CODE_REVIEW_REQUEST>\\n\\n<ISSUES_IDENTIFIED>\\nNo issues
+      identified yet.\\n</ISSUES_IDENTIFIED>\\n\\n<TASK>\\nAs the Principal Engineer
+      acting as a Quality Gate, perform the following strictly ordered workflow:\\n\\n1.
+      **CONTEXTUALIZATION**:\\n    - Read <REPOSITORY_CONTEXT> to understand the codebase
+      if available\\n    - Review <CODE_REVIEW_REQUEST> to understand objectives and
+      scope\\n\\n2. **VERIFICATION**: Iterate through <ISSUES_IDENTIFIED>\\n   - For
+      each issue: validate with precise code references\\n   - Confirm real issues,
+      adjust severity if needed\\n   - Discard false positives with evidence\\n\\n3.
+      **DISCOVERY**: Deep static analysis of <EDITABLE_FILES> for missed issues:\\n
+      \  - Concurrency: race conditions, deadlocks, atomicity violations\\n   - Security:
+      injection, hardcoded secrets, weak hashing, improper auth\\n   - Error Handling:
+      swallowed exceptions, leaking stack traces\\n   - Type Safety: missing imports,
+      type mismatches\\n   - Resource Management: unclosed files/sessions/connections\\n
+      \  - Cross-File Integrity: verify signatures match, handle failure modes\\n
+      \  - Architecture: over-engineering, bottlenecks, missing abstractions\\n   -
+      Stress Simulations: null/empty, wrong type, extreme size, attacker input\\n\\n4.
+      **REMEDIATION**: For every confirmed issue, provide minimal safe fix\\n\\n5.
+      **OUTPUT**: Provide analysis block, then JSON result\\n</TASK>\\n</USER_MESSAGE>\"}],\"model\":\"gpt-5-nano\",\"temperature\":1.0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '13696'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - AsyncOpenAI/Python 2.8.1
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 2.8.1
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '180.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.0
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: "{\n  \"id\": \"chatcmpl-CiBbOqFc2S6CJQXa1FyjXRZDJPPlo\",\n  \"object\":
+        \"chat.completion\",\n  \"created\": 1764647066,\n  \"model\": \"gpt-5-nano-2025-08-07\",\n
+        \ \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\":
+        \"assistant\",\n        \"content\": \"<analysis>\\n1. VERIFICATION:\\n   -
+        Issue \\\"SQL Injection vulnerability in authenticate_user\\\": Confirmed.
+        Evidence: auth.py lines show building query via f-string: query = f\\\"SELECT
+        * FROM users WHERE username = '{username}' AND password = '{password}'\\\"
+        and immediate execution. Location: auth.py:16-17. Fix required: switch to
+        parameterized queries and hashed passwords.\\n   - Issue \\\"Plain-text password
+        storage in create_user\\\": Confirmed. Evidence: auth.py lines 35-37 show
+        inserting the raw password into the database. Location: auth.py:35-37. Fix
+        required: hash passwords before storage and use parameterized queries.\\n
+        \  - Issue \\\"SQL Injection vulnerability in create_user\\\": Confirmed.
+        Evidence: auth.py line 37 constructs INSERT with f-string: \\\"... VALUES
+        ('{username}', '{password}')\\\" Location: auth.py:37. Fix required: parameterized
+        insert and hashed password.\\n   - Issue \\\"SELECT * usage in get_user_data\\\":
+        Confirmed. Evidence: auth.py line 58 uses SELECT * with direct formatting
+        of user_id. Location: auth.py:58. Fix required: parameterized query and select
+        explicit columns.\\n   - Issue \\\"Weak password policy\\\": Confirmed. Evidence:
+        auth.py lines 66-72 show a minimal policy of len(password) >= 4. Location:
+        auth.py:71-72. Fix required: enforce stronger policy (e.g., length >= 12 and
+        complexity checks).\\n   - Issue \\\"Resource management risk in authenticate_user\\\":
+        Confirmed. Evidence: authenticate_user opens a connection but has no cleanup
+        in case of exceptions (no try/finally/with). Location: auth.py:12-18. Fix
+        required: ensure connection is closed via finally or context manager.\\n2.
+        DISCOVERY:\\n   - Found multiple Security issues (SQL injection, plain text
+        password storage, weak policy) in auth.py with clear attack surfaces.\\n   -
+        Found Resource Management risk due to missing guaranteed conn.close() on exceptions
+        in authenticate_user.\\n   - Found Cross-cutting concerns: no parameterized
+        queries throughout; SELECT * usage; missing hashing; weak password policy;
+        minimal error handling/logging in create_user.\\n</analysis>\\n## SECTION
+        2: JSON RESULT\\n{\\n  \\\"status\\\": \\\"review_complete\\\",\\n  \\\"message\\\":
+        \\\"This review assesses the authentication module for security, error handling,
+        and correctness. It identifies SQL injection surfaces, plain-text password
+        storage, weak password policy, and resource management gaps. A minimal yet
+        safe patch is proposed to move to parameterized queries, password hashing,
+        explicit column selection, and robust resource cleanup.\\\",\\n  \\\"issues_found\\\":
+        [\\n    {\\n      \\\"severity\\\": \\\"critical\\\",\\n      \\\"previous_severity\\\":
+        \\\"new\\\",\\n      \\\"category\\\": \\\"\U0001F512 Security\\\",\\n      \\\"description\\\":
+        \\\"\U0001F512 SQL Injection in authenticate_user: auth.py:16-17 constructs
+        SQL with user input via f-string.\\\",\\n      \\\"location\\\": \\\"auth.py:16-17\\\",\\n
+        \     \\\"fix\\\": \\\"import hashlib\\\\\\\\nimport re\\\\\\\\n\\\\\\\\ndef
+        hash_password(password: str) -> str:\\\\\\\\n    return hashlib.sha256(password.encode('utf-8')).hexdigest()\\\\\\\\n\\\\\\\\ndef
+        authenticate_user(username: str, password: str) -> bool:\\\\\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"Authenticate
+        user against database using parameterized queries and hashed password.\\\\\\\"\\\\\\\"\\\\\\\"\\\\\\\\n
+        \   conn = sqlite3.connect('users.db')\\\\\\\\n    cursor = conn.cursor()\\\\\\\\n
+        \   try:\\\\\\\\n        cursor.execute(\\\\\\\"SELECT password FROM users
+        WHERE username = ?\\\\\\\", (username,))\\\\\\\\n        row = cursor.fetchone()\\\\\\\\n
+        \       if row is None:\\\\\\\\n            return False\\\\\\\\n        stored_hash
+        = row[0]\\\\\\\\n        return stored_hash == hash_password(password)\\\\\\\\n
+        \   finally:\\\\\\\\n        conn.close()\\\"\\n    },\\n    {\\n      \\\"severity\\\":
+        \\\"high\\\",\\n      \\\"previous_severity\\\": \\\"new\\\",\\n      \\\"category\\\":
+        \\\"\U0001F512 Security\\\",\\n      \\\"description\\\": \\\"\U0001F512 Plain-text
+        password storage in create_user: inserts raw password (auth.py:35-37).\\\",\\n
+        \     \\\"location\\\": \\\"auth.py:35-37\\\",\\n      \\\"fix\\\": \\\"def
+        create_user(username: str, password: str) -> bool:\\\\\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"Create
+        new user account with hashed password using parameterized query.\\\\\\\"\\\\\\\"\\\\\\\"\\\\\\\\n
+        \   conn = sqlite3.connect('users.db')\\\\\\\\n    cursor = conn.cursor()\\\\\\\\n
+        \   try:\\\\\\\\n        hashed = hash_password(password)\\\\\\\\n        cursor.execute(\\\\\\\"INSERT
+        INTO users (username, password) VALUES (?, ?)\\\\\\\", (username, hashed))\\\\\\\\n
+        \       conn.commit()\\\\\\\\n        return True\\\\\\\\n    except Exception:\\\\\\\\n
+        \       return False\\\\\\\\n    finally:\\\\\\\\n        conn.close()\\\"\\n
+        \   },\\n    {\\n      \\\"severity\\\": \\\"high\\\",\\n      \\\"previous_severity\\\":
+        \\\"new\\\",\\n      \\\"category\\\": \\\"\U0001F512 Security\\\",\\n      \\\"description\\\":
+        \\\"\U0001F512 SQL Injection in create_user: uses f-string in INSERT (auth.py:37).\\\",\\n
+        \     \\\"location\\\": \\\"auth.py:37\\\",\\n      \\\"fix\\\": \\\"def create_user(username:
+        str, password: str) -> bool:\\\\\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"Create new
+        user account with hashed password using parameterized query.\\\\\\\"\\\\\\\"\\\\\\\"\\\\\\\\n
+        \   conn = sqlite3.connect('users.db')\\\\\\\\n    cursor = conn.cursor()\\\\\\\\n
+        \   try:\\\\\\\\n        hashed = hash_password(password)\\\\\\\\n        cursor.execute(\\\\\\\"INSERT
+        INTO users (username, password) VALUES (?, ?)\\\\\\\", (username, hashed))\\\\\\\\n
+        \       conn.commit()\\\\\\\\n        return True\\\\\\\\n    except Exception:\\\\\\\\n
+        \       return False\\\\\\\\n    finally:\\\\\\\\n        conn.close()\\\"\\n
+        \   },\\n    {\\n      \\\"severity\\\": \\\"high\\\",\\n      \\\"previous_severity\\\":
+        \\\"new\\\",\\n      \\\"category\\\": \\\"\U0001F512 Security\\\",\\n      \\\"description\\\":
+        \\\"\U0001F512 SELECT * usage in get_user_data: auth.py:58 selects all columns
+        with direct formatting of user_id.\\\",\\n      \\\"location\\\": \\\"auth.py:58\\\",\\n
+        \     \\\"fix\\\": \\\"def get_user_data(user_id: int):\\\\\\\\n    \\\\\\\"\\\\\\\"\\\\\\\"Get
+        user data by ID with parameterized query and explicit column selection.\\\\\\\"\\\\\\\"\\\\\\\"\\\\\\\\n
+        \   conn = sqlite3.connect('users.db')\\\\\\\\n    cursor = conn.cursor()\\\\\\\\n
+        \   try:\\\\\\\\n        cursor.execute(\\\\\\\"SELECT id, username FROM users
+        WHERE id = ?\\\\\\\", (user_id,))\\\\\\\\n        result = cursor.fetchone()\\\\\\\\n
+        \       return result\\\\\\\\n    finally:\\\\\\\\n        conn.close()\\\"\\n
+        \   },\\n    {\\n      \\\"severity\\\": \\\"medium\\\",\\n      \\\"previous_severity\\\":
+        \\\"new\\\",\\n      \\\"category\\\": \\\"\U0001F512 Security\\\",\\n      \\\"description\\\":
+        \\\"\U0001F512 Weak password policy: check_password_strength uses len(password)
+        >= 4; should enforce stronger policy.\\\",\\n      \\\"location\\\": \\\"auth.py:71-72\\\",\\n
+        \     \\\"fix\\\": \\\"import re\\\\\\\\n\\\\\\\\ndef check_password_strength(password:
+        str) -> bool:\\\\\\\\n    \\\\\\\\\\\\\\\"\\\\\\\\\\\\\\\"\\\\\\\\\\\\\\\"Check
+        if password meets minimum requirements.\\\\\\\\\\\\\\\"\\\\\\\\\\\\\\\"\\\\\\\\\\\\\\\"\\\\\\\\n
+        \   if len(password) < 12:\\\\\\\\n        return False\\\\\\\\n    if not
+        re.search(r'[A-Z]', password):\\\\\\\\n        return False\\\\\\\\n    if
+        not re.search(r'[a-z]', password):\\\\\\\\n        return False\\\\\\\\n    if
+        not re.search(r'[0-9]', password):\\\\\\\\n        return False\\\\\\\\n    if
+        not re.search(r'[^A-Za-z0-9]', password):\\\\\\\\n        return False\\\\\\\\n
+        \   return True\\\"\\n    },\\n    {\\n      \\\"severity\\\": \\\"high\\\",\\n
+        \     \\\"previous_severity\\\": \\\"new\\\",\\n      \\\"category\\\": \\\"\U0001F4BE
+        Resource Leak\\\",\\n      \\\"description\\\": \\\"\U0001F527 Resource management
+        risk: authenticate_user lacks guaranteed conn.close() on exceptions (no try/finally
+        or with context).\\\",\\n      \\\"location\\\": \\\"auth.py:12-18\\\",\\n
+        \     \\\"fix\\\": \\\"def authenticate_user(username: str, password: str)
+        -> bool:\\\\\\\\n    \\\\\\\\\\\\\\\"\\\\\\\\\\\\\\\"\\\\\\\\\\\\\\\"Authenticate
+        user against database using parameterized queries and hashed password.\\\\\\\\\\\\\\\"\\\\\\\\\\\\\\\"\\\\\\\\\\\\\\\"\\\\\\\\n
+        \   conn = sqlite3.connect('users.db')\\\\\\\\n    cursor = conn.cursor()\\\\\\\\n
+        \   try:\\\\\\\\n        cursor.execute(\\\\\\\"SELECT password FROM users
+        WHERE username = ?\\\\\\\", (username,))\\\\\\\\n        row = cursor.fetchone()\\\\\\\\n
+        \       if row is None:\\\\\\\\n            return False\\\\\\\\n        stored_hash
+        = row[0]\\\\\\\\n        return stored_hash == hash_password(password)\\\\\\\\n
+        \   finally:\\\\\\\\n        conn.close()\\\"\\n    }\\n  ]\\n}\",\n        \"refusal\":
+        null,\n        \"annotations\": []\n      },\n      \"finish_reason\": \"stop\"\n
+        \   }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 3183,\n    \"completion_tokens\":
+        6125,\n    \"total_tokens\": 9308,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\":
+        2816,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\":
+        {\n      \"reasoning_tokens\": 4352,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\":
+        0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\":
+        \"default\",\n  \"system_fingerprint\": null\n}\n"
+    headers:
+      Access-Control-Expose-Headers:
+      - X-Request-ID
+      CF-RAY:
+      - 9a77d35be83875da-SEA
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 02 Dec 2025 03:45:18 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=0pWprFARwEAW27lVIofTNoMB9dyq9awjhaeYVV6uVSo-1764647118-1.0.1.1-3kDAbPYTXSCvWpbWVx8odyxjL48X7mS.YEuSKQVZxNkB1D7gQqou02tSekI4PbqAfp2CxxUjSwnQ2s.5KtUi4Zn4sEQ2somN67vIlMrpCUc;
+        path=/; expires=Tue, 02-Dec-25 04:15:18 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=8kcODpWbHfGsD8z7guI4AxUv8m3SdmqKnd8musfaTH4-1764647118968-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '8609'
+      openai-organization:
+      - tom-llc
+      openai-processing-ms:
+      - '52969'
+      openai-project:
+      - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
+      openai-version:
+      - '2020-10-01'
+      x-envoy-upstream-service-time:
+      - '53280'
+      x-openai-proxy-wasm:
+      - v0.1
+      x-ratelimit-limit-requests:
+      - '5000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '4999'
+      x-ratelimit-remaining-tokens:
+      - '1996708'
+      x-ratelimit-reset-requests:
+      - 12ms
+      x-ratelimit-reset-tokens:
+      - 98ms
+      x-request-id:
+      - req_6505604f8f0444a2ade9ce8500825042
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"messages\":[{\"role\":\"system\",\"content\":\"# ROLE\\nYou are a Principal
+      Engineer serving as a strict Quality Gate. Your responsibility is to evaluate
+      code with architectural depth and static analysis precision. You must verify
+      reported issues, uncover hidden defects, and identify all correctness, safety,
+      reliability, and design risks. Your approach is systematic, evidence-driven,
+      and comprehensive.\\n\\n# CRITICAL GUIDING PRINCIPLES\\n- **User-Centric Analysis:**
+      Align reviews with the project's specific architecture and goals.\\n- **Scoped
+      & Actionable:** Focus strictly on the provided code. Fixes must be copy-pasteable
+      and preserve existing style.\\n- **Pragmatic & Safe:** Do not suggest major
+      refactors unless the code is fundamentally broken or insecure. Avoid over-engineering.\\n-
+      **Discovery Coverage Rule:** For every file, ensure all categories (Concurrency,
+      Security, Error Handling, Type Safety, Resource Management, Cross-File Integrity,
+      Architectural Check, Per-Function Stress Simulations) are fully analyzed.\\n-
+      **Evidence-Based Decisions:** Every confirmed or discarded issue must be backed
+      by precise code references.\\n- **Severity Discipline:** Use defined severity
+      levels accurately. Do not inflate or deflate issue severity.\\n- **The \\\"Adversarial\\\"
+      Mindset:** Treat each function as if it were written by a malicious actor trying
+      to hide bugs.\\n- **Verification First:** You are the filter. If a reported
+      issue is false, discard it. If a reported issue is real, fix it.\\n- **Security
+      First:** When time-constrained, focus analysis order: Security \u2192 Concurrency
+      \u2192 Logic \u2192 Code Quality.\\n- **Impact Quantification:** For every issue,
+      estimate: \\\"How many users affected? What's the blast radius?\\\"\\n- **Linting
+      Silence:** Do NOT report syntax errors, missing imports, type annotation issues,
+      or formatting problems. These are handled by linters in CI. Your attention must
+      be 100% on LOGIC and SECURITY bugs that linters cannot catch. Every import error
+      you report is an architectural bug you didn't find.\\n- **Tone:** Professional,
+      objective, and concise.\\n\\n# SEVERITY DEFINITIONS\\nUse these definitions
+      to assign severity. Do not inflate severity.\\n- [\U0001F534 CRITICAL]: Data
+      corruption, race conditions in critical paths, security exploits, broken auth
+      or permission checks, execution paths leading to crash or denial of service.\\n-
+      [\U0001F7E0 HIGH]: Logic Bugs that cause incorrect business behavior, unhandled
+      runtime exceptions, resource leaks (memory/connections), or severe performance
+      or scaling failures.\\n- [\U0001F7E1 MEDIUM]: Missing validation, type mismatches,
+      unsafe defaults, edge cases, configuration issues, incorrect fallback behavior,
+      non-critical performance bottlenecks, or maintainability/code smells.\\n- [\U0001F7E2
+      LOW]: Typos, style violations, docstring errors, missing comments, or minor
+      maintainability issues.\\n\\n# ISSUE CATEGORY ICONS\\nUse these category icons
+      in addition to severity to quickly identify issue types:\\n- \U0001F512 **Security**:
+      Injection vulnerabilities, hardcoded secrets, weak hashing, auth issues\\n-
+      \U0001F41B **Logic Bug**: Incorrect business logic, wrong calculations, broken
+      control flow\\n- \u26A1 **Performance**: Bottlenecks, N+1 queries, inefficient
+      algorithms, scaling issues\\n- \U0001F504 **Concurrency**: Race conditions,
+      deadlocks, atomicity violations, thread safety\\n- \U0001F4BE **Resource Leak**:
+      Unclosed files/connections/sessions, memory leaks\\n- \U0001F3D7\uFE0F **Architecture**:
+      Design issues, over-engineering, missing abstractions, tight coupling\\n- \U0001F3A8
+      **Code Quality**: Maintainability, readability, style (non-critical)\\n- \u26A0\uFE0F
+      **Error Handling**: Swallowed exceptions, missing validation, improper error
+      propagation\\n\\n# INPUT FORMAT\\nYou will receive:\\n- **<REPOSITORY_CONTEXT>**:
+      Project instructions and architecture docs.\\n- **<EDITABLE_FILES>**: Source
+      code to review.\\n- **<ISSUES_IDENTIFIED>**: A list of potential issues found
+      by previous steps.\\n\\n# CRITICAL LINE NUMBER INSTRUCTIONS\\n- Code is provided
+      with markers like \\\"   1\u2502\\\". These are for reference ONLY.\\n- **NEVER**
+      include line number markers in your generated code/fixes.\\n- **ALWAYS** reference
+      specific line numbers in your text/analysis to locate issues.\\n\\n# REVIEW
+      WORKFLOW\\nFollow this sequence strictly:\\n\\n1. **CONTEXTUALIZATION**: \\n
+      \   - Read <REPOSITORY_CONTEXT> to understand the codebase if available:\\n
+      \      - Identify key architectural patterns, coding standards, and project
+      goals.\\n       - Note any specific areas of concern or focus mentioned.\\n
+      \   - Thoroughly review the <CODE_REVIEW_REQUEST> to understand the objectives
+      and scope.\\n\\n2. **VERIFICATION**: Iterate through <ISSUES_IDENTIFIED>\\n
+      \  - For each issue:\\n     - Validate the claim with precise code references.\\n
+      \    - If it is real, confirm and adjust severity if needed.\\n     - If it
+      is false, discard it.\\n     - Show your evidence for every decision.\\n\\n3.
+      **DISCOVERY**: Perform a deep static analysis of <EDITABLE_FILES> for missed
+      issues:\\n   - **Concurrency:** Race conditions, deadlocks, atomicity violations,
+      incorrect async usage. \\n   - **Security:** Injection, hardcoded secrets, weak
+      hashing, improper auth checks.\\n   - **Error Handling:** Swallowed exceptions,
+      leaking stack traces to API clients.\\n   - **Type Safety:** Missing imports,
+      type mismatches, incorrect optional handling.\\n   - **Resource Management:**
+      Unclosed files/sessions/connections.\\n   - **Cross-File Integrity:** Verify
+      function / API signatures match across files. Check that shared external resources
+      do not collide. Does the \\\"Consumer\\\" handle the \\\"Producer's\\\" failure
+      modes?\\n   - **Architectural Check:** Look for over-engineering, performance
+      bottlenecks, or missing abstractions that will cause immediate pain.\\n   -
+      **Stress Simulations:** For each method/entrypoint, simulate null/empty, wrong
+      type, extreme size, attacker input, dependency returning unexpected type, and
+      timeout/failure. Report any break.\\n\\n4. **REMEDIATION**: For every confirmed
+      issue:\\n   - Provide a minimal, safe fix.\\n   - Fix the Root Cause, not just
+      the symptom.\\n\\n\\n# STRUCTURED RESPONSES FOR SPECIAL CASES\\nCheck these
+      FIRST. If met, respond ONLY with the specific JSON object (no analysis block
+      needed).\\n\\n1. IF MORE INFORMATION IS NEEDED:\\n```json\\n{\\n  \\\"status\\\":
+      \\\"files_required_to_continue\\\",\\n  \\\"message\\\": \\\"<Explain what is
+      missing>\\\",\\n  \\\"files_needed\\\": [\\\"[file_name]\\\", \\\"[folder/]\\\"]\\n}\\n```\\n\\n2.
+      IF SCOPE IS TOO LARGE:\\n```json\\n{\\n  \\\"status\\\": \\\"focused_review_required\\\",\\n
+      \ \\\"message\\\": \\\"<Explain why scope is too large>\\\",\\n  \\\"suggestion\\\":
+      \\\"<e.g., 'Review auth module first'>\\\"\\n}\\n```\\n\\n3. IF CONTENT IS UNREVIEWABLE:\\n```json\\n{\\n
+      \ \\\"status\\\": \\\"unreviewable_content\\\",\\n  \\\"message\\\": \\\"<e.g.,
+      Binary file, Minified code>\\\"\\n}\\n```\\n\\n4. IF NO ISSUES FOUND (Code is
+      perfect):\\nOnly return \\\"no_issues_found\\\" if the Discovery Coverage Rule
+      is fully completed for all files and categories.\\n\\n```json\\n{\\n  \\\"status\\\":
+      \\\"no_issues_found\\\",\\n  \\\"message\\\": \\\"<One sentence praising specific
+      patterns found>\\\"\\n}\\n```\\n\\n# OUTPUT FORMAT\\nIf issues are found (verified
+      or new), you must output **TWO** sections in this order:\\n\\n## SECTION 1:
+      ANALYSIS BLOCK\\nWrap your thinking in XML tags. This is required to ensure
+      quality.\\n\\n```xml\\n<analysis>\\n1. VERIFICATION:\\n   - Issue \\\"X\\\":
+      Confirmed or discarded with evidence. Fix required.\\n   - Issue \\\"Y\\\":
+      False positive. The code actually handles this in line 45. Discarding.\\n2.
+      DISCOVERY:\\n   - Found potential race condition in file.py:12.\\n   - Found
+      missing import in utils.py.\\n</analysis>\\n```\\n\\n## SECTION 2: JSON RESULT\\nOutput
+      the final structured review.\\n```json\\n{\\n  \\\"status\\\": \\\"review_complete\\\",\\n
+      \ \\\"message\\\": \\\"This field MUST be valid markdown.\\\\nIt should have
+      sections like:\\\\n## **Priority Matrix**\\\\n| \U0001F534 Critical | \U0001F7E0
+      High | \U0001F7E1 Medium | \U0001F7E2 Low |\\\\n|---|---|---|---|\\\\n| N |
+      N | N | N |\\\\n\\\\n## **Overall Code Quality Summary:** (one short paragraph)\\\\n\\\\n##
+      **Top 3 Priority Fixes:** (quick bullets with category icons)\\\\n- \U0001F512
+      [Issue description]\\\\n- \U0001F41B [Issue description]\\\\n\\\\n## **Positive
+      Aspects:** (what was done well with examples)\\\\n| Pattern | Location | Impact
+      |\\\\n|---|---|---|\\\\n| \u2705 Good practice | `file.py:line` | Description
+      |\\\\n\\\\n## **Potential Review Gaps:** (what was not covered or needs further
+      review)\\\",\\n  \\\"issues_found\\\": [\\n    {\\n      \\\"severity\\\": \\\"critical|high|medium|low\\\",\\n
+      \     \\\"previous_severity\\\": \\\"new|critical|high|medium|low\\\",\\n      \\\"category\\\":
+      \\\"security|logic|performance|concurrency|resource_leak|architecture|code_quality|error_handling\\\",\\n
+      \     \\\"description\\\": \\\"<Brief explanation with category icon. Start
+      with icon like: \U0001F512 SQL injection in login query>\\\",\\n      \\\"location\\\":
+      \\\"file.py:23\\\",\\n      \\\"fix\\\": \\\"<Show ONLY the lines that need
+      changing. Use comments like '... existing code ...' to denote unchanged context.
+      Ensure indentation matches exactly. Do NOT include line number markers.>\\\"\\n
+      \   }\\n  ]\\n}\\n```\\n\\n**Note**: The `category` field is optional but recommended.
+      If provided, ensure the description also starts with the appropriate category
+      icon for visual consistency.\"},{\"role\":\"user\",\"content\":\"<REPOSITORY_CONTEXT>\\n<PROJECT_INSTRUCTIONS
+      source=\\\"CLAUDE.md\\\">\\n# Test Repository\\n\\n## Security Standards\\n-
+      Always use parameterized queries\\n- Never store passwords in plain text\\n-
+      Follow OWASP Top 10 guidelines\\n</PROJECT_INSTRUCTIONS>\\n</REPOSITORY_CONTEXT>\\n\\n<EDITABLE_FILES>\\n<file
+      path=\\\"/Users/tomek/src/multi_mcp/tests/data/repos/sql_injection/sql_injection/auth.py\\\"
+      relative_path=\\\"auth.py\\\" filename=\\\"auth.py\\\">\\n   1\u2502 \\\"\\\"\\\"Authentication
+      module with security vulnerabilities.\\\"\\\"\\\"\\n   2\u2502 \\n   3\u2502
+      import sqlite3\\n   4\u2502 \\n   5\u2502 \\n   6\u2502 def authenticate_user(username:
+      str, password: str) -> bool:\\n   7\u2502     \\\"\\\"\\\"Authenticate user
+      against database.\\n   8\u2502 \\n   9\u2502     SECURITY ISSUE: SQL Injection
+      vulnerability!\\n  10\u2502     User input is directly concatenated into SQL
+      query.\\n  11\u2502     \\\"\\\"\\\"\\n  12\u2502     conn = sqlite3.connect('users.db')\\n
+      \ 13\u2502     cursor = conn.cursor()\\n  14\u2502 \\n  15\u2502     # VULNERABILITY:
+      SQL Injection\\n  16\u2502     query = f\\\"SELECT * FROM users WHERE username
+      = '{username}' AND password = '{password}'\\\"\\n  17\u2502     cursor.execute(query)\\n
+      \ 18\u2502 \\n  19\u2502     result = cursor.fetchone()\\n  20\u2502     conn.close()\\n
+      \ 21\u2502 \\n  22\u2502     return result is not None\\n  23\u2502 \\n  24\u2502
+      \\n  25\u2502 def create_user(username: str, password: str) -> bool:\\n  26\u2502
+      \    \\\"\\\"\\\"Create new user account.\\n  27\u2502 \\n  28\u2502     SECURITY
+      ISSUES:\\n  29\u2502     1. Password stored in plain text (no hashing)\\n  30\u2502
+      \    2. SQL Injection vulnerability\\n  31\u2502     \\\"\\\"\\\"\\n  32\u2502
+      \    conn = sqlite3.connect('users.db')\\n  33\u2502     cursor = conn.cursor()\\n
+      \ 34\u2502 \\n  35\u2502     # VULNERABILITY: Plain text password storage\\n
+      \ 36\u2502     # VULNERABILITY: SQL Injection\\n  37\u2502     query = f\\\"INSERT
+      INTO users (username, password) VALUES ('{username}', '{password}')\\\"\\n  38\u2502
+      \\n  39\u2502     try:\\n  40\u2502         cursor.execute(query)\\n  41\u2502
+      \        conn.commit()\\n  42\u2502         conn.close()\\n  43\u2502         return
+      True\\n  44\u2502     except Exception:\\n  45\u2502         conn.close()\\n
+      \ 46\u2502         return False\\n  47\u2502 \\n  48\u2502 \\n  49\u2502 def
+      get_user_data(user_id: int):\\n  50\u2502     \\\"\\\"\\\"Get user data by ID.\\n
+      \ 51\u2502 \\n  52\u2502     SECURITY ISSUE: Using SELECT * exposes all columns\\n
+      \ 53\u2502     \\\"\\\"\\\"\\n  54\u2502     conn = sqlite3.connect('users.db')\\n
+      \ 55\u2502     cursor = conn.cursor()\\n  56\u2502 \\n  57\u2502     # VULNERABILITY:
+      SELECT * can expose sensitive data\\n  58\u2502     cursor.execute(f\\\"SELECT
+      * FROM users WHERE id = {user_id}\\\")\\n  59\u2502 \\n  60\u2502     result
+      = cursor.fetchone()\\n  61\u2502     conn.close()\\n  62\u2502 \\n  63\u2502
+      \    return result\\n  64\u2502 \\n  65\u2502 \\n  66\u2502 def check_password_strength(password:
+      str) -> bool:\\n  67\u2502     \\\"\\\"\\\"Check if password meets minimum requirements.\\n
+      \ 68\u2502 \\n  69\u2502     SECURITY ISSUE: Weak password policy\\n  70\u2502
+      \    \\\"\\\"\\\"\\n  71\u2502     # VULNERABILITY: Too permissive password
+      policy\\n  72\u2502     return len(password) >= 4  # Should be at least 12 characters!\\n</file>\\n\\n</EDITABLE_FILES>\\n\\n<USER_MESSAGE>\\n<CODE_REVIEW_REQUEST>\\nReview
+      authentication code\\n</CODE_REVIEW_REQUEST>\\n\\n<ISSUES_IDENTIFIED>\\nNo issues
+      identified yet.\\n</ISSUES_IDENTIFIED>\\n\\n<TASK>\\nAs the Principal Engineer
+      acting as a Quality Gate, perform the following strictly ordered workflow:\\n\\n1.
+      **CONTEXTUALIZATION**:\\n    - Read <REPOSITORY_CONTEXT> to understand the codebase
+      if available\\n    - Review <CODE_REVIEW_REQUEST> to understand objectives and
+      scope\\n\\n2. **VERIFICATION**: Iterate through <ISSUES_IDENTIFIED>\\n   - For
+      each issue: validate with precise code references\\n   - Confirm real issues,
+      adjust severity if needed\\n   - Discard false positives with evidence\\n\\n3.
+      **DISCOVERY**: Deep static analysis of <EDITABLE_FILES> for missed issues:\\n
+      \  - Concurrency: race conditions, deadlocks, atomicity violations\\n   - Security:
+      injection, hardcoded secrets, weak hashing, improper auth\\n   - Error Handling:
+      swallowed exceptions, leaking stack traces\\n   - Type Safety: missing imports,
+      type mismatches\\n   - Resource Management: unclosed files/sessions/connections\\n
+      \  - Cross-File Integrity: verify signatures match, handle failure modes\\n
+      \  - Architecture: over-engineering, bottlenecks, missing abstractions\\n   -
+      Stress Simulations: null/empty, wrong type, extreme size, attacker input\\n\\n4.
+      **REMEDIATION**: For every confirmed issue, provide minimal safe fix\\n\\n5.
+      **OUTPUT**: Provide analysis block, then JSON result\\n</TASK>\\n</USER_MESSAGE>\"}],\"model\":\"gpt-5-nano\",\"temperature\":1.0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '13696'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - AsyncOpenAI/Python 2.8.1
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 2.8.1
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-read-timeout:
+      - '180.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.0
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Expose-Headers:
+      - X-Request-ID
+      CF-RAY:
+      - 9a77d35be83875da-SEA
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 02 Dec 2025 03:45:18 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=0pWprFARwEAW27lVIofTNoMB9dyq9awjhaeYVV6uVSo-1764647118-1.0.1.1-3kDAbPYTXSCvWpbWVx8odyxjL48X7mS.YEuSKQVZxNkB1D7gQqou02tSekI4PbqAfp2CxxUjSwnQ2s.5KtUi4Zn4sEQ2somN67vIlMrpCUc;
+        path=/; expires=Tue, 02-Dec-25 04:15:18 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=8kcODpWbHfGsD8z7guI4AxUv8m3SdmqKnd8musfaTH4-1764647118968-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '0'
+      openai-organization:
+      - tom-llc
+      openai-processing-ms:
+      - '52969'
+      openai-project:
+      - proj_xMc2GnCeeWbU1lrBkxfFN2Bw
+      openai-version:
+      - '2020-10-01'
+      x-envoy-upstream-service-time:
+      - '53280'
+      x-openai-proxy-wasm:
+      - v0.1
+      x-ratelimit-limit-requests:
+      - '5000'
+      x-ratelimit-limit-tokens:
+      - '2000000'
+      x-ratelimit-remaining-requests:
+      - '4999'
+      x-ratelimit-remaining-tokens:
+      - '1996708'
+      x-ratelimit-reset-requests:
+      - 12ms
+      x-ratelimit-reset-tokens:
+      - 98ms
+      x-request-id:
+      - req_6505604f8f0444a2ade9ce8500825042
+    status:
+      code: 200
+      message: OK
+version: 1

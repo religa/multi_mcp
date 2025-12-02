@@ -2,11 +2,11 @@
 
 from pydantic import Field
 
-from src.schemas.base import SingleToolRequest, SingleToolResponse
+from src.schemas.base import ModelResponse, MultiToolRequest, MultiToolResponse
 
 
-class CodeReviewRequest(SingleToolRequest):
-    """Code review request."""
+class CodeReviewRequest(MultiToolRequest):
+    """Multi-model code review request (single-model supported via models=[default])."""
 
     content: str = Field(
         ...,
@@ -34,25 +34,19 @@ class CodeReviewRequest(SingleToolRequest):
     )
 
 
-class CodeReviewResponse(SingleToolResponse):
-    """Code review response."""
+class CodeReviewModelResult(ModelResponse):
+    """Individual model's code review result."""
 
-    content: str = Field(
-        ...,
-        description=(
-            "Step 1: Returns checklist for code review workflow. "
-            "Step 2+: Expert analysis covering security, performance, architecture, and code quality. "
-            "May request more files or suggest narrowing scope if needed."
-        ),
-    )
     issues_found: list[dict] | None = Field(
         default=None,
-        description=(
-            "Structured list of confirmed issues. "
-            "Each dict contains: "
-            "'severity' ('critical'/'high'/'medium'/'low'), "
-            "'location' ('filename:line_number'), "
-            "'description' (what's wrong and why it matters). "
-            "Empty list means no issues found. None means issues are in content only."
-        ),
+        description=("Issues found by this specific model. Each issue is tagged with 'model' field for identification."),
+    )
+
+
+class CodeReviewResponse(MultiToolResponse):
+    """Aggregated multi-model code review response."""
+
+    results: list[CodeReviewModelResult] = Field(
+        default_factory=list,
+        description="Individual model responses with per-model issues (tagged with 'model' field)",
     )

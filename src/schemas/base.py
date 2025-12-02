@@ -99,12 +99,12 @@ class SingleToolRequest(BaseToolRequest):
 
 
 class MultiToolRequest(BaseToolRequest):
-    """Request for multi-model parallel execution (e.g., compare)."""
+    """Request for multi-model parallel execution (e.g., compare, codereview)."""
 
     models: list[str] = Field(
         default_factory=lambda: settings.default_model_list,
-        min_length=2,
-        description=f"List of LLM models to run in parallel (minimum 2) (will use default models ({settings.default_model_list}) if not specified)",
+        min_length=1,
+        description=f"List of LLM models to run in parallel (minimum 1) (will use default models ({settings.default_model_list}) if not specified)",
     )
 
 
@@ -179,9 +179,10 @@ class MultiToolResponse(BaseModel):
     """Response from multi-model parallel execution."""
 
     thread_id: str = Field(..., description="Thread identifier")
-    status: Literal["success", "partial", "error"] = Field(
-        ...,
-        description="Overall status: 'success' (all succeeded), 'partial' (some failed), 'error' (all failed)",
-    )
     summary: str = Field(..., description="Execution summary (e.g., '2/3 models succeeded')")
     results: list[ModelResponse] = Field(..., description="Individual model responses")
+    status: Literal["success", "in_progress", "partial", "error"] = Field(
+        ...,
+        description="Overall status: 'success' (all succeeded), 'in_progress' (some still running), 'partial' (some failed), 'error' (all failed)",
+    )
+    next_action: NextAction | None = Field(default=None, description="Server hint for next step")

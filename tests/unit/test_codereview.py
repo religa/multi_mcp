@@ -36,15 +36,15 @@ class TestCodeReviewStepLogic:
             content="Starting code review",
             step_number=1,
             next_action="continue",
-            model="gpt-5-mini",
+            models=["gpt-5-mini"],
             base_path="/tmp/test",
             thread_id="test-thread",
         )
 
         assert result["status"] == "in_progress"
-        assert "checklist" in result["content"].lower()
-        assert "Read and understand the code base" in result["content"]
-        assert "step 2" in result["content"].lower()
+        assert "checklist" in result["summary"].lower()
+        assert "Read and understand the code base" in result["summary"]
+        assert "step 2" in result["summary"].lower()
         assert result["next_action"]["action"] == "continue"
         assert result["next_action"]["reason"]
         assert "thread_id" in result
@@ -58,13 +58,13 @@ class TestCodeReviewStepLogic:
             content="Stopping immediately",
             step_number=1,
             next_action="stop",
-            model="gpt-5-mini",
+            models=["gpt-5-mini"],
             base_path="/tmp/test",
             thread_id="test-thread",
         )
 
         assert result["status"] == "in_progress"
-        assert "checklist" in result["content"].lower()
+        assert "checklist" in result["summary"].lower()
         assert result["next_action"]["action"] == "continue"
 
     @pytest.mark.asyncio
@@ -78,7 +78,7 @@ class TestCodeReviewStepLogic:
                 content="Start",
                 step_number=1,
                 next_action="continue",
-                model="gpt-5-mini",
+                models=["gpt-5-mini"],
                 base_path="/tmp/test",
                 thread_id="test-thread",
             )
@@ -90,14 +90,14 @@ class TestCodeReviewStepLogic:
                 content="Continuing without files",
                 step_number=2,
                 next_action="continue",
-                model="gpt-5-mini",
+                models=["gpt-5-mini"],
                 base_path="/tmp/test",
                 thread_id=thread_id,
                 relevant_files=[],
             )
 
         assert result["status"] == "in_progress"
-        assert "No relevant files" in result["content"]
+        assert "No relevant files" in result["summary"]
         assert result["next_action"]["action"] == "continue"
         assert "relevant_files" in result["next_action"]["reason"]
         mock_llm.assert_not_called()
@@ -117,7 +117,7 @@ class TestCodeReviewStepLogic:
                 content="Too many files",
                 step_number=2,
                 next_action="continue",
-                model="gpt-5-mini",
+                models=["gpt-5-mini"],
                 base_path="/tmp/test",
                 relevant_files=too_many_files,
             )
@@ -146,7 +146,7 @@ class TestCodeReviewStepLogic:
                 content="Start",
                 step_number=1,
                 next_action="continue",
-                model="gpt-5-mini",
+                models=["gpt-5-mini"],
                 base_path="/tmp/test",
                 thread_id="test-thread",
             )
@@ -157,7 +157,7 @@ class TestCodeReviewStepLogic:
                 content="Exact max files",
                 step_number=2,
                 next_action="continue",
-                model="gpt-5-mini",
+                models=["gpt-5-mini"],
                 base_path="/tmp/test",
                 thread_id=thread_id,
                 relevant_files=exact_files,
@@ -179,7 +179,7 @@ class TestCodeReviewLLMResponseParsing:
             "content": "Analyzing code",
             "step_number": 2,
             "next_action": "continue",
-            "model": "gpt-5-mini",
+            "models": ["gpt-5-mini"],
             "base_path": "/tmp/test",
             "relevant_files": ["/tmp/test/file.py"],
         }
@@ -204,18 +204,20 @@ class TestCodeReviewLLMResponseParsing:
 
             result = await codereview_impl(**{**base_params, "thread_id": thread_id})
 
-        assert result["status"] == "in_progress"
-        assert "Need authentication files" in result["content"]
-        assert "auth.py" in result["content"]
-        assert "session.py" in result["content"]
-        assert result["next_action"]["action"] == "continue"
-        assert "2 additional files" in result["next_action"]["reason"]
-        assert result["metadata"]["model"] == "gpt-5-mini"
-        assert result["metadata"]["total_tokens"] == 15  # From mock_llm_response helper
+        # Multi-model response structure
+        assert result["status"] == "in_progress"  # Work not done - files required
+        assert result["next_action"]["action"] == "continue"  # Consensus: needs files
+        assert "requested additional files" in result["next_action"]["reason"]
+        assert "Review paused - additional files required" in result["summary"]
+        # Check per-model result
+        assert len(result["results"]) == 1
+        assert result["results"][0]["status"] == "success"
+        assert result["results"][0]["metadata"]["model"] == "gpt-5-mini"
+        assert result["results"][0]["metadata"]["total_tokens"] == 15
 
     @pytest.mark.asyncio
     async def test_llm_response_focused_review_required(self, base_params):
-        """Test parsing 'focused_review_required' status."""
+        """Test parsing 'focused_review_required' status - treated as needs files."""
         json_response = """{
                 "status": "focused_review_required",
                 "message": "Scope is too large",
@@ -232,15 +234,15 @@ class TestCodeReviewLLMResponseParsing:
 
             result = await codereview_impl(**{**base_params, "thread_id": thread_id})
 
-        assert result["status"] == "in_progress"
-        assert "Scope is too large" in result["content"]
-        assert "Focus on authentication module only" in result["content"]
-        assert result["next_action"]["action"] == "continue"
-        assert "Scope too large" in result["next_action"]["reason"]
+        # Multi-model response structure
+        assert result["status"] == "in_progress"  # Work not done - files required
+        assert result["next_action"]["action"] == "continue"  # Consensus: needs files
+        assert "Review paused - additional files required" in result["summary"]
+        assert len(result["results"]) == 1
 
     @pytest.mark.asyncio
     async def test_llm_response_unreviewable_content(self, base_params):
-        """Test parsing 'unreviewable_content' status."""
+        """Test parsing 'unreviewable_content' status - treated as completion."""
         json_response = """{
                 "status": "unreviewable_content",
                 "message": "Files are binary or corrupted"
@@ -256,9 +258,11 @@ class TestCodeReviewLLMResponseParsing:
 
             result = await codereview_impl(**{**base_params, "thread_id": thread_id})
 
-        assert result["status"] == "success"
-        assert "Content is unreviewable" in result["content"]
-        assert "binary or corrupted" in result["content"]
+        # Multi-model response structure
+        assert result["status"] == "success"  # All models succeeded
+        assert result["next_action"]["action"] == "stop"  # All completed
+        assert len(result["results"]) > 0  # Has model results
+        assert result["results"][0].get("issues_found") is None or len(result["results"][0].get("issues_found", [])) == 0  # No issues
 
     @pytest.mark.asyncio
     async def test_llm_response_no_issues_found(self, base_params):
@@ -278,9 +282,12 @@ class TestCodeReviewLLMResponseParsing:
 
             result = await codereview_impl(**{**base_params, "thread_id": thread_id})
 
-        assert result["status"] == "success"
-        assert "Code looks good" in result["content"]
-        assert result["issues_found"] == []
+        # Multi-model response structure
+        assert result["status"] == "success"  # All models succeeded
+        assert result["next_action"]["action"] == "stop"  # All completed
+        assert "No issues found" in result["summary"]  # Aggregate summary
+        assert len(result["results"]) > 0  # Has model results
+        assert result["results"][0].get("issues_found") is None or len(result["results"][0].get("issues_found", [])) == 0  # No issues
 
     @pytest.mark.asyncio
     async def test_llm_response_review_complete_with_issues(self, base_params):
@@ -304,11 +311,17 @@ class TestCodeReviewLLMResponseParsing:
 
             result = await codereview_impl(**{**base_params, "thread_id": thread_id})
 
-        assert result["status"] == "success"
-        assert "Found 2 security issues" in result["content"]
-        assert len(result["issues_found"]) == 2
-        assert result["issues_found"][0]["severity"] == "high"
-        assert "SQL injection" in result["issues_found"][0]["description"]
+        # Multi-model response structure
+        assert result["status"] == "success"  # All models succeeded
+        assert result["next_action"]["action"] == "stop"  # All completed
+        assert "models succeeded" in result["summary"]  # Aggregate summary with stats
+        assert "Found 2 issue" in result["summary"]  # Should mention issues found
+        assert len(result["results"]) > 0  # Has model results
+        assert result["results"][0]["issues_found"] is not None  # Has issues
+        assert len(result["results"][0]["issues_found"]) == 2  # Issues from model
+        assert result["results"][0]["issues_found"][0]["severity"] == "high"
+        assert "SQL injection" in result["results"][0]["issues_found"][0]["description"]
+        assert result["results"][0]["issues_found"][0]["model"] == "gpt-5-mini"  # Tagged with model
 
 
 class TestCodeReviewErrorHandling:
@@ -322,14 +335,14 @@ class TestCodeReviewErrorHandling:
             "content": "Analyzing code",
             "step_number": 2,
             "next_action": "continue",
-            "model": "gpt-5-mini",
+            "models": ["gpt-5-mini"],
             "base_path": "/tmp/test",
             "relevant_files": ["/tmp/test/file.py"],
         }
 
     @pytest.mark.asyncio
     async def test_llm_response_invalid_json_returns_text(self, base_params):
-        """Test that invalid JSON returns as text content."""
+        """Test that invalid JSON is handled gracefully."""
         plain_text = "This is plain text, not JSON"
 
         with (
@@ -342,13 +355,17 @@ class TestCodeReviewErrorHandling:
 
             result = await codereview_impl(**{**base_params, "thread_id": thread_id})
 
-        assert result["status"] == "success"
-        assert result["content"] == plain_text
-        assert result["metadata"]["model"] == "gpt-5-mini"
+        # Multi-model response structure
+        assert result["status"] == "error"  # Invalid JSON treated as error
+        assert len(result["results"]) == 1
+        assert result["results"][0]["status"] == "error"  # Error status
+        assert result["results"][0]["error"] == "Failed to parse LLM response as JSON"
+        assert result["results"][0]["content"] == plain_text  # Raw response preserved
+        assert result["results"][0]["metadata"]["model"] == "gpt-5-mini"
 
     @pytest.mark.asyncio
     async def test_llm_response_missing_status_field(self, base_params):
-        """Test that JSON without 'status' field returns as text."""
+        """Test that JSON without 'status' field is handled gracefully."""
         json_response = '{"message": "Missing status field"}'
 
         with (
@@ -361,12 +378,14 @@ class TestCodeReviewErrorHandling:
 
             result = await codereview_impl(**{**base_params, "thread_id": thread_id})
 
-        assert result["status"] == "success"
-        assert '"message"' in result["content"]
+        # Multi-model response structure
+        assert result["status"] == "success"  # All models succeeded
+        assert len(result["results"]) == 1
+        assert result["results"][0]["content"] == json_response  # Raw response preserved
 
     @pytest.mark.asyncio
     async def test_llm_response_unknown_status_value(self, base_params):
-        """Test that unknown status value returns as text."""
+        """Test that unknown status value is handled gracefully."""
         with (
             patch(
                 "src.utils.llm_runner.litellm_client.call_async",
@@ -380,9 +399,10 @@ class TestCodeReviewErrorHandling:
 
             result = await codereview_impl(**{**base_params, "thread_id": thread_id})
 
-        assert result["status"] == "success"
-        # Should return original JSON as text
-        assert "unknown_status_value" in result["content"]
+        # Multi-model response structure
+        assert result["status"] == "success"  # All models succeeded
+        assert len(result["results"]) == 1
+        assert "unknown_status_value" in result["results"][0]["content"]  # Raw response preserved
 
     @pytest.mark.asyncio
     async def test_llm_response_review_complete_missing_issues(self, base_params):
@@ -418,10 +438,13 @@ class TestCodeReviewErrorHandling:
 
             result = await codereview_impl(**{**base_params, "thread_id": thread_id})
 
+        # Multi-model response structure
+        assert result["status"] == "success"
+        assert len(result["results"]) == 1
         # mock_llm_response provides defaults from ModelResponseMetadata
-        assert result["metadata"]["prompt_tokens"] == 10  # From mock_llm_response helper
-        assert result["metadata"]["completion_tokens"] == 5  # From mock_llm_response helper
-        assert result["metadata"]["total_tokens"] == 15  # From mock_llm_response helper
+        assert result["results"][0]["metadata"]["prompt_tokens"] == 10
+        assert result["results"][0]["metadata"]["completion_tokens"] == 5
+        assert result["results"][0]["metadata"]["total_tokens"] == 15
 
     @pytest.mark.asyncio
     async def test_metadata_with_missing_canonical_name(self, base_params):
@@ -438,8 +461,11 @@ class TestCodeReviewErrorHandling:
 
             result = await codereview_impl(**{**base_params, "thread_id": thread_id})
 
+        # Multi-model response structure
+        assert result["status"] == "success"
+        assert len(result["results"]) == 1
         # Should fall back to model parameter
-        assert result["metadata"]["model"] == "gpt-5-mini"
+        assert result["results"][0]["metadata"]["model"] == "gpt-5-mini"
 
 
 class TestCodeReviewContextBuilding:
@@ -457,7 +483,7 @@ class TestCodeReviewContextBuilding:
                 content="Analyze",
                 step_number=1,
                 next_action="stop",
-                model="gpt-5-mini",
+                models=["gpt-5-mini"],
                 base_path="/tmp/test",
                 relevant_files=["/tmp/test/file.py"],
                 thread_id="test-thread",
@@ -466,7 +492,7 @@ class TestCodeReviewContextBuilding:
             # Verify step 1 returns checklist without calling LLM
             assert not mock_llm.called
             assert result["status"] == "in_progress"
-            assert "checklist" in result["content"].lower()
+            assert "checklist" in result["summary"].lower()
 
     @pytest.mark.asyncio
     async def test_expert_context_with_issues_found(self):
@@ -485,7 +511,7 @@ class TestCodeReviewContextBuilding:
                 content="Start",
                 step_number=1,
                 next_action="continue",
-                model="gpt-5-mini",
+                models=["gpt-5-mini"],
                 base_path="/tmp/test",
                 thread_id="test-thread",
             )
@@ -496,7 +522,7 @@ class TestCodeReviewContextBuilding:
                 content="Analyze",
                 step_number=2,
                 next_action="continue",
-                model="gpt-5-mini",
+                models=["gpt-5-mini"],
                 base_path="/tmp/test",
                 thread_id=thread_id,
                 relevant_files=["/tmp/test/file.py"],
