@@ -31,7 +31,7 @@ class TestConsolidateModelResults:
             ),
         )
 
-        with patch("src.utils.llm_runner.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_response
 
             results = [
@@ -170,7 +170,7 @@ class TestConsolidateModelResults:
             ),
         )
 
-        with patch("src.utils.llm_runner.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_response
 
             results = [
@@ -211,7 +211,7 @@ class TestConsolidateModelResults:
             ),
         )
 
-        with patch("src.utils.llm_runner.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_response
 
             results = [
@@ -251,7 +251,7 @@ class TestConsolidateModelResults:
             ),
         )
 
-        with patch("src.utils.llm_runner.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_response
 
             results = [
@@ -383,7 +383,7 @@ class TestInvalidJsonFiltering:
             ),
         )
 
-        with patch("src.utils.llm_runner.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_consolidation
 
             # Mix of valid and invalid JSON
@@ -481,7 +481,7 @@ class TestInvalidJsonFiltering:
             ),
         )
 
-        with patch("src.utils.llm_runner.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_response
 
             results = [
@@ -514,3 +514,64 @@ class TestInvalidJsonFiltering:
             assert isinstance(consolidated, CodeReviewModelResult)
             assert consolidated.status == "success"
             assert consolidated.metadata.source_models == ["gpt-5-mini"]
+
+
+class TestSortIssuesByLocation:
+    """Test _sort_issues_by_location helper function."""
+
+    def test_sort_issues_by_location(self):
+        """Verify issues are sorted alphabetically by location."""
+        from src.utils.consolidation import _sort_issues_by_location
+
+        unsorted_issues = [
+            {"location": "utils.py:50", "severity": "high", "description": "Issue 1"},
+            {"location": "auth.py:10", "severity": "critical", "description": "Issue 2"},
+            {"location": "utils.py:20", "severity": "medium", "description": "Issue 3"},
+            {"location": "auth.py", "severity": "low", "description": "Issue 4"},
+            {"location": "db.py:100-105", "severity": "high", "description": "Issue 5"},
+        ]
+
+        sorted_issues = _sort_issues_by_location(unsorted_issues)
+
+        # Verify alphabetical order by location field
+        assert sorted_issues[0]["location"] == "auth.py"
+        assert sorted_issues[1]["location"] == "auth.py:10"
+        assert sorted_issues[2]["location"] == "db.py:100-105"
+        assert sorted_issues[3]["location"] == "utils.py:20"
+        assert sorted_issues[4]["location"] == "utils.py:50"
+
+    def test_sort_issues_by_location_edge_cases(self):
+        """Verify sorting handles edge cases gracefully."""
+        from src.utils.consolidation import _sort_issues_by_location
+
+        edge_cases = [
+            {"location": None, "description": "Missing location"},
+            {"location": "", "description": "Empty location"},
+            {"location": "a.py:10", "description": "First alphabetically"},
+            {"location": "z.py:5", "description": "Last alphabetically"},
+        ]
+
+        # Should not raise exception
+        sorted_issues = _sort_issues_by_location(edge_cases)
+        assert len(sorted_issues) == 4
+
+        # Empty string sorts first (empty string < any char)
+        assert sorted_issues[0]["location"] == ""
+        # Then alphabetical order
+        assert sorted_issues[1]["location"] == "a.py:10"
+        assert sorted_issues[2]["location"] == "z.py:5"
+        # None sorts last (using "~" fallback which comes after most chars)
+        assert sorted_issues[3]["location"] is None
+
+    def test_sort_issues_empty_list(self):
+        """Verify sorting handles empty list."""
+        from src.utils.consolidation import _sort_issues_by_location
+
+        assert _sort_issues_by_location([]) == []
+
+    def test_sort_issues_single_item(self):
+        """Verify sorting handles single item list."""
+        from src.utils.consolidation import _sort_issues_by_location
+
+        single_issue = [{"location": "file.py:10", "description": "Single"}]
+        assert _sort_issues_by_location(single_issue) == single_issue

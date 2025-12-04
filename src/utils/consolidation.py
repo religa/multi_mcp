@@ -1,14 +1,20 @@
 """Multi-model response consolidation."""
 
 import logging
-from typing import Any
+
+from src.config import settings
+from src.prompts import CODEREVIEW_CONSOLIDATION_PROMPT
+from src.schemas.base import ModelResponse, ModelResponseMetadata
+from src.schemas.codereview import CodeReviewModelResult
+from src.utils.json_parser import parse_llm_json
+from src.utils.llm_runner import execute_single
 
 logger = logging.getLogger(__name__)
 
 
 async def consolidate_model_results(
-    raw_results: list[Any],
-):
+    raw_results: list[ModelResponse],
+) -> CodeReviewModelResult:
     """
     Consolidate multiple model results into a single CodeReviewModelResult.
 
@@ -34,9 +40,6 @@ async def consolidate_model_results(
 
     if not successful:
         # No successful results - return error as CodeReviewModelResult
-        from src.schemas.base import ModelResponseMetadata
-        from src.schemas.codereview import CodeReviewModelResult
-
         model_names = ", ".join(r.metadata.model for r in raw_results)
 
         metadata = ModelResponseMetadata(
@@ -58,8 +61,6 @@ async def consolidate_model_results(
         )
 
     # Filter out results with unparseable JSON
-    from src.utils.json_parser import parse_llm_json
-
     valid_results = []
     filtered_count = 0
     for result in successful:
@@ -75,9 +76,6 @@ async def consolidate_model_results(
 
     if not valid_results:
         # All results have invalid JSON - return error
-        from src.schemas.base import ModelResponseMetadata
-        from src.schemas.codereview import CodeReviewModelResult
-
         model_names = ", ".join(r.metadata.model for r in successful)
 
         metadata = ModelResponseMetadata(
@@ -107,9 +105,6 @@ async def consolidate_model_results(
     messages = _build_consolidation_messages(valid_results)
 
     # Single LLM call to consolidate using default model
-    from src.config import settings
-    from src.utils.llm_runner import execute_single
-
     try:
         # Use execute_single for automatic artifact saving and logging
         response = await execute_single(
@@ -122,28 +117,23 @@ async def consolidate_model_results(
             raise ValueError(f"Consolidation LLM call failed: {response.error}")
 
         # Parse response
-        from src.utils.json_parser import parse_llm_json
-
         consolidated = parse_llm_json(response.content)
 
         if not isinstance(consolidated, dict):
             raise ValueError(f"Expected dict, got {type(consolidated)}")
 
         # Build final result as CodeReviewModelResult
-        from src.schemas.base import ModelResponseMetadata
-        from src.schemas.codereview import CodeReviewModelResult
-
         model_names = ", ".join(r.metadata.model for r in valid_results)
 
         # Aggregate token counts (sum = total cost/resource usage)
         # Only count tokens from valid results that were actually consolidated
-        total_prompt_tokens = sum(r.metadata.prompt_tokens for r in valid_results if r.metadata.prompt_tokens)
-        total_completion_tokens = sum(r.metadata.completion_tokens for r in valid_results if r.metadata.completion_tokens)
-        total_tokens = sum(r.metadata.total_tokens for r in valid_results if r.metadata.total_tokens)
+        total_prompt_tokens = sum(r.metadata.prompt_tokens or 0 for r in valid_results)
+        total_completion_tokens = sum(r.metadata.completion_tokens or 0 for r in valid_results)
+        total_tokens = sum(r.metadata.total_tokens or 0 for r in valid_results)
 
         # Aggregate latency (max = wall-clock time in parallel execution)
         # Users wait for the SLOWEST model, not sum of all models
-        max_source_latency = max((r.metadata.latency_ms for r in valid_results if r.metadata.latency_ms), default=0)
+        max_source_latency = max((r.metadata.latency_ms or 0 for r in valid_results), default=0)
 
         # Add consolidation LLM metrics to aggregates
         if response.metadata.total_tokens:
@@ -169,20 +159,23 @@ async def consolidate_model_results(
             consolidation_model=settings.default_model,
         )
 
+        # Safety sort: ensure issues are sorted by location even if LLM doesn't comply
+        issues_found = consolidated.get("issues_found", [])
+        if issues_found:
+            issues_found = _sort_issues_by_location(issues_found)
+            logger.debug(f"[CONSOLIDATION] Sorted {len(issues_found)} issues by location")
+
         # Return typed Pydantic model
         return CodeReviewModelResult(
             content=consolidated.get("message", "No summary provided."),
             status=consolidated.get("status", "success"),
-            issues_found=consolidated.get("issues_found", []),
+            issues_found=issues_found,
             metadata=metadata,
         )
 
     except Exception as e:
         logger.warning(f"[CONSOLIDATION] Failed: {e}. Falling back to first result.")
         # Fallback: return first successful result as CodeReviewModelResult
-        from src.schemas.base import ModelResponseMetadata
-        from src.schemas.codereview import CodeReviewModelResult
-
         first = successful[0]
 
         # Extract issues from first result
@@ -213,10 +206,30 @@ async def consolidate_model_results(
         )
 
 
-def _build_consolidation_messages(successful_results: list[Any]) -> list[dict]:
-    """Build messages array for LLM to consolidate multiple model responses."""
-    from src.prompts import CODEREVIEW_CONSOLIDATION_PROMPT
+def _sort_issues_by_location(issues: list[dict]) -> list[dict]:
+    """Sort issues alphabetically by location field.
 
+    Args:
+        issues: List of issue dicts with 'location' field
+
+    Returns:
+        Sorted list of issues (alphabetically by location)
+    """
+    if not issues:
+        return issues
+
+    def sort_key(issue: dict) -> str:
+        loc = issue.get("location")
+        # None sorts last, empty string sorts first, others sort naturally
+        if loc is None:
+            return "~"
+        return loc
+
+    return sorted(issues, key=sort_key)
+
+
+def _build_consolidation_messages(successful_results: list[ModelResponse]) -> list[dict]:
+    """Build messages array for LLM to consolidate multiple model responses."""
     # Build model responses in XML format
     model_responses = []
     for result in successful_results:
@@ -241,8 +254,6 @@ Please consolidate these code review results following the instructions in the s
 
 def _extract_issues_from_content(content: str) -> list[dict]:
     """Fallback: Try to extract issues from model content (JSON parsing)."""
-    from src.utils.json_parser import parse_llm_json
-
     try:
         parsed = parse_llm_json(content)
         if isinstance(parsed, dict) and "issues_found" in parsed:

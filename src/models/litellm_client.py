@@ -352,9 +352,21 @@ class LiteLLMClient:
             # Use existing robust JSON parser (handles malformed JSON)
             parsed = parse_llm_json(stdout)
             if parsed is not None:
-                # Extract 'response' field if present (Gemini CLI format)
-                if isinstance(parsed, dict) and "response" in parsed:
-                    return parsed["response"]
+                # Extract content based on CLI format
+                if isinstance(parsed, dict):
+                    # Claude CLI format: check for errors first
+                    # {"type":"result","is_error":true/false,"result":"content"}
+                    if "is_error" in parsed and parsed["is_error"]:
+                        # Claude CLI returned an error
+                        error_msg = parsed.get("result", "Unknown error from Claude CLI")
+                        raise ValueError(f"Claude CLI error: {error_msg}")
+
+                    # Gemini CLI format: {"response": "content"}
+                    if "response" in parsed:
+                        return parsed["response"]
+                    # Claude CLI format: {"result": "content"}
+                    elif "result" in parsed:
+                        return parsed["result"]
                 return str(parsed)
             else:
                 logger.warning("[CLI_PARSE] JSON parse failed, falling back to text")

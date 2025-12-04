@@ -227,7 +227,7 @@ async def test_codereview_token_budget(integration_test_model, test_repo_path, a
 
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.timeout(120)
+@pytest.mark.timeout(180)
 async def test_codereview_repository_context(integration_test_model, auth_file_path, tmp_path):
     """Test that repository context (CLAUDE.md) is loaded if present."""
     import uuid

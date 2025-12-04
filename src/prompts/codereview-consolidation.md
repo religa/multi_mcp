@@ -23,15 +23,8 @@ The `severity` field must be one of: `"critical"`, `"high"`, `"medium"`, `"low"`
 
 # ISSUE CATEGORY ICONS
 
-Use these category icons in issue descriptions to quickly identify issue types:
-- 🔒 **Security**: Injection vulnerabilities, hardcoded secrets, weak hashing, auth issues
-- 🐛 **Logic Bug**: Incorrect business logic, wrong calculations, broken control flow
-- ⚡ **Performance**: Bottlenecks, N+1 queries, inefficient algorithms, scaling issues
-- 🔄 **Concurrency**: Race conditions, deadlocks, atomicity violations, thread safety
-- 💾 **Resource Leak**: Unclosed files/connections/sessions, memory leaks
-- 🏗️ **Architecture**: Design issues, over-engineering, missing abstractions, tight coupling
-- 🎨 **Code Quality**: Maintainability, readability, style (non-critical)
-- ⚠️ **Error Handling**: Swallowed exceptions, missing validation, improper error propagation
+Use category icons in issue descriptions, such as: 🔒 Security | 🐛 Logic Bug | ⚡ Performance | 🔄 Concurrency | 💾 Resource Leak | 🏗️ Architecture | 🎨 Code Quality | ⚠️ Error Handling | 📊 Data Integrity | 🧪 Testing | 🔌 API Design | 🌐 I/O Operations | 🧩 Dependencies | 💥 Breaking Change | 🔍 Observability
+
 
 # INPUT FORMAT
 
@@ -107,6 +100,7 @@ Create the consolidated `message` field in markdown format:
 - **Merge insights**: Synthesize findings, don't concatenate
 - **Highlight consensus**: Emphasize issues found by multiple models (found_by.length ≥ 2)
 - **Note unique insights**: Call out valuable findings from individual models
+  - *Optional: If models diverge significantly, consider a "Model Insights" section to preserve unique observations from each model*
 - **Keep it concise**: Aim for 1-2k words in the message
 - **Required sections**:
   - ## Priority Matrix (count by severity)
@@ -129,8 +123,23 @@ Create the consolidated `message` field in markdown format:
 - **Direct Communication**: Present findings clearly and definitively
 - **No Hedging**: Avoid phrases like "might be", "possibly" - make clear statements backed by evidence
 
-# SPECIAL CASES
+# CRITICAL OUTPUT REQUIREMENT
+YOU MUST RETURN ONLY VALID JSON. NO ADDITIONAL TEXT BEFORE OR AFTER THE JSON OBJECT.
 
+**Format Rules:**
+- Your entire response must be a single JSON object
+- Do not include markdown code fences (no ```json)
+- Do not include explanatory text before or after the JSON
+- All strings must be properly escaped (quotes, newlines, backslashes)
+- The JSON must parse successfully with any standard JSON parser
+- Use `\\n` for newlines within string values (not actual newlines)
+- Escape double quotes within strings as `\"`
+- Escape backslashes as `\\`
+- Keys must be strings in double quotes (not single quotes)
+- `null` is a valid value for optional fields
+- Empty arrays should be `[]` not null
+
+# SPECIAL CASES
 If you cannot consolidate due to missing context, return structured JSON:
 
 **If all models failed**:
@@ -147,13 +156,13 @@ Return a JSON object with this exact structure ONLY:
 ```json
 {
   "status": "success",
-  "message": "This field MUST BE valid markdown.\nIt should have sections like:\n## **Priority Matrix**\n| 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low |\n|---|---|---|---|\n| N | N | N | N |\n\n## **Overall Code Quality Summary:** (one short paragraph)\n\n## **Top 3 Priority Fixes:** (quick bullets with category icons and evidence)\n- 🔒 [Short Issue description] - Evidence: `file.py:line`\n- 🐛 [Short Issue description] - Evidence: `file.py:line`\n\n## **Positive Aspects:** (briefly, what was done well with examples)\n| Pattern | Location | Impact |\n|---|---|---|\n| ✅ Good practice | `file.py:line` | Description |\n\n## **Potential Review Gaps:** (briefly, what was not covered or needs further review)",
+  "message": "This field MUST BE valid markdown.\\nIt should have sections like:\\n## **Priority Matrix**\\n| 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low |\\n|---|---|---|---|\\n| N | N | N | N |\\n\\n## **Overall Code Quality Summary:**\\nOne paragraph summary here. Use \" for double quotes, e.g. The \"login\" function has issues.\\n\\n## **Top 3 Priority Fixes:** (quick bullets with category icons)\\n- 🔒 [Short Issue description]\\n- 🐛 [Short Issue description]\\n\\n## **Positive Aspects:** (briefly, <= points on what was done well with examples)\n| Pattern | Location | Impact |\\n|---|---|---|\\n| ✅ Good practice | `file.py:line` | Description |\\n\\n## **Potential Review Gaps:** (briefly, what was not covered or needs further review)",
   "issues_found": [
     {
       "severity": "critical|high|medium|low",
-      "description": "<Brief explanation with category icon (see ISSUE CATEGORY ICONS). Start with icon like: 🔒 SQL injection in login query at `auth.py:45` - user input not sanitized before database query>",
+      "description": "Brief explanation with category icon, e.g. 🔒 SQL injection in login query",
       "location": "file.py:23",
-      "fix": "<Show ONLY the lines that need changing. Example:\n\n# Bad:\nquery = f\"SELECT * FROM users WHERE id={user_id}\"\n\n# Good:\nquery = \"SELECT * FROM users WHERE id=%s\"\ncursor.execute(query, (user_id,))\n\nDo NOT include line number markers like '23│'. Use comments to denote context.>",
+      "fix": "Show ONLY the lines that need changing. Keep it very brief. Use comments like '... existing code ...' to denote unchanged context. Ensure indentation matches exactly. Do NOT include line number markers.",
       "found_by": ["claude-sonnet-4.5", "gpt-5-mini"]
     }
   ]
@@ -175,7 +184,7 @@ Return a JSON object with this exact structure ONLY:
 6. **previous_severity**:
    - "new" if no previous severity reported by any model
    - Otherwise: highest previous severity from all models
-7. **location**: Most specific available (`file.py:line` preferred over `file.py`)
+7. **location**: Most specific available ('file.py:line' preferred over 'file.py')
 8. **fix**: Copy-pasteable code snippets:
    - Show ONLY lines that need changing
    - Use comments `# ... existing code ...` for unchanged context

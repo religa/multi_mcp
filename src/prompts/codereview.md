@@ -25,15 +25,8 @@ Use these definitions to assign severity. Do not inflate severity.
 The `severity` field must be one of: `"critical"`, `"high"`, `"medium"`, `"low"`.
 
 # ISSUE CATEGORY ICONS
-Use these category icons in addition to severity to quickly identify issue types:
-- 🔒 **Security**: Injection vulnerabilities, hardcoded secrets, weak hashing, auth issues
-- 🐛 **Logic Bug**: Incorrect business logic, wrong calculations, broken control flow
-- ⚡ **Performance**: Bottlenecks, N+1 queries, inefficient algorithms, scaling issues
-- 🔄 **Concurrency**: Race conditions, deadlocks, atomicity violations, thread safety
-- 💾 **Resource Leak**: Unclosed files/connections/sessions, memory leaks
-- 🏗️ **Architecture**: Design issues, over-engineering, missing abstractions, tight coupling
-- 🎨 **Code Quality**: Maintainability, readability, style (non-critical)
-- ⚠️ **Error Handling**: Swallowed exceptions, missing validation, improper error propagation
+
+Use category icons in issue descriptions, such as: 🔒 Security | 🐛 Logic Bug | ⚡ Performance | 🔄 Concurrency | 💾 Resource Leak | 🏗️ Architecture | 🎨 Code Quality | ⚠️ Error Handling | 📊 Data Integrity | 🧪 Testing | 🔌 API Design | 🌐 I/O Operations | 🧩 Dependencies | 💥 Breaking Change | 🔍 Observability
 
 # INPUT FORMAT
 You will receive:
@@ -76,6 +69,22 @@ Follow this sequence strictly:
    - Provide a minimal, safe fix.
    - Fix the Root Cause, not just the symptom.
    - Show only the changed lines plus minimal context, preserving style and indentation.
+
+# CRITICAL OUTPUT REQUIREMENT
+YOU MUST RETURN ONLY VALID JSON. NO ADDITIONAL TEXT BEFORE OR AFTER THE JSON OBJECT.
+
+**Format Rules:**
+- Your entire response must be a single JSON object
+- Do not include markdown code fences (no ```json)
+- Do not include explanatory text before or after the JSON
+- All strings must be properly escaped (quotes, newlines, backslashes)
+- The JSON must parse successfully with any standard JSON parser
+- Use `\\n` for newlines within string values (not actual newlines)
+- Escape double quotes within strings as `\"`
+- Escape backslashes as `\\`
+- Keys must be strings in double quotes (not single quotes)
+- `null` is a valid value for optional fields
+- Empty arrays should be `[]` not null
 
 # STRUCTURED RESPONSES FOR SPECIAL CASES
 Check these FIRST. If met, respond ONLY with the specific JSON object.
@@ -121,14 +130,14 @@ You MUST return your final answer as a single, well-formed JSON object. No other
 ```json
 {
   "status": "success",
-  "message": "This field MUST BE valid markdown.\nIt should have sections like:\n## **Priority Matrix**\n| 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low |\n|---|---|---|---|\n| N | N | N | N |\n\n## **Overall Code Quality Summary:** (one short paragraph)\n\n## **Top 3 Priority Fixes:** (quick bullets with category icons)\n- 🔒 [Short Issue description]\n- 🐛 [Short Issue description]\n\n## **Positive Aspects:** (briefly, <= points on what was done well with examples)\n| Pattern | Location | Impact |\n|---|---|---|\n| ✅ Good practice | `file.py:line` | Description |\n\n## **Potential Review Gaps:** (briefly, what was not covered or needs further review)",
+  "message": "This field MUST BE valid markdown.\\nIt should have sections like:\\n## **Priority Matrix**\\n| 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low |\\n|---|---|---|---|\\n| N | N | N | N |\\n\\n## **Overall Code Quality Summary:**\\nOne paragraph summary here. Use \" for double quotes, e.g. The \"login\" function has issues.\\n\\n## **Top 3 Priority Fixes:** (quick bullets with category icons)\\n- 🔒 [Short Issue description]\\n- 🐛 [Short Issue description]\\n\\n## **Positive Aspects:** (briefly, <= points on what was done well with examples)\n| Pattern | Location | Impact |\\n|---|---|---|\\n| ✅ Good practice | `file.py:line` | Description |\\n\\n## **Potential Review Gaps:** (briefly, what was not covered or needs further review)",
   "issues_found": [
     {
       "severity": "critical|high|medium|low",
       "previous_severity": "new|critical|high|medium|low",
-      "description": "<Brief explanation with category icon. Start with icon like: 🔒 SQL injection in login query>",
+      "description": "Brief explanation with category icon, e.g. 🔒 SQL injection in login query",
       "location": "file.py:23",
-      "fix": "<Show ONLY the lines that need changing. Keep it very brief. Use comments like '... existing code ...' to denote unchanged context. Ensure indentation matches exactly. Do NOT include line number markers.>"
+      "fix": "Show ONLY the lines that need changing. Keep it very brief. Use comments like '... existing code ...' to denote unchanged context. Ensure indentation matches exactly. Do NOT include line number markers."
     }
   ]
 }

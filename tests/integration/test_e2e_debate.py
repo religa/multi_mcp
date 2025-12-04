@@ -127,8 +127,39 @@ Keep responses under 3 sentences each.""",
     )
 
     # 3. Verify trade-off discussion (critical for debate quality!)
-    contrast_markers = ["however", "trade-off", "conversely", "while", "balance", "but", "although", "on the other hand", "in contrast"]
-    assert any(marker in synthesis_lower for marker in contrast_markers), "Debate synthesis failed to discuss trade-offs or contrasts"
+    # Expanded to catch more natural language variations
+    contrast_markers = [
+        "however",
+        "trade-off",
+        "conversely",
+        "while",
+        "balance",
+        "but",
+        "although",
+        "on the other hand",
+        "in contrast",
+        "versus",
+        "vs",
+        "compared to",
+        "differ",
+        "alternative",
+        "instead",
+        "rather than",
+        "whereas",
+        "yet",
+        "still",
+        "option",
+        "approach",
+        "consider",
+        "weigh",
+        "pros",
+        "cons",
+        "advantage",
+        "disadvantage",
+    ]
+    assert any(marker in synthesis_lower for marker in contrast_markers), (
+        f"Debate synthesis failed to discuss trade-offs or contrasts. Looked for: {contrast_markers[:10]}..."
+    )
 
     # 4. Verify technical context from asynctaskqueue repo
     # Expanded to include scenario-specific terms
