@@ -102,6 +102,29 @@ Can you multi compare the best state management approach for this React app?
 Can you multi debate the best project code name for this project?
 ```
 
+## Enabling Allowlist
+
+Edit `~/.claude/settings.json` and add the following lines to `permissions.allow` to enable Claude Code to use Multi MCP without blocking for user permission:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      ...
+      "mcp__multi__chat",
+      "mcp__multi__codereview",
+      "mcp__multi__compare",
+      "mcp__multi__debate",
+      "mcp__multi__models"
+    ],
+  },
+  "env": {
+    "MCP_TIMEOUT": "300000",
+    "MCP_TOOL_TIMEOUT": "300000"
+  },
+}
+```
+
 ## Model Aliases
 
 Use short aliases instead of full model names:
