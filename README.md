@@ -1,25 +1,40 @@
-# Multi-MCP
+# Multi-MCP: Multi-Model Code Review and Analysis MCP Server for Claude Code
 
 [![CI](https://github.com/religa/multi_mcp/workflows/CI/badge.svg)](https://github.com/religa/multi_mcp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 
-A multi-model AI orchestration server that provides advanced code analysis capabilities through the Model Context Protocol (MCP). Multi-MCP orchestrates multiple LLM providers to deliver multi-agent chat, debate and code review tools.
+A **multi-model AI orchestration MCP server** for **automated code review** and **LLM-powered analysis**. Multi-MCP integrates with **Claude Code CLI** to orchestrate multiple AI models (OpenAI GPT, Anthropic Claude, Google Gemini) for **code quality checks**, **security analysis** (OWASP Top 10), and **multi-agent consensus**. Built on the **Model Context Protocol (MCP)**, this tool enables Python developers and DevOps teams to automate code reviews with AI-powered insights directly in their development workflow.
 
-Built as a **Model Context Protocol (MCP) server** for Claude Code CLI, Multi-MCP enables developers to leverage multiple AI models (OpenAI GPT, Anthropic Claude, Google Gemini) simultaneously for code analysis tasks. Whether you need automated code review with OWASP security checks, multi-model consensus for critical decisions, or AI-powered development assistance, this MCP server integrates directly into your Claude Code workflow. Perfect for Python developers, security teams, and AI engineers looking to automate code quality checks and leverage LLM-powered analysis in their development pipeline.
-
-⚠️ **Early Development**: Currently supports `codereview`, `chat`, `compare`, `debate`, and `models` tools. More tools coming soon.
+![Demo Video](https://github.com/user-attachments/assets/39c3f100-e20d-4c3d-8130-b01c401f2d29)
 
 ## Features
 
-- **🔍 Code Review** - Systematic workflow for thorough code review using external models
-- **💬 Chat** - Interactive AI assistance for development questions
-- **🔄 Compare** - Multi-model parallel analysis
-- **🎭 Debate** - Two-step multi-model workflow: independent answers followed by critique
-- **🤖 Multi-Model Support** - Works with OpenAI, Anthropic, Google, and OpenRouter
-- **🖥️ CLI Model Execution** - Run CLI-based models (Claude Code CLI, Gemini CLI, Codex CLI) alongside API models
+- **🔍 Code Review** - Systematic workflow with OWASP Top 10 security checks and performance analysis
+- **💬 Chat** - Interactive development assistance with repository context awareness
+- **🔄 Compare** - Parallel multi-model analysis for architectural decisions
+- **🎭 Debate** - Multi-agent consensus workflow (independent answers + critique)
+- **🤖 Multi-Model Support** - OpenAI GPT, Anthropic Claude, Google Gemini, and OpenRouter
+- **🖥️ CLI & API Models** - Mix CLI-based (Gemini CLI, Codex CLI) and API models
 - **🏷️ Model Aliases** - Use short names like `mini`, `sonnet`, `gemini`
-- **🧵 Conversation Threading** - Maintain context across multi-step reviews
+- **🧵 Threading** - Maintain context across multi-step reviews
+
+## How It Works
+
+Multi-MCP acts as an **MCP server** that Claude Code connects to, providing AI-powered code analysis tools:
+
+1. **Install** the MCP server and configure your AI model API keys
+2. **Integrate** with Claude Code CLI automatically via `make install`
+3. **Invoke** tools using natural language (e.g., "multi codereview this file")
+4. **Get Results** from multiple AI models orchestrated in parallel
+
+## Performance
+
+**Fast Multi-Model Analysis:**
+- ⚡ **Parallel Execution** - 3 models in ~10s (vs ~30s sequential)
+- 🔄 **Async Architecture** - Non-blocking Python asyncio
+- 💾 **Conversation Threading** - Maintains context across multi-step reviews
+- 📊 **Low Latency** - Response time = slowest model, not sum of all models
 
 ## Quick Start
 
@@ -37,13 +52,31 @@ cd multi_mcp
 make install
 
 # The installer will:
-# 1. Install dependencies
-# 2. Configure your .env file
+# 1. Install dependencies (uv sync)
+# 2. Configure your .env file (from .env.example)
 # 3. Automatically add to Claude Code config (requires jq)
 # 4. Test the installation
 ```
 
 After installation, restart Claude Code and type `/multi` to see available commands.
+
+## Configuration
+
+**Environment Configuration:**
+
+Edit `.env` with your API keys:
+
+```bash
+# API Keys (configure at least one)
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+GEMINI_API_KEY=...
+OPENROUTER_API_KEY=sk-or-...
+
+# Model Configuration
+DEFAULT_MODEL=gpt-5-mini
+DEFAULT_MODEL_LIST=gpt-5-mini,gemini-2.5-flash
+```
 
 ## Usage Examples
 
@@ -68,76 +101,6 @@ Can you multi compare the best state management approach for this React app?
 ```
 Can you multi debate the best project code name for this project?
 ```
-
-**Manual Setup:**
-
-```bash
-# Clone the repository
-git clone https://github.com/religa/multi_mcp.git
-cd multi_mcp
-
-# Install dependencies
-uv sync
-
-# Create .env file from template
-cp .env.example .env
-# Edit .env and add your API keys
-
-# Start the server
-./scripts/run_server.sh
-```
-
-**Environment Configuration:**
-
-Edit `.env` with your API keys:
-
-```bash
-# API Keys (configure at least one)
-OPENAI_API_KEY=sk-...
-ANTHROPIC_API_KEY=sk-ant-...
-GEMINI_API_KEY=...
-OPENROUTER_API_KEY=sk-or-...
-
-# Model Configuration
-DEFAULT_MODEL=gpt-5-mini
-DEFAULT_MODEL_LIST=gpt-5-mini,gemini-2.5-flash
-```
-
-## CLI Usage (Experimental)
-
-Multi-MCP includes a standalone CLI for code review without needing an MCP client.
-
-⚠️ **Note:** The CLI is experimental and under active development.
-
-```bash
-# Review a directory
-multi src/
-
-# Review specific files
-multi src/server.py src/config.py
-
-# Use a different model
-multi --model mini src/
-
-# JSON output for CI/pipelines
-multi --json src/ > results.json
-
-# Verbose logging
-multi -v src/
-
-# Specify project root (for CLAUDE.md loading)
-multi --base-path /path/to/project src/
-```
-
-**CLI Options:**
-
-| Flag | Description |
-|------|-------------|
-| `paths` | Files or directories to review (required) |
-| `--model MODEL` | Model to use (default: from settings) |
-| `--json` | Output JSON for CI/pipelines |
-| `-v, --verbose` | Enable DEBUG logging |
-| `--base-path PATH` | Project root for context loading |
 
 ## Model Aliases
 
@@ -193,21 +156,6 @@ codex-cli:
   notes: "Codex CLI with full tool access"
 ```
 
-**Usage Examples:**
-
-Use CLI models just like API models:
-
-```bash
-# Code review with CLI model
-Can you multi codereview this module using gemini-cli?
-
-# Compare API vs CLI models
-Can you multi compare the best approach using gpt-5-mini and gemini-cli?
-
-# Chat with CLI model
-Can you ask Multi chat using codex-cli how to optimize this function?
-```
-
 **Prerequisites:**
 
 CLI models require the respective CLI tools to be installed:
@@ -220,56 +168,42 @@ pip install google-generativeai-cli
 npm install -g @anthropics/codex-cli
 ```
 
-**Parser Types:**
+## CLI Usage (Experimental)
 
-- `json` - Parses JSON output (e.g., Gemini CLI with `-o json`)
-- `jsonl` - Parses JSONL event streams (e.g., Codex CLI with `--json`)
-- `text` - Raw text output (fallback)
+Multi-MCP includes a standalone CLI for code review without needing an MCP client.
 
-## Architecture
-
-```
-multi_mcp/
-├── src/
-│   ├── server.py              # FastMCP server with MCP tools
-│   ├── cli.py                 # Standalone CLI
-│   ├── config.py              # Settings (env-based)
-│   ├── models/                # Model config & LiteLLM integration
-│   ├── schemas/               # Pydantic validation
-│   ├── memory/                # Conversation threading
-│   ├── tools/                 # Tool implementations
-│   ├── prompts/               # System prompts
-│   └── utils/                 # Helpers & logging
-├── config/
-│   └── models.yaml            # Model definitions
-└── tests/
-    ├── unit/                  # Unit tests
-    └── integration/           # E2E tests
-```
-
-## Contributing
-
-**Setup:**
+⚠️ **Note:** The CLI is experimental and under active development.
 
 ```bash
-git clone https://github.com/religa/multi_mcp.git
-cd multi_mcp
-uv sync --extra dev  # Install dependencies + dev tools (pytest, ruff, pyright)
+# Review a directory
+multi src/
+
+# Review specific files
+multi src/server.py src/config.py
+
+# Use a different model
+multi --model mini src/
+
+# JSON output for CI/pipelines
+multi --json src/ > results.json
+
+# Verbose logging
+multi -v src/
+
+# Specify project root (for CLAUDE.md loading)
+multi --base-path /path/to/project src/
 ```
 
-**Development:**
+## Why Multi-MCP?
 
-```bash
-uv run pyright        # Type checking
-uv run ruff check .   # Linting
-uv run ruff format .  # Formatting
-uv run pytest         # Run unit tests
-```
+| Feature | Multi-MCP | Single-Model Tools |
+|---------|-----------|-------------------|
+| Parallel model execution | ✅ | ❌ |
+| Multi-model consensus | ✅ | Varies |
+| Model debates | ✅ | ❌ |
+| CLI + API model support | ✅ | ❌ |
+| OWASP security analysis | ✅ | Varies |
 
-**Submit PRs** to `main` branch with:
-- ✅ All tests passing (`uv run pytest`)
-- ✅ Type checking clean (`uv run pyright`)
-- ✅ Code formatted (`uv run ruff format .`)
 
 ## Troubleshooting
 
@@ -289,6 +223,38 @@ uv run python src/server.py
 
 Check logs in `logs/server.log` for detailed information.
 
+## FAQ
+
+**Q: Do I need all three AI providers?**
+A: No, just one API key (OpenAI, Anthropic, or Google) is enough to get started.
+
+**Q: Does it truly run in parallel?**
+A: Yes! When you use `codereview`, `compare` or `debate` tools, all models are executed concurrently using Python's `asyncio.gather()`. This means you get responses from multiple models in the time it takes for the slowest model to respond, not the sum of all response times.
+
+**Q: How many models can I run at the same time?**
+A: There's no hard limit! You can run as many models as you want in parallel. In practice, 2-5 models work well for most use cases. All tools use your configured default models (typically 2-3), but you can specify any number of models you want.
+
+## Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Development setup
+- Code standards
+- Testing guidelines
+- Pull request process
+
+**Quick start:**
+```bash
+git clone https://github.com/YOUR_USERNAME/multi_mcp.git
+cd multi_mcp
+uv sync --extra dev
+make check && make test
+```
+
 ## License
 
 MIT License - see LICENSE file for details
+
+## Links
+
+- [Issue Tracker](https://github.com/religa/multi_mcp/issues)
+- [Contributing Guide](CONTRIBUTING.md)

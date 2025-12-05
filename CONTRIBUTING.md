@@ -71,9 +71,19 @@ make test-integration
 - **Type hints** on all functions
 - **Async-first** - use `async def` for I/O operations
 - **Test coverage** - minimum 80% overall (add tests for new features)
-- **Line length** - 140 characters max (configured in `pyproject.toml`)
+- **Line length** - 120 characters max (configured in `pyproject.toml`)
 - **Error handling** - return structured error dicts with context
 - **Logging** - use `logger.info()` for model calls with thread_id, model name, token usage
+
+## Design Principles
+
+- **DRY (Don't Repeat Yourself)**: Field descriptions, validation rules, and documentation defined once in Pydantic models
+- **Single Source of Truth**: Schema models are the authoritative source for parameter definitions
+- **Type Safety**: Full type checking with Pydantic and Pyright
+- **YAGNI**: Don't add complexity until actually needed
+- **KISS**: Keep it simple, stupid!
+- **Clean Code**: No dead code, all imports used, all tests passing
+- **Greenfield project**: No worries about backward compatibility - breaking changes are allowed
 
 ## Project Structure
 
@@ -116,24 +126,24 @@ src/
 
 ## Testing
 
-We have 389 total tests: 364 unit tests (~2s) and 25 integration tests (~2-3min with parallel execution).
+We have 510 total tests: 436 unit tests (~2s) and 74 integration tests (~10-15min with real API calls).
 
 ```bash
-# Unit tests only (364 tests, ~2s, fast - run before every commit)
+# Unit tests only (436 tests, ~2s, fast - run before every commit)
 make test
 # or: uv run pytest tests/unit/ -v
 
-# Integration tests (25 tests, ~2-3min with parallel execution, requires real API keys)
+# Integration tests (74 tests, ~10-15min, requires real API keys)
 make test-integration
 # or: RUN_E2E=1 uv run pytest tests/integration/ -n auto -v
 
-# Run integration tests sequentially (slower, ~10min)
+# Run integration tests sequentially (slower, ~15min)
 RUN_E2E=1 uv run pytest tests/integration/ -v
 
 # Run with specific number of workers
 RUN_E2E=1 uv run pytest tests/integration/ -n 4 -v
 
-# All tests (389 total)
+# All tests (510 total)
 make test-all
 # or: RUN_E2E=1 uv run pytest -v
 
@@ -141,9 +151,11 @@ make test-all
 uv run pytest tests/unit/ --cov=src --cov-report=html
 ```
 
-**Note:** Integration tests require at least one API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENROUTER_API_KEY) and make real API calls which cost money. They are **disabled in CI** to save costs.
+**Note:** Integration tests require at least one API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENROUTER_API_KEY) and make real API calls which cost money. They are **disabled in CI** to save costs. We use low-cost models (gpt-5-mini, gemini-2.5-flash) for testing.
 
-**Parallel Execution:** Integration tests run in parallel by default using `pytest-xdist` (`-n auto`), reducing runtime from ~10 minutes to ~2-3 minutes. Tests use unique thread IDs (UUIDs) so they don't conflict.
+**Parallel Execution:** Integration tests can run in parallel using `pytest-xdist` (`-n auto`), but currently run sequentially by default. Tests use unique thread IDs (UUIDs) so they don't conflict.
+
+**VCR Status:** VCR (cassette recording) is currently **disabled** due to compatibility issues with httpx/litellm. All integration tests make real API calls. See `tests/cassettes/README.md` for details.
 
 ### Test Organization
 
@@ -186,6 +198,30 @@ Found a bug or have a feature request? [Open an issue](https://github.com/religa
 - CI runs unit tests + code quality checks on every push/PR
 - All CI checks must pass before merge
 - You must confirm integration tests passed locally when submitting PR
+
+## Architecture Overview
+
+Multi-MCP uses a clean, factory-based architecture:
+
+**Factory Pattern for MCP Tools:**
+- Tools are auto-generated from Pydantic schemas using `create_mcp_wrapper()` factory
+- Schema models define field descriptions once (DRY principle)
+- Implementation functions (`*_impl()`) contain business logic
+- MCP decorators handle context management and logging
+
+**Request Context Management:**
+- Uses Python's `contextvars` for request-scoped data
+- Context includes: `thread_id`, `workflow`, `step_number`, `base_path`
+- Set at entry via `@mcp_decorator`, accessed via `get_*()` helpers
+- Enables clean APIs without explicit parameter passing
+
+**Model Configuration:**
+- YAML-based model config (`config/models.yaml`)
+- Aliases resolve to full model names (e.g., `mini` → `gpt-5-mini`)
+- Use-case defaults: `fast`, `smart`, `cheap`
+- Supports both API models (via LiteLLM) and CLI models (subprocess execution)
+
+For detailed architecture documentation, see `CLAUDE.md`.
 
 ## Development Workflow
 
@@ -234,6 +270,60 @@ This removes:
 - `.ruff_cache/`, `.mypy_cache/`, `.pyright/`
 - `*.pyc`, `*.pyo`, `*.swp` files
 - Coverage reports, dist/, build/
+
+## Logging and Debugging
+
+Multi-MCP has comprehensive logging for development and debugging:
+
+**MCP Tool Logging** (`src/utils/mcp_logger.py`):
+- Logs all MCP tool requests and responses
+- Format: `logs/TIMESTAMP.THREAD_ID.mcp.json`
+- Tracks: tool_name, direction (request/response), data, thread_id
+
+**LLM API Logging** (`src/utils/request_logger.py`):
+- Logs all LiteLLM API calls
+- Format: `logs/TIMESTAMP.THREAD_ID.llm.json`
+- Tracks: model, messages, temperature, usage, response
+
+**Console Logging:**
+- All logs also go to `logs/server.log`
+- Structured tags: `[CODEREVIEW]`, `[CHAT]`, `[COMPARE]`, `[MODEL_CALL]`, `[MCP_LOG]`
+
+**Example log files:**
+```
+logs/
+├── server.log                         # Console logs
+├── 20251204_180512_345.thread123.mcp.json  # MCP request
+├── 20251204_180514_678.thread123.mcp.json  # MCP response
+└── 20251204_180515_234.thread123.llm.json  # LLM API call
+```
+
+## Common Development Tasks
+
+**Updating Prompts:**
+- Edit files in `src/prompts/*.md`
+- Changes take effect on server restart
+- Test with: `RUN_E2E=1 uv run pytest tests/integration/`
+
+**Adding New Models:**
+- Edit `config/models.yaml`
+- Add aliases, temperature constraints, provider info
+- Update tests if model behavior differs
+- See `CLAUDE.md` for model configuration details
+
+**Debugging Model Calls:**
+- Check MCP logs: `cat logs/*.mcp.json | jq .`
+- Check LLM logs: `cat logs/*.llm.json | jq .`
+- Check console logs for tagged entries with thread_id
+- Use `LOG_LEVEL=DEBUG` for verbose output
+
+## Project File Guidelines
+
+- **Documentation**: New documentation goes in `docs/`
+- **Temporary Files**: Use `tmp/` for experiments and complex bash scripts
+- **Reference Projects**: `ref/` contains reference projects - DO NOT modify
+- **No Bash for File Operations**: Use Claude Code's Read/Write tools, NOT Bash commands
+- **Python Scripts**: Write to `tmp/` directory first, then execute with `uv run python tmp/file_name.py`
 
 ## Questions?
 
