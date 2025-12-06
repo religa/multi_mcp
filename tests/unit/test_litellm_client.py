@@ -57,6 +57,7 @@ class TestLiteLLMClient:
         with (
             patch("src.models.litellm_client.litellm.acompletion", new_callable=AsyncMock) as mock_completion,
             patch("src.models.litellm_client.log_llm_interaction"),
+            patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
 
@@ -78,6 +79,7 @@ class TestLiteLLMClient:
         with (
             patch("src.models.litellm_client.litellm.acompletion", new_callable=AsyncMock) as mock_completion,
             patch("src.models.litellm_client.log_llm_interaction"),
+            patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
 
@@ -97,6 +99,7 @@ class TestLiteLLMClient:
         with (
             patch("src.models.litellm_client.litellm.acompletion", new_callable=AsyncMock) as mock_completion,
             patch("src.models.litellm_client.log_llm_interaction"),
+            patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
 
@@ -112,6 +115,7 @@ class TestLiteLLMClient:
         with (
             patch("src.models.litellm_client.litellm.acompletion", new_callable=AsyncMock) as mock_completion,
             patch("src.models.litellm_client.log_llm_interaction"),
+            patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
 
@@ -127,6 +131,7 @@ class TestLiteLLMClient:
         with (
             patch("src.models.litellm_client.litellm.acompletion", new_callable=AsyncMock) as mock_completion,
             patch("src.models.litellm_client.log_llm_interaction"),
+            patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
 
@@ -142,6 +147,7 @@ class TestLiteLLMClient:
         with (
             patch("src.models.litellm_client.litellm.acompletion", new_callable=AsyncMock) as mock_completion,
             patch("src.models.litellm_client.log_llm_interaction") as mock_log,
+            patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
 
@@ -162,6 +168,7 @@ class TestLiteLLMClient:
         with (
             patch("src.models.litellm_client.litellm.acompletion", new_callable=AsyncMock) as mock_completion,
             patch("src.models.litellm_client.log_llm_interaction"),
+            patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.side_effect = Exception("API error")
 
@@ -178,6 +185,7 @@ class TestLiteLLMClient:
         with (
             patch("src.models.litellm_client.litellm.acompletion", new_callable=AsyncMock) as mock_completion,
             patch("src.models.litellm_client.log_llm_interaction"),
+            patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.side_effect = TimeoutError()
 
@@ -199,6 +207,7 @@ class TestLiteLLMClient:
         with (
             patch("src.models.litellm_client.litellm.acompletion", new_callable=AsyncMock) as mock_completion,
             patch("src.models.litellm_client.log_llm_interaction"),
+            patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
 
@@ -229,6 +238,7 @@ class TestLiteLLMClient:
         with (
             patch("src.models.litellm_client.litellm.acompletion", new_callable=AsyncMock) as mock_completion,
             patch("src.models.litellm_client.log_llm_interaction"),
+            patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
 
@@ -248,6 +258,7 @@ class TestLiteLLMClient:
         with (
             patch("src.models.litellm_client.litellm.acompletion", new_callable=AsyncMock) as mock_completion,
             patch("src.models.litellm_client.log_llm_interaction"),
+            patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
 
@@ -273,3 +284,213 @@ class TestLiteLLMClient:
         # Second access should return same instance
         resolver2 = client.resolver
         assert resolver is resolver2
+
+    @pytest.mark.asyncio
+    async def test_credential_validation_azure_missing_key(self, sample_config):
+        """Test that Azure models fail with explicit error when AZURE_API_KEY is missing."""
+        config = ModelsConfiguration(
+            version="1.0",
+            default_model="azure-gpt-5-mini",
+            models={
+                "azure-gpt-5-mini": ModelConfig(litellm_model="azure/gpt-5-mini", aliases=["azure-mini"]),
+            },
+        )
+        resolver = ModelResolver(config=config)
+        client = LiteLLMClient(resolver=resolver)
+
+        with patch("src.models.litellm_client.settings") as mock_settings:
+            mock_settings.azure_api_key = None
+            mock_settings.azure_api_base = "https://example.azure.com"
+
+            result = await client.call_async(messages=[{"role": "user", "content": "Hello"}], model="azure-gpt-5-mini")
+
+            assert result.status == "error"
+            assert "AZURE_API_KEY" in result.error
+            assert "environment or .env file" in result.error
+            assert "already set: AZURE_API_BASE" in result.error
+
+    @pytest.mark.asyncio
+    async def test_credential_validation_azure_missing_base(self, sample_config):
+        """Test that Azure models fail with explicit error when AZURE_API_BASE is missing."""
+        config = ModelsConfiguration(
+            version="1.0",
+            default_model="azure-gpt-5-mini",
+            models={
+                "azure-gpt-5-mini": ModelConfig(litellm_model="azure/gpt-5-mini", aliases=["azure-mini"]),
+            },
+        )
+        resolver = ModelResolver(config=config)
+        client = LiteLLMClient(resolver=resolver)
+
+        with patch("src.models.litellm_client.settings") as mock_settings:
+            mock_settings.azure_api_key = "test-key"
+            mock_settings.azure_api_base = None
+
+            result = await client.call_async(messages=[{"role": "user", "content": "Hello"}], model="azure-gpt-5-mini")
+
+            assert result.status == "error"
+            assert "AZURE_API_BASE" in result.error
+            assert "environment or .env file" in result.error
+            assert "already set: AZURE_API_KEY" in result.error
+
+    @pytest.mark.asyncio
+    async def test_credential_validation_azure_missing_both(self, sample_config):
+        """Test that Azure models show both missing credentials."""
+        config = ModelsConfiguration(
+            version="1.0",
+            default_model="azure-gpt-5-mini",
+            models={
+                "azure-gpt-5-mini": ModelConfig(litellm_model="azure/gpt-5-mini", aliases=["azure-mini"]),
+            },
+        )
+        resolver = ModelResolver(config=config)
+        client = LiteLLMClient(resolver=resolver)
+
+        with patch("src.models.litellm_client.settings") as mock_settings:
+            mock_settings.azure_api_key = None
+            mock_settings.azure_api_base = None
+
+            result = await client.call_async(messages=[{"role": "user", "content": "Hello"}], model="azure-gpt-5-mini")
+
+            assert result.status == "error"
+            assert "AZURE_API_KEY" in result.error
+            assert "AZURE_API_BASE" in result.error
+            assert "environment or .env file" in result.error
+
+    @pytest.mark.asyncio
+    async def test_credential_validation_gemini_missing(self, sample_config):
+        """Test that Gemini models fail with explicit error when GEMINI_API_KEY is missing."""
+        config = ModelsConfiguration(
+            version="1.0",
+            default_model="gemini-2.5-flash",
+            models={
+                "gemini-2.5-flash": ModelConfig(litellm_model="gemini/gemini-2.5-flash", aliases=["flash"]),
+            },
+        )
+        resolver = ModelResolver(config=config)
+        client = LiteLLMClient(resolver=resolver)
+
+        with patch("src.models.litellm_client.settings") as mock_settings:
+            mock_settings.gemini_api_key = None
+
+            result = await client.call_async(messages=[{"role": "user", "content": "Hello"}], model="gemini-2.5-flash")
+
+            assert result.status == "error"
+            assert "GEMINI_API_KEY" in result.error
+            assert "environment or .env file" in result.error
+
+    @pytest.mark.asyncio
+    async def test_credential_validation_anthropic_missing(self, sample_config):
+        """Test that Anthropic models fail with explicit error when ANTHROPIC_API_KEY is missing."""
+        config = ModelsConfiguration(
+            version="1.0",
+            default_model="claude-sonnet-4.5",
+            models={
+                "claude-sonnet-4.5": ModelConfig(litellm_model="anthropic/claude-sonnet-4-5-20250929", aliases=["sonnet"]),
+            },
+        )
+        resolver = ModelResolver(config=config)
+        client = LiteLLMClient(resolver=resolver)
+
+        with patch("src.models.litellm_client.settings") as mock_settings:
+            mock_settings.anthropic_api_key = None
+
+            result = await client.call_async(messages=[{"role": "user", "content": "Hello"}], model="claude-sonnet-4.5")
+
+            assert result.status == "error"
+            assert "ANTHROPIC_API_KEY" in result.error
+            assert "environment or .env file" in result.error
+
+    @pytest.mark.asyncio
+    async def test_credential_validation_openrouter_missing(self, sample_config):
+        """Test that OpenRouter models fail with explicit error when OPENROUTER_API_KEY is missing."""
+        config = ModelsConfiguration(
+            version="1.0",
+            default_model="openrouter-model",
+            models={
+                "openrouter-model": ModelConfig(litellm_model="openrouter/some-model", aliases=["or"]),
+            },
+        )
+        resolver = ModelResolver(config=config)
+        client = LiteLLMClient(resolver=resolver)
+
+        with patch("src.models.litellm_client.settings") as mock_settings:
+            mock_settings.openrouter_api_key = None
+
+            result = await client.call_async(messages=[{"role": "user", "content": "Hello"}], model="openrouter-model")
+
+            assert result.status == "error"
+            assert "OPENROUTER_API_KEY" in result.error
+            assert "environment or .env file" in result.error
+
+    @pytest.mark.asyncio
+    async def test_credential_validation_openai_missing(self, sample_config):
+        """Test that OpenAI models fail with explicit error when OPENAI_API_KEY is missing."""
+        config = ModelsConfiguration(
+            version="1.0",
+            default_model="gpt-5-mini",
+            models={
+                "gpt-5-mini": ModelConfig(litellm_model="openai/gpt-5-mini", aliases=["mini"]),
+            },
+        )
+        resolver = ModelResolver(config=config)
+        client = LiteLLMClient(resolver=resolver)
+
+        with patch("src.models.litellm_client.settings") as mock_settings:
+            mock_settings.openai_api_key = None
+
+            result = await client.call_async(messages=[{"role": "user", "content": "Hello"}], model="gpt-5-mini")
+
+            assert result.status == "error"
+            assert "OPENAI_API_KEY" in result.error
+            assert "environment or .env file" in result.error
+
+    @pytest.mark.asyncio
+    async def test_credential_validation_bedrock_missing_all(self, sample_config):
+        """Test that Bedrock models fail with explicit error when all AWS credentials are missing."""
+        config = ModelsConfiguration(
+            version="1.0",
+            default_model="bedrock-model",
+            models={
+                "bedrock-model": ModelConfig(litellm_model="bedrock/anthropic.claude-sonnet-4-5-v2", aliases=["bedrock"]),
+            },
+        )
+        resolver = ModelResolver(config=config)
+        client = LiteLLMClient(resolver=resolver)
+
+        with patch("src.models.litellm_client.settings") as mock_settings:
+            mock_settings.aws_access_key_id = None
+            mock_settings.aws_secret_access_key = None
+            mock_settings.aws_region_name = None
+
+            result = await client.call_async(messages=[{"role": "user", "content": "Hello"}], model="bedrock-model")
+
+            assert result.status == "error"
+            assert "AWS_ACCESS_KEY_ID" in result.error
+            assert "AWS_SECRET_ACCESS_KEY" in result.error
+            assert "AWS_REGION_NAME" in result.error
+            assert "environment or .env file" in result.error
+
+    @pytest.mark.asyncio
+    async def test_credential_validation_bedrock_partial(self, sample_config):
+        """Test that Bedrock shows which AWS credentials are already set."""
+        config = ModelsConfiguration(
+            version="1.0",
+            default_model="bedrock-model",
+            models={
+                "bedrock-model": ModelConfig(litellm_model="bedrock/anthropic.claude-sonnet-4-5-v2", aliases=["bedrock"]),
+            },
+        )
+        resolver = ModelResolver(config=config)
+        client = LiteLLMClient(resolver=resolver)
+
+        with patch("src.models.litellm_client.settings") as mock_settings:
+            mock_settings.aws_access_key_id = "AKIAIOSFODNN7EXAMPLE"
+            mock_settings.aws_secret_access_key = None
+            mock_settings.aws_region_name = "us-east-1"
+
+            result = await client.call_async(messages=[{"role": "user", "content": "Hello"}], model="bedrock-model")
+
+            assert result.status == "error"
+            assert "AWS_SECRET_ACCESS_KEY" in result.error
+            assert "already set: AWS_ACCESS_KEY_ID, AWS_REGION_NAME" in result.error

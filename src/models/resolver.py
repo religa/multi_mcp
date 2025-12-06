@@ -176,6 +176,7 @@ class ModelResolver:
                     "name": name,
                     "aliases": config.aliases,
                     "provider": config.get_provider(),
+                    "litellm_model": config.litellm_model,
                     "context_window": context_window,
                     "max_tokens": max_tokens,
                     "disabled": config.disabled,

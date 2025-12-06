@@ -11,7 +11,7 @@ from typing import Any
 import litellm
 
 from src.config import settings
-from src.models.config import ModelConfig
+from src.models.config import PROVIDERS, ModelConfig
 from src.models.resolver import ModelResolver
 from src.schemas.base import ModelResponse, ModelResponseMetadata
 from src.utils.json_parser import parse_llm_json
@@ -40,6 +40,52 @@ class LiteLLMClient:
             self._resolver = ModelResolver()
         return self._resolver
 
+    def _validate_provider_credentials(self, litellm_model: str) -> str | None:
+        """Validate that required provider credentials are configured.
+
+        Args:
+            litellm_model: LiteLLM model string (e.g., "azure/gpt-5-mini", "gemini/gemini-2.5-flash")
+
+        Returns:
+            Error message if credentials missing, None if valid
+        """
+        # Extract provider from litellm_model (format: "provider/model-name")
+        provider = litellm_model.split("/")[0].lower() if "/" in litellm_model else None
+        if not provider:
+            return None
+
+        provider_config = PROVIDERS.get(provider)
+        if not provider_config:
+            return None
+
+        missing = []
+        present = []
+
+        for attr, env_var in provider_config.credentials:
+            if not getattr(settings, attr, None):
+                missing.append(env_var)
+            else:
+                present.append(env_var)
+
+        if not missing:
+            return None
+
+        msg = f"{provider_config.name} models require {' and '.join(missing)} to be set in environment or .env file"
+        if present:
+            msg += f" (already set: {', '.join(present)})"
+        return msg
+
+    def validate_model_credentials(self, litellm_model: str) -> str | None:
+        """Public wrapper for credential validation (safe to call from other modules).
+
+        Args:
+            litellm_model: LiteLLM model string (e.g., "azure/gpt-5-mini", "gemini/gemini-2.5-flash")
+
+        Returns:
+            Error message if credentials missing, None if valid
+        """
+        return self._validate_provider_credentials(litellm_model)
+
     async def call_async(
         self,
         messages: list[dict],
@@ -67,6 +113,24 @@ class LiteLLMClient:
             # API model execution (existing logic)
             timeout = settings.model_timeout_seconds
             litellm_model = model_config.litellm_model
+
+            # Validate we have a litellm_model for API calls
+            if not litellm_model:
+                error_msg = f"Model '{canonical_name}' has no litellm_model configured"
+                logger.error(f"[MODEL_CALL] {error_msg}")
+                return ModelResponse.error_response(
+                    error=error_msg,
+                    model=canonical_name,
+                )
+
+            # Validate provider credentials before making API call
+            credential_error = self._validate_provider_credentials(litellm_model)
+            if credential_error:
+                logger.error(f"[MODEL_CALL] Credential validation failed for {litellm_model}: {credential_error}")
+                return ModelResponse.error_response(
+                    error=credential_error,
+                    model=canonical_name,
+                )
 
             # Apply temperature (config constraint > default)
             temp = settings.default_temperature

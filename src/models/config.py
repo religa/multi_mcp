@@ -1,8 +1,9 @@
 """Model configuration loader with YAML support and LiteLLM fallback."""
 
 import logging
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 import litellm
 import yaml
@@ -11,6 +12,71 @@ from pydantic import BaseModel, Field, model_validator
 from src.utils.paths import PROJECT_ROOT
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class ProviderConfig:
+    """Configuration for a single provider's credential requirements."""
+
+    name: str  # Human-readable provider name (e.g., "Azure OpenAI")
+    credentials: tuple[tuple[str, str], ...]  # Tuple of (settings_attr, env_var_name) tuples
+
+    def __post_init__(self) -> None:
+        """Validate credentials configuration.
+
+        Raises:
+            ValueError: If credentials are invalid
+        """
+        if not self.credentials:
+            raise ValueError(f"ProviderConfig '{self.name}' must have at least one credential")
+
+        for i, cred in enumerate(self.credentials):
+            if not isinstance(cred, tuple) or len(cred) != 2:
+                raise ValueError(f"ProviderConfig '{self.name}' credential {i} must be a 2-tuple, got {type(cred).__name__}")
+
+            settings_attr, env_var = cred
+            if not isinstance(settings_attr, str) or not settings_attr:
+                raise ValueError(f"ProviderConfig '{self.name}' credential {i} settings_attr must be non-empty string")
+            if not isinstance(env_var, str) or not env_var:
+                raise ValueError(f"ProviderConfig '{self.name}' credential {i} env_var must be non-empty string")
+
+
+# Provider configurations
+# Maps provider ID to ProviderConfig
+#
+# To add a new provider:
+# 1. Add entry here with name and required credentials
+# 2. Add corresponding fields to Settings in src/config.py
+PROVIDERS: Final[dict[str, ProviderConfig]] = {
+    "azure": ProviderConfig(
+        name="Azure OpenAI",
+        credentials=(("azure_api_key", "AZURE_API_KEY"), ("azure_api_base", "AZURE_API_BASE")),
+    ),
+    "bedrock": ProviderConfig(
+        name="AWS Bedrock",
+        credentials=(
+            ("aws_access_key_id", "AWS_ACCESS_KEY_ID"),
+            ("aws_secret_access_key", "AWS_SECRET_ACCESS_KEY"),
+            ("aws_region_name", "AWS_REGION_NAME"),
+        ),
+    ),
+    "gemini": ProviderConfig(
+        name="Google Gemini",
+        credentials=(("gemini_api_key", "GEMINI_API_KEY"),),
+    ),
+    "anthropic": ProviderConfig(
+        name="Anthropic Claude",
+        credentials=(("anthropic_api_key", "ANTHROPIC_API_KEY"),),
+    ),
+    "openrouter": ProviderConfig(
+        name="OpenRouter",
+        credentials=(("openrouter_api_key", "OPENROUTER_API_KEY"),),
+    ),
+    "openai": ProviderConfig(
+        name="OpenAI",
+        credentials=(("openai_api_key", "OPENAI_API_KEY"),),
+    ),
+}
 
 
 class ModelConstraints(BaseModel):

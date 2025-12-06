@@ -44,6 +44,11 @@ class Settings(BaseSettings):
     azure_api_base: str | None = Field(default=None, alias="AZURE_API_BASE")
     azure_api_version: str = Field(default="2025-04-01-preview", alias="AZURE_API_VERSION")
 
+    # AWS Bedrock (optional - LiteLLM picks these up from os.environ)
+    aws_access_key_id: str | None = Field(default=None, alias="AWS_ACCESS_KEY_ID")
+    aws_secret_access_key: str | None = Field(default=None, alias="AWS_SECRET_ACCESS_KEY")
+    aws_region_name: str | None = Field(default=None, alias="AWS_REGION_NAME")
+
     # Model defaults
     default_model: str = Field(default="gpt-5-mini", alias="DEFAULT_MODEL")
     default_model_list: list[str] = Field(
@@ -125,15 +130,24 @@ class Settings(BaseSettings):
     )
 
     @model_validator(mode="after")
-    def set_azure_env_vars(self) -> "Settings":
-        """Set Azure environment variables so LiteLLM can pick them up.
+    def set_provider_env_vars(self) -> "Settings":
+        """Set provider environment variables so LiteLLM can pick them up.
 
-        LiteLLM reads Azure config directly from os.environ, so we need to
+        LiteLLM reads provider config directly from os.environ, so we need to
         ensure our settings (including defaults) are available there.
         """
         import os
 
-        # Set AZURE_API_VERSION with default if not already in environment
+        from src.models.config import PROVIDERS
+
+        # Set all provider credentials from PROVIDERS configuration
+        for provider_config in PROVIDERS.values():
+            for settings_attr, env_var in provider_config.credentials:
+                value = getattr(self, settings_attr, None)
+                if value and not os.getenv(env_var):
+                    os.environ[env_var] = value
+
+        # Set Azure API version (config parameter, not a credential)
         if self.azure_api_version and not os.getenv("AZURE_API_VERSION"):
             os.environ["AZURE_API_VERSION"] = self.azure_api_version
 

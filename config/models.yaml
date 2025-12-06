@@ -166,6 +166,22 @@ models:
     notes: "Claude CLI with acceptEdits permission mode, using Haiku for cost efficiency"
 
   # ============================================
+  # AWS Bedrock Models
+  # ============================================
+  # To use AWS Bedrock models, configure AWS credentials in .env:
+  #   AWS_ACCESS_KEY_ID=your_access_key
+  #   AWS_SECRET_ACCESS_KEY=your_secret_key
+  #   AWS_REGION_NAME=us-east-1
+
+  bedrock-claude-4-5-sonnet:
+    litellm_model: bedrock/anthropic.claude-sonnet-4-5-v2
+    aliases:
+      - bedrock-sonnet
+    params:
+      aws_region_name: us-east-1  # Override default region if needed
+    notes: "Claude Sonnet 4.5 via AWS Bedrock"
+
+  # ============================================
   # OpenRouter Models
   # ============================================
 
