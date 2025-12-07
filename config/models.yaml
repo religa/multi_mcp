@@ -82,7 +82,7 @@ models:
     litellm_model: anthropic/claude-sonnet-4-5-20250929
     aliases:
       - sonnet
-    notes: "Great for reasoning and analysis with native web search ($10/1k searches)"
+    notes: "Great for reasoning and analysis with native web search"
 
   claude-opus-4.5:
     litellm_model: anthropic/claude-opus-4-5-20251101
@@ -100,7 +100,7 @@ models:
     aliases:
       - gemini-2.5
       - gemini-2
-    notes: "High-quality Google model with grounding ($14/1k searches)"
+    notes: "High-quality Google model with grounding"
 
   gemini-2.5-flash:
     litellm_model: gemini/gemini-2.5-flash
@@ -108,7 +108,7 @@ models:
     aliases:
       - gemini-flash
       - flash
-    notes: "Fast and cheap with grounding ($14/1k searches)"
+    notes: "Fast and cheap with grounding"
 
   gemini-3-pro-preview:
     litellm_model: gemini/gemini-3-pro-preview
@@ -117,7 +117,7 @@ models:
       - gemini-3-pro
       - gemini-3
       - gemini
-    notes: "Latest Google model with grounding ($14/1k searches)"
+    notes: "Latest Google model with grounding"
 
   # ============================================
   # CLI Models

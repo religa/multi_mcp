@@ -283,6 +283,76 @@ get_claude_code_config_path() {
     echo "$HOME/.claude.json"
 }
 
+get_claude_code_settings_path() {
+    # Claude Code settings path (same on all platforms)
+    echo "$HOME/.claude/settings.json"
+}
+
+update_claude_code_allowlist() {
+    # Add multi-mcp tools to Claude Code allowlist if settings.json exists with permissions key
+    local settings_path
+    settings_path=$(get_claude_code_settings_path)
+
+    if [[ ! -f "$settings_path" ]]; then
+        print_info "Claude Code settings not found at $settings_path - skipping allowlist"
+        return 0
+    fi
+
+    # Check if jq is available
+    if ! command -v jq &> /dev/null; then
+        print_warning "jq not found - cannot update Claude Code allowlist"
+        return 0
+    fi
+
+    # Check if permissions key exists
+    if ! jq -e '.permissions' "$settings_path" &> /dev/null; then
+        print_info "No 'permissions' key in settings.json - skipping allowlist"
+        return 0
+    fi
+
+    print_info "Updating Claude Code allowlist..."
+
+    # Tools to add
+    local tools=(
+        "mcp__multi__chat"
+        "mcp__multi__codereview"
+        "mcp__multi__compare"
+        "mcp__multi__debate"
+        "mcp__multi__models"
+        "mcp__multi__version"
+    )
+
+    # Create backup before modifying
+    local backup_path="${settings_path}.backup"
+    cp "$settings_path" "$backup_path"
+    print_info "Backup created: $backup_path"
+
+    local temp_settings
+    temp_settings=$(mktemp)
+    trap 'rm -f "${temp_settings:-}" 2>/dev/null || true' RETURN
+
+    # Start with current settings
+    cp "$settings_path" "$temp_settings"
+
+    # Add each tool if not already present
+    local added=0
+    for tool in "${tools[@]}"; do
+        if ! jq -e ".permissions.allow | index(\"$tool\")" "$temp_settings" &> /dev/null; then
+            if jq ".permissions.allow += [\"$tool\"]" "$temp_settings" > "${temp_settings}.new"; then
+                mv "${temp_settings}.new" "$temp_settings"
+                ((added++))
+            fi
+        fi
+    done
+
+    if [[ $added -gt 0 ]]; then
+        mv "$temp_settings" "$settings_path"
+        print_success "Added $added tool(s) to Claude Code allowlist"
+    else
+        print_info "All tools already in allowlist"
+    fi
+}
+
 update_mcp_config_file() {
     local config_path="$1"
     local python_path="$2"
@@ -413,6 +483,9 @@ add_mcp_config_to_claude() {
             ((success_count++))
         fi
     fi
+
+    # Update Claude Code allowlist (if settings.json exists with permissions key)
+    update_claude_code_allowlist
 
     if [[ $success_count -eq 0 ]]; then
         print_error "Failed to configure any MCP clients"
@@ -549,6 +622,18 @@ test_installation() {
     echo "" >&2
 }
 
+test_model_providers() {
+    print_header "Testing Model Providers"
+
+    # Run the model test script
+    if uv run python scripts/test_models.py; then
+        print_success "Model provider tests completed"
+    else
+        print_warning "Some model providers are not working"
+        print_info "Check your API keys in $ENV_FILE"
+    fi
+}
+
 show_next_steps() {
     print_header "Next Steps"
 
@@ -606,6 +691,14 @@ main() {
 
     # Testing
     test_installation
+
+    # Test model providers (optional - asks user)
+    echo "" >&2
+    read -p "Test model providers now? (Y/n): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+        test_model_providers
+    fi
 
     # Completion
     show_next_steps
