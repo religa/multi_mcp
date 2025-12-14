@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from src.utils.mcp_decorator import mcp_monitor
+from multi_mcp.utils.mcp_decorator import mcp_monitor
 
 
 class TestMCPMonitorDecorator:
@@ -18,7 +18,7 @@ class TestMCPMonitorDecorator:
         async def my_tool(x: int, y: str = "default", thread_id: str = "test-id") -> dict:
             return {"x": x, "y": y}
 
-        with patch("src.utils.mcp_decorator.log_mcp_interaction") as mock_log:
+        with patch("multi_mcp.utils.mcp_decorator.log_mcp_interaction") as mock_log:
             result = await my_tool(x=42, y="test", thread_id="thread-123")
 
         assert result == {"x": 42, "y": "test"}
@@ -46,7 +46,7 @@ class TestMCPMonitorDecorator:
         async def my_tool(x: int) -> dict:
             return {"x": x}
 
-        with patch("src.utils.mcp_decorator.log_mcp_interaction") as mock_log:
+        with patch("multi_mcp.utils.mcp_decorator.log_mcp_interaction") as mock_log:
             result = await my_tool(10)
 
         assert result == {"x": 10}
@@ -63,8 +63,8 @@ class TestMCPMonitorDecorator:
             return {"data": data, "thread_id": thread_id}
 
         with (
-            patch("src.utils.mcp_decorator.log_mcp_interaction") as mock_log,
-            patch("src.utils.mcp_decorator.set_request_context") as mock_set_context,
+            patch("multi_mcp.utils.mcp_decorator.log_mcp_interaction") as mock_log,
+            patch("multi_mcp.utils.mcp_decorator.set_request_context") as mock_set_context,
         ):
             await my_tool("test", thread_id="thread-123")
 
@@ -82,7 +82,7 @@ class TestMCPMonitorDecorator:
         async def models(thread_id: str = "test-id") -> dict:
             return {"models": ["gpt-5-mini", "claude-sonnet"]}
 
-        with patch("src.utils.mcp_decorator.log_mcp_interaction") as mock_log:
+        with patch("multi_mcp.utils.mcp_decorator.log_mcp_interaction") as mock_log:
             result = await models(thread_id="thread-456")
 
         assert result == {"models": ["gpt-5-mini", "claude-sonnet"]}
@@ -100,7 +100,7 @@ class TestMCPMonitorDecorator:
         async def my_tool(required: str, thread_id: str = "test-id", optional: str = "default_value", items: list | None = None) -> dict:
             return {"required": required, "optional": optional, "items": items}
 
-        with patch("src.utils.mcp_decorator.log_mcp_interaction") as mock_log:
+        with patch("multi_mcp.utils.mcp_decorator.log_mcp_interaction") as mock_log:
             await my_tool(required="test", thread_id="thread-789")
 
         # Verify only passed kwargs are logged (no defaults)
@@ -119,7 +119,7 @@ class TestMCPMonitorDecorator:
         async def failing_tool(x: int) -> dict:
             raise ValueError("Something went wrong")
 
-        with patch("src.utils.mcp_decorator.log_mcp_interaction") as mock_log:
+        with patch("multi_mcp.utils.mcp_decorator.log_mcp_interaction") as mock_log:
             with pytest.raises(ValueError, match="Something went wrong"):
                 await failing_tool(42)
 
@@ -157,7 +157,7 @@ class TestMCPMonitorDecorator:
             items.append("new")
             return {"items": items}
 
-        with patch("src.utils.mcp_decorator.log_mcp_interaction") as mock_log:
+        with patch("multi_mcp.utils.mcp_decorator.log_mcp_interaction") as mock_log:
             # Call twice to verify defaults aren't shared/mutated
             await tool_with_list()
             await tool_with_list()
@@ -175,7 +175,7 @@ class TestMCPMonitorDecorator:
         async def my_tool(a: int, b: int, c: int = 3) -> dict:
             return {"sum": a + b + c}
 
-        with patch("src.utils.mcp_decorator.log_mcp_interaction") as mock_log:
+        with patch("multi_mcp.utils.mcp_decorator.log_mcp_interaction") as mock_log:
             result = await my_tool(b=2, a=1)
 
         assert result == {"sum": 6}
@@ -205,7 +205,7 @@ class TestMCPMonitorDecorator:
             call_order.append("tool")
             return {"x": x}
 
-        with patch("src.utils.mcp_decorator.log_mcp_interaction"):
+        with patch("multi_mcp.utils.mcp_decorator.log_mcp_interaction"):
             await my_tool(1)
 
         # Outer decorator wraps mcp_monitor
@@ -220,8 +220,8 @@ class TestMCPMonitorDecorator:
             return {"data": data, "base_path": base_path}
 
         with (
-            patch("src.utils.mcp_decorator.log_mcp_interaction") as mock_log,
-            patch("src.utils.mcp_decorator.set_request_context") as mock_set_context,
+            patch("multi_mcp.utils.mcp_decorator.log_mcp_interaction") as mock_log,
+            patch("multi_mcp.utils.mcp_decorator.set_request_context") as mock_set_context,
         ):
             await my_tool("test", base_path="/path/to/project", thread_id="thread-123")
 
@@ -241,8 +241,8 @@ class TestMCPMonitorDecorator:
             return {"data": data}
 
         with (
-            patch("src.utils.mcp_decorator.log_mcp_interaction") as mock_log,
-            patch("src.utils.mcp_decorator.set_request_context") as mock_set_context,
+            patch("multi_mcp.utils.mcp_decorator.log_mcp_interaction") as mock_log,
+            patch("multi_mcp.utils.mcp_decorator.set_request_context") as mock_set_context,
         ):
             await my_tool(data="test", base_path="/project", step_number=5, workflow_name="codereview", thread_id="thread-456")
 

@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from src.schemas.codereview import CodeReviewModelResult
-from src.utils.consolidation import (
+from multi_mcp.schemas.codereview import CodeReviewModelResult
+from multi_mcp.utils.consolidation import (
     _build_consolidation_messages,
     _extract_issues_from_content,
     consolidate_model_results,
@@ -31,7 +31,7 @@ class TestConsolidateModelResults:
             ),
         )
 
-        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("multi_mcp.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_response
 
             results = [
@@ -103,7 +103,7 @@ class TestConsolidateModelResults:
             assert consolidated.metadata.latency_ms == 10000
 
             # Consolidation model should be the default model from settings
-            from src.config import settings
+            from multi_mcp.config import settings
 
             assert consolidated.metadata.consolidation_model == settings.default_model
 
@@ -128,7 +128,7 @@ class TestConsolidateModelResults:
     @pytest.mark.asyncio
     async def test_consolidation_failure_fallback(self):
         """On consolidation failure, return first successful result."""
-        with patch("src.models.litellm_client.LiteLLMClient.execute", new_callable=AsyncMock) as mock_llm:
+        with patch("multi_mcp.models.litellm_client.LiteLLMClient.execute", new_callable=AsyncMock) as mock_llm:
             mock_llm.side_effect = Exception("API timeout")
 
             results = [
@@ -170,7 +170,7 @@ class TestConsolidateModelResults:
             ),
         )
 
-        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("multi_mcp.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_response
 
             results = [
@@ -211,7 +211,7 @@ class TestConsolidateModelResults:
             ),
         )
 
-        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("multi_mcp.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_response
 
             results = [
@@ -251,7 +251,7 @@ class TestConsolidateModelResults:
             ),
         )
 
-        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("multi_mcp.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_response
 
             results = [
@@ -383,7 +383,7 @@ class TestInvalidJsonFiltering:
             ),
         )
 
-        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("multi_mcp.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_consolidation
 
             # Mix of valid and invalid JSON
@@ -481,7 +481,7 @@ class TestInvalidJsonFiltering:
             ),
         )
 
-        with patch("src.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
+        with patch("multi_mcp.utils.consolidation.execute_single", new_callable=AsyncMock) as mock_execute:
             mock_execute.return_value = mock_response
 
             results = [
@@ -521,7 +521,7 @@ class TestSortIssuesByLocation:
 
     def test_sort_issues_by_location(self):
         """Verify issues are sorted alphabetically by location."""
-        from src.utils.consolidation import _sort_issues_by_location
+        from multi_mcp.utils.consolidation import _sort_issues_by_location
 
         unsorted_issues = [
             {"location": "utils.py:50", "severity": "high", "description": "Issue 1"},
@@ -542,7 +542,7 @@ class TestSortIssuesByLocation:
 
     def test_sort_issues_by_location_edge_cases(self):
         """Verify sorting handles edge cases gracefully."""
-        from src.utils.consolidation import _sort_issues_by_location
+        from multi_mcp.utils.consolidation import _sort_issues_by_location
 
         edge_cases = [
             {"location": None, "description": "Missing location"},
@@ -565,13 +565,13 @@ class TestSortIssuesByLocation:
 
     def test_sort_issues_empty_list(self):
         """Verify sorting handles empty list."""
-        from src.utils.consolidation import _sort_issues_by_location
+        from multi_mcp.utils.consolidation import _sort_issues_by_location
 
         assert _sort_issues_by_location([]) == []
 
     def test_sort_issues_single_item(self):
         """Verify sorting handles single item list."""
-        from src.utils.consolidation import _sort_issues_by_location
+        from multi_mcp.utils.consolidation import _sort_issues_by_location
 
         single_issue = [{"location": "file.py:10", "description": "Single"}]
         assert _sort_issues_by_location(single_issue) == single_issue

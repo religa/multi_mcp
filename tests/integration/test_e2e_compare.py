@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from src.tools.compare import compare_impl
+from multi_mcp.tools.compare import compare_impl
 
 # Skip all tests in this module if RUN_E2E is not set
 pytestmark = pytest.mark.skipif(

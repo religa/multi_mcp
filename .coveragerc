@@ -1,10 +1,10 @@
 [run]
-source = src
+source = multi_mcp
 omit =
     tests/*
     .venv/*
     */site-packages/*
-    src/cli.py
+    multi_mcp/cli.py
 
 [report]
 exclude_lines =

@@ -21,7 +21,7 @@ async def test_claude_cli_basic_smoke(require_cli):
     """Smoke test: Claude CLI basic execution."""
     require_cli("claude")
 
-    from src.utils.llm_runner import execute_single
+    from multi_mcp.utils.llm_runner import execute_single
 
     result = await execute_single(
         model="claude-cli",
@@ -39,7 +39,7 @@ async def test_claude_cli_alias_smoke(require_cli):
     """Smoke test: Claude CLI with alias."""
     require_cli("claude")
 
-    from src.utils.llm_runner import execute_single
+    from multi_mcp.utils.llm_runner import execute_single
 
     result = await execute_single(
         model="cl-cli",  # Using alias
@@ -56,7 +56,7 @@ async def test_gemini_cli_basic_smoke(require_cli):
     """Smoke test: Gemini CLI basic execution."""
     require_cli("gemini")
 
-    from src.utils.llm_runner import execute_single
+    from multi_mcp.utils.llm_runner import execute_single
 
     result = await execute_single(
         model="gemini-cli",
@@ -73,7 +73,7 @@ async def test_gemini_cli_alias_smoke(require_cli):
     """Smoke test: Gemini CLI with alias."""
     require_cli("gemini")
 
-    from src.utils.llm_runner import execute_single
+    from multi_mcp.utils.llm_runner import execute_single
 
     result = await execute_single(
         model="gem-cli",  # Using alias
@@ -90,7 +90,7 @@ async def test_codex_cli_basic_smoke(require_cli):
     """Smoke test: Codex CLI basic execution."""
     require_cli("codex")
 
-    from src.utils.llm_runner import execute_single
+    from multi_mcp.utils.llm_runner import execute_single
 
     result = await execute_single(
         model="codex-cli",
@@ -107,7 +107,7 @@ async def test_codex_cli_alias_smoke(require_cli):
     """Smoke test: Codex CLI with alias."""
     require_cli("codex")
 
-    from src.utils.llm_runner import execute_single
+    from multi_mcp.utils.llm_runner import execute_single
 
     result = await execute_single(
         model="cx-cli",  # Using alias

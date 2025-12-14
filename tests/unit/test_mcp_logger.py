@@ -3,8 +3,8 @@
 import json
 from unittest.mock import patch
 
-from src.utils.context import clear_context, set_request_context
-from src.utils.mcp_logger import log_mcp_interaction
+from multi_mcp.utils.context import clear_context, set_request_context
+from multi_mcp.utils.mcp_logger import log_mcp_interaction
 
 
 class TestMCPLogger:
@@ -13,7 +13,7 @@ class TestMCPLogger:
     def test_log_mcp_request(self, tmp_path):
         """Test logging MCP request."""
         set_request_context(thread_id="test-123")
-        with patch("src.utils.log_helpers.LOGS_DIR", tmp_path):
+        with patch("multi_mcp.utils.log_helpers.LOGS_DIR", tmp_path):
             log_mcp_interaction(direction="request", tool_name="codereview", data={"step": "Review code", "step_number": 1})
 
         # Find the log file
@@ -34,7 +34,7 @@ class TestMCPLogger:
     def test_log_mcp_response(self, tmp_path):
         """Test logging MCP response."""
         set_request_context(thread_id="test-123")
-        with patch("src.utils.log_helpers.LOGS_DIR", tmp_path):
+        with patch("multi_mcp.utils.log_helpers.LOGS_DIR", tmp_path):
             log_mcp_interaction(direction="response", tool_name="codereview", data={"status": "success", "issues_found": []})
 
         log_files = list(tmp_path.glob("*.mcp.json"))
@@ -51,7 +51,7 @@ class TestMCPLogger:
         """Test logging without thread_id (e.g., models)."""
         clear_context()  # Clear any previous context
         set_request_context(thread_id=None)  # No thread_id in context
-        with patch("src.utils.log_helpers.LOGS_DIR", tmp_path):
+        with patch("multi_mcp.utils.log_helpers.LOGS_DIR", tmp_path):
             log_mcp_interaction(direction="request", tool_name="models", data={})
 
         log_files = list(tmp_path.glob("*.mcp.json"))
@@ -70,7 +70,7 @@ class TestMCPLogger:
     def test_log_mcp_filename_format(self, tmp_path):
         """Test that filename has correct format."""
         set_request_context(thread_id="thread-456")
-        with patch("src.utils.log_helpers.LOGS_DIR", tmp_path):
+        with patch("multi_mcp.utils.log_helpers.LOGS_DIR", tmp_path):
             log_mcp_interaction(direction="request", tool_name="codereview", data={"test": "data"})
 
         log_files = list(tmp_path.glob("*.mcp.json"))
@@ -85,14 +85,14 @@ class TestMCPLogger:
     def test_log_mcp_error_handling(self, tmp_path):
         """Test that logging errors don't fail the main flow."""
         # Mock write_log_file to simulate failure
-        with patch("src.utils.mcp_logger.write_log_file", return_value=None):
+        with patch("multi_mcp.utils.mcp_logger.write_log_file", return_value=None):
             # Should not raise exception
             log_mcp_interaction(direction="request", tool_name="codereview", data={"test": "data"})
 
     def test_log_mcp_json_serialization(self, tmp_path):
         """Test that complex data structures are properly serialized."""
         set_request_context(thread_id="test-123")
-        with patch("src.utils.log_helpers.LOGS_DIR", tmp_path):
+        with patch("multi_mcp.utils.log_helpers.LOGS_DIR", tmp_path):
             log_mcp_interaction(
                 direction="request",
                 tool_name="codereview",
@@ -122,7 +122,7 @@ class TestMCPLogger:
         import time
 
         set_request_context(thread_id="test-123")
-        with patch("src.utils.log_helpers.LOGS_DIR", tmp_path):
+        with patch("multi_mcp.utils.log_helpers.LOGS_DIR", tmp_path):
             # Log codereview
             log_mcp_interaction(direction="request", tool_name="codereview", data={"step": 1})
 

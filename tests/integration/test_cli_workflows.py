@@ -8,9 +8,9 @@ import uuid
 
 import pytest
 
-from src.tools.chat import chat_impl
-from src.tools.compare import compare_impl
-from src.tools.debate import debate_impl
+from multi_mcp.tools.chat import chat_impl
+from multi_mcp.tools.compare import compare_impl
+from multi_mcp.tools.debate import debate_impl
 
 
 class TestChatWithCLI:

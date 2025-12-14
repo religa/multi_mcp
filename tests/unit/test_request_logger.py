@@ -5,8 +5,8 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from src.utils.context import clear_context, set_request_context
-from src.utils.request_logger import log_llm_interaction
+from multi_mcp.utils.context import clear_context, set_request_context
+from multi_mcp.utils.request_logger import log_llm_interaction
 
 
 class TestLogLLMInteraction:
@@ -19,7 +19,7 @@ class TestLogLLMInteraction:
         response_data = {"content": "Hi there", "usage": {"total_tokens": 10}}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 log_llm_interaction(request_data, response_data)
 
                 # Check that file was created
@@ -38,7 +38,7 @@ class TestLogLLMInteraction:
         response_data = {"content": "Response"}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 log_llm_interaction(request_data, response_data)
 
                 files = list(Path(tmpdir).glob("*.llm.json"))
@@ -60,7 +60,7 @@ class TestLogLLMInteraction:
         }
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 log_llm_interaction(request_data, response_data)
 
                 files = list(Path(tmpdir).glob("*.llm.json"))
@@ -77,7 +77,7 @@ class TestLogLLMInteraction:
         response_data = {"content": "Response"}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 log_llm_interaction(request_data, response_data)
 
                 files = list(Path(tmpdir).glob("*.llm.json"))
@@ -94,7 +94,7 @@ class TestLogLLMInteraction:
         response_data = {"content": "Response"}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 log_llm_interaction(request_data, response_data)
 
                 files = list(Path(tmpdir).glob("*.llm.json"))
@@ -123,7 +123,7 @@ class TestLogLLMInteraction:
         response_data = {"content": "4", "usage": {"total_tokens": 20}}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 log_llm_interaction(request_data, response_data)
 
                 files = list(Path(tmpdir).glob("*.llm.json"))
@@ -142,7 +142,7 @@ class TestLogLLMInteraction:
         response_data = {"content": "Response"}
 
         # Use invalid directory to trigger error
-        with patch("src.utils.log_helpers.LOGS_DIR", Path("/invalid/nonexistent/dir")):
+        with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path("/invalid/nonexistent/dir")):
             # Should not raise exception
             log_llm_interaction(request_data, response_data)
 
@@ -153,7 +153,7 @@ class TestLogLLMInteraction:
         response_data = {"content": "Response"}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 log_llm_interaction(request_data, response_data)
 
                 files = list(Path(tmpdir).glob("*.llm.json"))
@@ -171,7 +171,7 @@ class TestLogLLMInteraction:
         response_data = {"content": "Response"}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 log_llm_interaction(request_data, response_data)
 
                 files = list(Path(tmpdir).glob("*.llm.json"))
@@ -200,7 +200,7 @@ class TestLogLLMInteraction:
         }
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 log_llm_interaction(request_data, response_data)
 
                 files = list(Path(tmpdir).glob("*.llm.json"))

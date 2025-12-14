@@ -6,8 +6,8 @@ from unittest.mock import patch
 
 import pytest
 
-from src.schemas.base import ModelResponse, ModelResponseMetadata
-from src.tools.chat import chat_impl
+from multi_mcp.schemas.base import ModelResponse, ModelResponseMetadata
+from multi_mcp.tools.chat import chat_impl
 
 
 def mock_llm_response(content: str, model: str = "gpt-5-mini") -> ModelResponse:
@@ -31,7 +31,7 @@ class TestChatBasicFunctionality:
     @pytest.mark.asyncio
     async def test_new_thread_created_when_none(self):
         """Test that new thread is created when thread_id is None."""
-        with patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("Hello! How can I help?")):
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("Hello! How can I help?")):
             result = await chat_impl(
                 name="Chat",
                 content="Hello",
@@ -49,7 +49,7 @@ class TestChatBasicFunctionality:
     @pytest.mark.asyncio
     async def test_stop_action_still_calls_llm(self):
         """Test that next_action='stop' still processes the message (chat always calls LLM)."""
-        with patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("Goodbye! Have a great day.")):
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("Goodbye! Have a great day.")):
             result = await chat_impl(
                 name="Chat",
                 content="Goodbye",
@@ -71,7 +71,9 @@ class TestChatLLMCalls:
     @pytest.mark.asyncio
     async def test_llm_called_with_message(self):
         """Test that LLM is called with user message."""
-        with patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("I can help with that.")) as mock_llm:
+        with patch(
+            "multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("I can help with that.")
+        ) as mock_llm:
             result = await chat_impl(
                 name="Chat",
                 content="How do I write tests?",
@@ -104,7 +106,7 @@ class TestChatLLMCalls:
     @pytest.mark.asyncio
     async def test_response_includes_metadata(self):
         """Test that response includes token usage metadata."""
-        with patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("Response text")):
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("Response text")):
             result = await chat_impl(
                 name="Chat",
                 content="Test message",
@@ -134,7 +136,7 @@ class TestChatFileHandling:
             test_file = Path(tmpdir) / "test.py"
             test_file.write_text("def hello():\n    return 'world'\n")
 
-            with patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("Response")) as mock_llm:
+            with patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("Response")) as mock_llm:
                 result = await chat_impl(
                     name="Chat",
                     content="Review this code",
@@ -162,7 +164,7 @@ class TestChatFileHandling:
     @pytest.mark.asyncio
     async def test_chat_works_without_files(self):
         """Test backward compatibility - chat works without files."""
-        with patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("Hello!")) as mock_llm:
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("Hello!")) as mock_llm:
             result = await chat_impl(
                 name="Chat",
                 content="Hi",
@@ -196,7 +198,7 @@ class TestChatSpecialCases:
         """Test special case: files_required_to_continue."""
         json_response = '{"status": "files_required_to_continue", "message": "To answer this question, I need to see: src/auth.py"}'
 
-        with patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)):
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)):
             result = await chat_impl(
                 name="Chat",
                 content="Review auth",
@@ -214,7 +216,8 @@ class TestChatSpecialCases:
     async def test_chat_normal_text_response(self):
         """Test normal text response (no special case)."""
         with patch(
-            "src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response("Authentication is handled in src/auth.py...")
+            "multi_mcp.utils.llm_runner._litellm_client.execute",
+            return_value=mock_llm_response("Authentication is handled in src/auth.py..."),
         ):
             result = await chat_impl(
                 name="Chat",
@@ -234,7 +237,7 @@ class TestChatSpecialCases:
         """Test special case: clarification_required."""
         json_response = '{"status": "clarification_required", "message": "Which module did you mean - auth or authentication?", "options": ["auth module", "authentication service"]}'
 
-        with patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)):
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)):
             result = await chat_impl(
                 name="Chat",
                 content="Review auth",

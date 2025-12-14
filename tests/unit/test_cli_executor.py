@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.models.cli_executor import CLIExecutor
-from src.models.config import ModelConfig
-from src.schemas.base import ModelResponse
+from multi_mcp.models.cli_executor import CLIExecutor
+from multi_mcp.models.config import ModelConfig
+from multi_mcp.schemas.base import ModelResponse
 
 
 class TestCLIExecutor:
@@ -51,7 +51,7 @@ class TestCLIExecutor:
         with (
             patch("shutil.which", return_value="/usr/bin/gemini"),
             patch("asyncio.create_subprocess_exec", new_callable=AsyncMock) as mock_exec,
-            patch("src.models.cli_executor.log_llm_interaction"),
+            patch("multi_mcp.models.cli_executor.log_llm_interaction"),
         ):
             mock_exec.return_value = mock_subprocess_success
 
@@ -101,7 +101,7 @@ class TestCLIExecutor:
         with (
             patch("shutil.which", return_value="/usr/bin/gemini"),
             patch("asyncio.create_subprocess_exec", new_callable=AsyncMock) as mock_exec,
-            patch("src.models.cli_executor.settings") as mock_settings,
+            patch("multi_mcp.models.cli_executor.settings") as mock_settings,
         ):
             mock_settings.model_timeout_seconds = 1
 
@@ -261,8 +261,8 @@ class TestCLIExecutor:
         with (
             patch("shutil.which", return_value="/usr/bin/test-cli"),
             patch("asyncio.create_subprocess_exec", new_callable=AsyncMock) as mock_exec,
-            patch("src.models.cli_executor.settings") as mock_settings,
-            patch("src.models.cli_executor.log_llm_interaction"),
+            patch("multi_mcp.models.cli_executor.settings") as mock_settings,
+            patch("multi_mcp.models.cli_executor.log_llm_interaction"),
         ):
             mock_settings.anthropic_api_key = "test-key"
             mock_settings.openai_api_key = None
@@ -306,7 +306,7 @@ class TestCLIExecutor:
         with (
             patch("shutil.which", return_value="/usr/bin/gemini"),
             patch("asyncio.create_subprocess_exec", new_callable=AsyncMock) as mock_exec,
-            patch("src.models.cli_executor.log_llm_interaction"),
+            patch("multi_mcp.models.cli_executor.log_llm_interaction"),
         ):
             mock_exec.return_value = mock_process
 
@@ -327,7 +327,7 @@ class TestCLIExecutor:
         with (
             patch("shutil.which", return_value="/usr/bin/gemini"),
             patch("asyncio.create_subprocess_exec", new_callable=AsyncMock) as mock_exec,
-            patch("src.models.cli_executor.log_llm_interaction") as mock_log,
+            patch("multi_mcp.models.cli_executor.log_llm_interaction") as mock_log,
         ):
             mock_exec.return_value = mock_subprocess_success
 

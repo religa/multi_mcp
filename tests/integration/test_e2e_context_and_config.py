@@ -13,7 +13,7 @@ pytestmark = pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="Integration te
 @pytest.mark.timeout(120)
 async def test_chat_with_agents_md(integration_test_model, tmp_path):
     """Test that AGENTS.md is loaded and used in chat context."""
-    from src.tools.chat import chat_impl
+    from multi_mcp.tools.chat import chat_impl
 
     # Create a test repository with AGENTS.md
     test_repo = tmp_path / "test_repo"
@@ -73,7 +73,7 @@ def process_data(user_input):
 @pytest.mark.timeout(300)  # 5 minutes for API calls
 async def test_model_alias_resolution(tmp_path):
     """Test that model aliases resolve correctly in E2E flow."""
-    from src.tools.chat import chat_impl
+    from multi_mcp.tools.chat import chat_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -106,7 +106,7 @@ async def test_model_alias_resolution(tmp_path):
 @pytest.mark.timeout(60)
 async def test_version_tool_returns_metadata():
     """Test that version tool returns complete metadata."""
-    from src.server import version
+    from multi_mcp.server import version
 
     # Unwrap FastMCP function wrapper
     if hasattr(version, "fn"):

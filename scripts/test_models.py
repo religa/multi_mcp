@@ -12,9 +12,9 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.config import settings
-from src.models.config import PROVIDERS
-from src.models.litellm_client import LiteLLMClient
+from multi_mcp.config import settings
+from multi_mcp.models.config import PROVIDERS
+from multi_mcp.models.litellm_client import LiteLLMClient
 
 # Models to test per provider (cheapest/fastest)
 # Note: Model must exist in config/models.yaml

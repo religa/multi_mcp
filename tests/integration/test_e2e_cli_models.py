@@ -56,7 +56,7 @@ async def test_cli_model_in_chat():
     """Test CLI model works in chat tool."""
     import uuid
 
-    from src.tools.chat import chat_impl
+    from multi_mcp.tools.chat import chat_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -90,7 +90,7 @@ async def test_cli_model_in_compare(integration_test_model):
     """Test CLI model works in compare tool alongside API model."""
     import uuid
 
-    from src.tools.compare import compare_impl
+    from multi_mcp.tools.compare import compare_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -136,7 +136,7 @@ async def test_cli_model_in_codereview():
     import uuid
     from pathlib import Path
 
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -181,7 +181,7 @@ async def test_cli_model_in_debate(integration_test_model):
     """Test CLI model works in debate tool."""
     import uuid
 
-    from src.tools.debate import debate_impl
+    from multi_mcp.tools.debate import debate_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -230,7 +230,7 @@ async def test_multiple_cli_models_in_compare():
     """Test multiple CLI models work together in compare."""
     import uuid
 
-    from src.tools.compare import compare_impl
+    from multi_mcp.tools.compare import compare_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -277,7 +277,7 @@ async def test_all_three_clis_in_compare():
     """Test all three CLI models (Gemini, Codex, Claude) work together in compare."""
     import uuid
 
-    from src.tools.compare import compare_impl
+    from multi_mcp.tools.compare import compare_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -326,8 +326,8 @@ async def test_all_three_clis_in_compare():
 @pytest.mark.timeout(150)
 async def test_cli_model_invalid_command():
     """Test CLI model with non-existent command returns error."""
-    from src.models.config import ModelConfig, get_models_config
-    from src.utils.llm_runner import execute_single
+    from multi_mcp.models.config import ModelConfig, get_models_config
+    from multi_mcp.utils.llm_runner import execute_single
 
     # Temporarily add a fake CLI model
     config = get_models_config()

@@ -3,10 +3,10 @@
 import pytest
 from pydantic import ValidationError
 
-from src.schemas.base import BaseToolRequest, ModelResponseMetadata, NextAction, SingleToolRequest, SingleToolResponse
-from src.schemas.chat import ChatRequest
-from src.schemas.codereview import CodeReviewRequest, CodeReviewResponse
-from src.schemas.compare import CompareRequest
+from multi_mcp.schemas.base import BaseToolRequest, ModelResponseMetadata, NextAction, SingleToolRequest, SingleToolResponse
+from multi_mcp.schemas.chat import ChatRequest
+from multi_mcp.schemas.codereview import CodeReviewRequest, CodeReviewResponse
+from multi_mcp.schemas.compare import CompareRequest
 
 
 class TestBaseToolRequest:
@@ -217,8 +217,8 @@ class TestCodeReviewResponse:
 
     def test_valid_codereview_response(self):
         """Test creating a valid CodeReviewResponse with model results."""
-        from src.schemas.base import ModelResponseMetadata
-        from src.schemas.codereview import CodeReviewModelResult
+        from multi_mcp.schemas.base import ModelResponseMetadata
+        from multi_mcp.schemas.codereview import CodeReviewModelResult
 
         response = CodeReviewResponse(
             thread_id="test-123",

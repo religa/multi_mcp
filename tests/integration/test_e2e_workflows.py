@@ -14,7 +14,7 @@ pytestmark = pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="Integration te
 @pytest.mark.timeout(180)
 async def test_codereview_multi_step_refinement(integration_test_model, tmp_path):
     """Test multi-step code review with scope refinement across 3 steps."""
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     # Create test files
     auth_file = tmp_path / "auth.py"
@@ -107,7 +107,7 @@ ALLOWED_HOSTS = ["*"]
 @pytest.mark.timeout(300)
 async def test_chat_long_conversation(integration_test_model, tmp_path):
     """Test 5+ turn conversation with context preservation."""
-    from src.tools.chat import chat_impl
+    from multi_mcp.tools.chat import chat_impl
 
     thread_id = str(uuid.uuid4())
     test_file = tmp_path / "calculator.py"
@@ -204,7 +204,7 @@ def subtract(a, b):
 @pytest.mark.timeout(300)  # 5 minutes for multi-model compare
 async def test_compare_continuation(compare_models, tmp_path):
     """Test continuing a compare with follow-up questions."""
-    from src.tools.compare import compare_impl
+    from multi_mcp.tools.compare import compare_impl
 
     thread_id = str(uuid.uuid4())
     test_file = tmp_path / "example.py"

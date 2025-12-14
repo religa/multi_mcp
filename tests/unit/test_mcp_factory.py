@@ -6,7 +6,7 @@ from typing import Literal, get_type_hints
 import pytest
 from pydantic import BaseModel, Field
 
-from src.utils.mcp_factory import create_mcp_wrapper
+from multi_mcp.utils.mcp_factory import create_mcp_wrapper
 
 
 class SimpleRequest(BaseModel):
@@ -231,8 +231,8 @@ class TestRealSchemas:
 
     def test_chat_request_signature(self):
         """Test ChatRequest schema generates valid signature."""
-        from src.schemas.chat import ChatRequest
-        from src.tools.chat import chat_impl
+        from multi_mcp.schemas.chat import ChatRequest
+        from multi_mcp.tools.chat import chat_impl
 
         wrapper = create_mcp_wrapper(ChatRequest, chat_impl, "Test chat")
         sig = inspect.signature(wrapper)
@@ -252,8 +252,8 @@ class TestRealSchemas:
 
     def test_codereview_request_signature(self):
         """Test CodeReviewRequest schema generates valid signature."""
-        from src.schemas.codereview import CodeReviewRequest
-        from src.tools.codereview import codereview_impl
+        from multi_mcp.schemas.codereview import CodeReviewRequest
+        from multi_mcp.tools.codereview import codereview_impl
 
         wrapper = create_mcp_wrapper(CodeReviewRequest, codereview_impl, "Test codereview")
         sig = inspect.signature(wrapper)
@@ -273,8 +273,8 @@ class TestRealSchemas:
 
     def test_compare_request_signature(self):
         """Test CompareRequest schema generates valid signature."""
-        from src.schemas.compare import CompareRequest
-        from src.tools.compare import compare_impl
+        from multi_mcp.schemas.compare import CompareRequest
+        from multi_mcp.tools.compare import compare_impl
 
         wrapper = create_mcp_wrapper(CompareRequest, compare_impl, "Test compare")
         sig = inspect.signature(wrapper)

@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from src.schemas.base import BaseToolRequest, ModelResponse, ModelResponseMetadata
-from src.utils.artifacts import save_tool_artifacts
-from src.utils.context import clear_context, set_request_context
+from multi_mcp.schemas.base import BaseToolRequest, ModelResponse, ModelResponseMetadata
+from multi_mcp.utils.artifacts import save_tool_artifacts
+from multi_mcp.utils.context import clear_context, set_request_context
 
 
 @pytest.fixture
@@ -63,7 +63,7 @@ async def test_save_tool_artifacts_success(base_request, success_response):
     )
 
     try:
-        with patch("src.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
+        with patch("multi_mcp.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
             # Return paths under base_path for relative path conversion
             mock_save.return_value = [
                 Path("/test/project/.artifacts/artifact1.md"),
@@ -112,7 +112,7 @@ async def test_save_tool_artifacts_error_response(base_request, error_response):
     )
 
     try:
-        with patch("src.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
+        with patch("multi_mcp.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
             result = await save_tool_artifacts(response=error_response)
 
             assert result is None
@@ -139,7 +139,7 @@ async def test_save_tool_artifacts_empty_content(base_request):
     )
 
     try:
-        with patch("src.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
+        with patch("multi_mcp.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
             result = await save_tool_artifacts(response=response)
 
             assert result is None
@@ -160,7 +160,7 @@ async def test_save_tool_artifacts_exception_handling(base_request, success_resp
     )
 
     try:
-        with patch("src.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
+        with patch("multi_mcp.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
             mock_save.side_effect = Exception("Test error")
 
             result = await save_tool_artifacts(response=success_response)
@@ -183,7 +183,7 @@ async def test_save_tool_artifacts_no_paths_returned(base_request, success_respo
     )
 
     try:
-        with patch("src.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
+        with patch("multi_mcp.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
             mock_save.return_value = None
 
             result = await save_tool_artifacts(response=success_response)
@@ -205,7 +205,7 @@ async def test_save_tool_artifacts_empty_paths_list(base_request, success_respon
     )
 
     try:
-        with patch("src.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
+        with patch("multi_mcp.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
             mock_save.return_value = []
 
             result = await save_tool_artifacts(response=success_response)
@@ -239,7 +239,7 @@ async def test_save_tool_artifacts_with_zero_metadata_values(base_request):
     )
 
     try:
-        with patch("src.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
+        with patch("multi_mcp.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
             # Return path under base_path for relative path conversion
             mock_save.return_value = [Path("/test/project/.artifacts/artifact.md")]
 
@@ -282,7 +282,7 @@ async def test_save_tool_artifacts_preserves_issues_in_content(base_request):
     )
 
     try:
-        with patch("src.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
+        with patch("multi_mcp.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
             # Return path under base_path for relative path conversion
             mock_save.return_value = [Path("/test/project/.artifacts/artifact.json")]
 
@@ -312,7 +312,7 @@ async def test_save_tool_artifacts_missing_context():
     set_request_context(base_path="/test/project")
 
     try:
-        with patch("src.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
+        with patch("multi_mcp.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
             result = await save_tool_artifacts(response=response)
 
             assert result is None
@@ -339,7 +339,7 @@ async def test_save_tool_artifacts_missing_base_path():
     )
 
     try:
-        with patch("src.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
+        with patch("multi_mcp.utils.artifacts.save_artifact_files", new_callable=AsyncMock) as mock_save:
             result = await save_tool_artifacts(response=response)
 
             assert result is None

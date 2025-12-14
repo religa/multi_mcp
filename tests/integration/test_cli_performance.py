@@ -8,7 +8,7 @@ import time
 
 import pytest
 
-from src.utils.llm_runner import execute_single
+from multi_mcp.utils.llm_runner import execute_single
 
 
 class TestCLIPerformance:
@@ -189,7 +189,7 @@ class TestCLIStressTests:
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         # Most should succeed (allow for rate limiting)
-        from src.schemas.base import ModelResponse
+        from multi_mcp.schemas.base import ModelResponse
 
         successful = [r for r in results if isinstance(r, ModelResponse) and r.status == "success"]
         assert len(successful) >= 3, f"Only {len(successful)}/5 calls succeeded"

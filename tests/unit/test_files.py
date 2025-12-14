@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from src.utils.paths import resolve_path
+from multi_mcp.utils.paths import resolve_path
 
 
 class TestPathNormalization:
@@ -134,19 +134,19 @@ class TestBinaryFileDetection:
 
     def test_text_file_not_binary(self, temp_files):
         """Test that text files are not detected as binary."""
-        from src.utils.files import is_binary_file
+        from multi_mcp.utils.files import is_binary_file
 
         assert is_binary_file(temp_files["text"]) is False
 
     def test_null_bytes_detected_as_binary(self, temp_files):
         """Test that files with null bytes are detected as binary."""
-        from src.utils.files import is_binary_file
+        from multi_mcp.utils.files import is_binary_file
 
         assert is_binary_file(temp_files["binary"]) is True
 
     def test_nonexistent_file_not_binary(self):
         """Test that nonexistent files return False."""
-        from src.utils.files import is_binary_file
+        from multi_mcp.utils.files import is_binary_file
 
         assert is_binary_file("/nonexistent/file.xyz") is False
 
@@ -176,7 +176,7 @@ class TestEmbedFilesForExpert:
 
     def test_embed_files_basic(self, temp_project):
         """Test basic file embedding."""
-        from src.utils.files import embed_files_for_expert
+        from multi_mcp.utils.files import embed_files_for_expert
 
         files = [os.path.join(temp_project, "small.py")]
         result = embed_files_for_expert(files, temp_project)
@@ -192,7 +192,7 @@ class TestEmbedFilesForExpert:
 
     def test_embed_files_empty_list(self, temp_project):
         """Test embedding with empty file list."""
-        from src.utils.files import embed_files_for_expert
+        from multi_mcp.utils.files import embed_files_for_expert
 
         result = embed_files_for_expert([], temp_project)
 
@@ -202,7 +202,7 @@ class TestEmbedFilesForExpert:
 
     def test_embed_files_skips_binary(self, temp_project):
         """Test that binary files are skipped."""
-        from src.utils.files import embed_files_for_expert
+        from multi_mcp.utils.files import embed_files_for_expert
 
         files = [
             os.path.join(temp_project, "small.py"),
@@ -216,7 +216,7 @@ class TestEmbedFilesForExpert:
 
     def test_embed_files_skips_large_files(self, temp_project):
         """Test that large files are skipped."""
-        from src.utils.files import embed_files_for_expert
+        from multi_mcp.utils.files import embed_files_for_expert
 
         files = [
             os.path.join(temp_project, "small.py"),
@@ -229,7 +229,7 @@ class TestEmbedFilesForExpert:
 
     def test_embed_files_skips_invalid_paths(self, temp_project):
         """Test that invalid paths are skipped gracefully."""
-        from src.utils.files import embed_files_for_expert
+        from multi_mcp.utils.files import embed_files_for_expert
 
         files = [
             os.path.join(temp_project, "small.py"),
@@ -246,7 +246,7 @@ class TestEmbedFilesForExpert:
 
     def test_embed_files_multiple_files(self, temp_project):
         """Test embedding multiple files."""
-        from src.utils.files import embed_files_for_expert
+        from multi_mcp.utils.files import embed_files_for_expert
 
         files = [
             os.path.join(temp_project, "small.py"),
@@ -262,7 +262,7 @@ class TestEmbedFilesForExpert:
 
     def test_embed_files_with_path_traversal_attempt(self, temp_project):
         """Test that path traversal attempts are blocked."""
-        from src.utils.files import embed_files_for_expert
+        from multi_mcp.utils.files import embed_files_for_expert
 
         files = [
             "../../../etc/passwd",
@@ -277,7 +277,7 @@ class TestEmbedFilesForExpert:
 
     def test_embed_files_preserves_file_path_in_output(self, temp_project):
         """Test that original file path is preserved in XML."""
-        from src.utils.files import embed_files_for_expert
+        from multi_mcp.utils.files import embed_files_for_expert
 
         # Use relative path
         files = ["small.py"]
@@ -288,7 +288,7 @@ class TestEmbedFilesForExpert:
 
     def test_embed_files_xml_structure(self, temp_project):
         """Test that output has correct XML structure."""
-        from src.utils.files import embed_files_for_expert
+        from multi_mcp.utils.files import embed_files_for_expert
 
         files = [os.path.join(temp_project, "small.py")]
         result = embed_files_for_expert(files, temp_project)
@@ -307,7 +307,7 @@ class TestEmbedFilesForExpert:
 
     def test_embed_files_path_attributes(self, temp_project):
         """Test that path, relative_path, and filename attributes are correct."""
-        from src.utils.files import embed_files_for_expert
+        from multi_mcp.utils.files import embed_files_for_expert
 
         # Create a nested directory structure
         subdir = Path(temp_project) / "src" / "utils"

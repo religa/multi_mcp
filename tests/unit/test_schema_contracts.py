@@ -18,8 +18,8 @@ class TestCodereviewContract:
 
     def test_schema_fields_match_impl_params(self):
         """CodeReviewRequest fields match codereview_impl parameters."""
-        from src.schemas.codereview import CodeReviewRequest
-        from src.tools.codereview import codereview_impl
+        from multi_mcp.schemas.codereview import CodeReviewRequest
+        from multi_mcp.tools.codereview import codereview_impl
 
         # Get schema fields
         schema_fields = set(CodeReviewRequest.model_fields.keys())
@@ -34,7 +34,7 @@ class TestCodereviewContract:
 
     def test_required_fields_have_no_defaults(self):
         """Required schema fields don't have defaults."""
-        from src.schemas.codereview import CodeReviewRequest
+        from multi_mcp.schemas.codereview import CodeReviewRequest
 
         required_fields = ["name", "content", "step_number", "next_action"]
 
@@ -45,7 +45,7 @@ class TestCodereviewContract:
 
     def test_optional_fields_have_defaults(self):
         """Optional schema fields have defaults."""
-        from src.schemas.codereview import CodeReviewRequest
+        from multi_mcp.schemas.codereview import CodeReviewRequest
 
         optional_fields = ["thread_id", "model", "relevant_files", "base_path", "issues_found"]
 
@@ -61,8 +61,8 @@ class TestChatContract:
 
     def test_schema_fields_match_impl_params(self):
         """ChatRequest fields match chat_impl parameters."""
-        from src.schemas.chat import ChatRequest
-        from src.tools.chat import chat_impl
+        from multi_mcp.schemas.chat import ChatRequest
+        from multi_mcp.tools.chat import chat_impl
 
         # Get schema fields
         schema_fields = set(ChatRequest.model_fields.keys())
@@ -77,7 +77,7 @@ class TestChatContract:
 
     def test_required_fields(self):
         """Chat required fields are marked correctly."""
-        from src.schemas.chat import ChatRequest
+        from multi_mcp.schemas.chat import ChatRequest
 
         required_fields = ["name", "content", "step_number", "next_action"]
 
@@ -91,8 +91,8 @@ class TestCompareContract:
 
     def test_schema_fields_match_impl_params(self):
         """CompareRequest fields match compare_impl parameters."""
-        from src.schemas.compare import CompareRequest
-        from src.tools.compare import compare_impl
+        from multi_mcp.schemas.compare import CompareRequest
+        from multi_mcp.tools.compare import compare_impl
 
         # Get schema fields
         schema_fields = set(CompareRequest.model_fields.keys())
@@ -107,7 +107,7 @@ class TestCompareContract:
 
     def test_models_field_required(self):
         """Compare 'models' field is optional with default."""
-        from src.schemas.compare import CompareRequest
+        from multi_mcp.schemas.compare import CompareRequest
 
         # 'models' should be optional (has default)
         field = CompareRequest.model_fields["models"]
@@ -120,8 +120,8 @@ class TestDebateContract:
 
     def test_schema_fields_match_impl_params(self):
         """DebateRequest fields match debate_impl parameters."""
-        from src.schemas.debate import DebateRequest
-        from src.tools.debate import debate_impl
+        from multi_mcp.schemas.debate import DebateRequest
+        from multi_mcp.tools.debate import debate_impl
 
         # Get schema fields
         schema_fields = set(DebateRequest.model_fields.keys())
@@ -136,7 +136,7 @@ class TestDebateContract:
 
     def test_models_field_optional(self):
         """Debate 'models' field is optional with default."""
-        from src.schemas.debate import DebateRequest
+        from multi_mcp.schemas.debate import DebateRequest
 
         # 'models' should be optional (has default)
         field = DebateRequest.model_fields["models"]
@@ -148,7 +148,7 @@ class TestBaseToolRequest:
 
     def test_base_has_common_fields(self):
         """BaseToolRequest has all common fields."""
-        from src.schemas.base import BaseToolRequest
+        from multi_mcp.schemas.base import BaseToolRequest
 
         # Common fields all tools should have
         common_fields = ["name", "content", "step_number", "next_action", "base_path"]
@@ -158,7 +158,7 @@ class TestBaseToolRequest:
 
     def test_single_tool_request_has_model(self):
         """SingleToolRequest has model field."""
-        from src.schemas.base import SingleToolRequest
+        from multi_mcp.schemas.base import SingleToolRequest
 
         # SingleToolRequest should have 'model' field
         assert "model" in SingleToolRequest.model_fields, "SingleToolRequest should have 'model' field"
@@ -173,29 +173,29 @@ class TestSchemaInheritance:
 
     def test_codereview_inherits_base(self):
         """CodeReviewRequest inherits from BaseToolRequest."""
-        from src.schemas.base import BaseToolRequest
-        from src.schemas.codereview import CodeReviewRequest
+        from multi_mcp.schemas.base import BaseToolRequest
+        from multi_mcp.schemas.codereview import CodeReviewRequest
 
         assert issubclass(CodeReviewRequest, BaseToolRequest), "CodeReviewRequest should inherit from BaseToolRequest"
 
     def test_chat_inherits_single(self):
         """ChatRequest inherits from SingleToolRequest."""
-        from src.schemas.base import SingleToolRequest
-        from src.schemas.chat import ChatRequest
+        from multi_mcp.schemas.base import SingleToolRequest
+        from multi_mcp.schemas.chat import ChatRequest
 
         assert issubclass(ChatRequest, SingleToolRequest), "ChatRequest should inherit from SingleToolRequest"
 
     def test_compare_inherits_base(self):
         """CompareRequest inherits from BaseToolRequest."""
-        from src.schemas.base import BaseToolRequest
-        from src.schemas.compare import CompareRequest
+        from multi_mcp.schemas.base import BaseToolRequest
+        from multi_mcp.schemas.compare import CompareRequest
 
         assert issubclass(CompareRequest, BaseToolRequest), "CompareRequest should inherit from BaseToolRequest"
 
     def test_debate_inherits_base(self):
         """DebateRequest inherits from BaseToolRequest."""
-        from src.schemas.base import BaseToolRequest
-        from src.schemas.debate import DebateRequest
+        from multi_mcp.schemas.base import BaseToolRequest
+        from multi_mcp.schemas.debate import DebateRequest
 
         assert issubclass(DebateRequest, BaseToolRequest), "DebateRequest should inherit from BaseToolRequest"
 
@@ -205,7 +205,7 @@ class TestSchemaValidation:
 
     def test_codereview_validates_next_action(self):
         """CodeReviewRequest validates next_action enum."""
-        from src.schemas.codereview import CodeReviewRequest
+        from multi_mcp.schemas.codereview import CodeReviewRequest
 
         # Valid next_action
         valid_request = CodeReviewRequest(
@@ -229,7 +229,7 @@ class TestSchemaValidation:
 
     def test_chat_validates_step_number(self):
         """ChatRequest validates step_number is positive."""
-        from src.schemas.chat import ChatRequest
+        from multi_mcp.schemas.chat import ChatRequest
 
         # Valid step_number
         valid_request = ChatRequest(

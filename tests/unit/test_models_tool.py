@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import pytest
 
-from src.models.config import ModelConfig, ModelsConfiguration
-from src.tools.models import models_impl
+from multi_mcp.models.config import ModelConfig, ModelsConfiguration
+from multi_mcp.tools.models import models_impl
 
 
 class TestModelsImpl:
@@ -38,8 +38,8 @@ class TestModelsImpl:
     async def test_models_impl_returns_model_list(self, sample_config):
         """Test that models_impl returns list of models with credential validation."""
         with (
-            patch("src.tools.models.ModelResolver") as mock_resolver_class,
-            patch("src.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
+            patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -91,8 +91,8 @@ class TestModelsImpl:
     async def test_models_impl_includes_aliases_and_metadata(self, sample_config):
         """Test that returned models include all metadata fields."""
         with (
-            patch("src.tools.models.ModelResolver") as mock_resolver_class,
-            patch("src.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
+            patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -129,8 +129,8 @@ class TestModelsImpl:
     async def test_models_impl_excludes_disabled_models(self, sample_config):
         """Test that disabled models are excluded from the list."""
         with (
-            patch("src.tools.models.ModelResolver") as mock_resolver_class,
-            patch("src.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
+            patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -174,8 +174,8 @@ class TestModelsImpl:
     async def test_models_impl_credential_validation_invalid(self, sample_config):
         """Test that invalid credentials are properly marked."""
         with (
-            patch("src.tools.models.ModelResolver") as mock_resolver_class,
-            patch("src.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
+            patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -206,8 +206,8 @@ class TestModelsImpl:
     async def test_models_impl_skips_cli_models(self, sample_config):
         """Test that CLI models are skipped for credential validation."""
         with (
-            patch("src.tools.models.ModelResolver") as mock_resolver_class,
-            patch("src.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
+            patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -253,8 +253,8 @@ class TestModelsImpl:
     async def test_models_impl_handles_validation_exception(self, sample_config):
         """Test that validation exceptions are handled gracefully."""
         with (
-            patch("src.tools.models.ModelResolver") as mock_resolver_class,
-            patch("src.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
+            patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -285,8 +285,8 @@ class TestModelsImpl:
     async def test_models_impl_handles_missing_litellm_model(self, sample_config):
         """Test that models without litellm_model get 'unknown' status."""
         with (
-            patch("src.tools.models.ModelResolver") as mock_resolver_class,
-            patch("src.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
+            patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config

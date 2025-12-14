@@ -16,7 +16,7 @@ class TestServerImport:
     def test_server_imports_successfully(self):
         """Server module imports without errors."""
         try:
-            import src.server  # noqa: F401
+            import multi_mcp.server  # noqa: F401
 
             assert True, "Server imported successfully"
         except ImportError as e:
@@ -24,14 +24,14 @@ class TestServerImport:
 
     def test_server_has_mcp_instance(self):
         """Server module has mcp instance."""
-        from src.server import mcp
+        from multi_mcp.server import mcp
 
         assert mcp is not None, "mcp instance should exist"
         assert hasattr(mcp, "tool"), "mcp should have tool decorator"
 
     def test_server_has_all_tools(self):
         """Server has all expected tool functions."""
-        from src.server import chat, codereview, compare, debate, models, version
+        from multi_mcp.server import chat, codereview, compare, debate, models, version
 
         # Verify all tool functions exist
         assert chat is not None, "chat tool should exist"
@@ -47,7 +47,7 @@ class TestToolRegistration:
 
     def test_tools_registered_with_mcp(self):
         """All tools are registered with MCP server."""
-        from src.server import mcp
+        from multi_mcp.server import mcp
 
         # Get registered tools via MCP's internal registry
         # FastMCP stores tools in mcp._tools or similar
@@ -56,7 +56,7 @@ class TestToolRegistration:
 
     def test_tool_count(self):
         """Verify expected number of tools registered."""
-        from src.server import chat, codereview, compare, debate, models, version
+        from multi_mcp.server import chat, codereview, compare, debate, models, version
 
         # Count tools (FunctionTool objects from FastMCP)
         tools = [chat, codereview, compare, debate, models, version]
@@ -68,7 +68,7 @@ class TestToolRegistration:
 
     def test_no_duplicate_tool_names(self):
         """No duplicate tool names in registration."""
-        from src.server import chat, codereview, compare, debate, models, version
+        from multi_mcp.server import chat, codereview, compare, debate, models, version
 
         # FunctionTool objects have .name attribute
         tool_names = [
@@ -89,7 +89,7 @@ class TestToolSchemas:
 
     def test_codereview_schema_valid(self):
         """Codereview tool has valid schema."""
-        from src.schemas.codereview import CodeReviewRequest
+        from multi_mcp.schemas.codereview import CodeReviewRequest
 
         # Schema should be a Pydantic model
         assert hasattr(CodeReviewRequest, "model_fields"), "CodeReviewRequest should be a Pydantic model"
@@ -103,7 +103,7 @@ class TestToolSchemas:
 
     def test_chat_schema_valid(self):
         """Chat tool has valid schema."""
-        from src.schemas.chat import ChatRequest
+        from multi_mcp.schemas.chat import ChatRequest
 
         # Schema should be a Pydantic model
         assert hasattr(ChatRequest, "model_fields"), "ChatRequest should be a Pydantic model"
@@ -115,7 +115,7 @@ class TestToolSchemas:
 
     def test_compare_schema_valid(self):
         """Compare tool has valid schema."""
-        from src.schemas.compare import CompareRequest
+        from multi_mcp.schemas.compare import CompareRequest
 
         # Schema should be a Pydantic model
         assert hasattr(CompareRequest, "model_fields"), "CompareRequest should be a Pydantic model"
@@ -128,7 +128,7 @@ class TestToolSchemas:
 
     def test_debate_schema_valid(self):
         """Debate tool has valid schema."""
-        from src.schemas.debate import DebateRequest
+        from multi_mcp.schemas.debate import DebateRequest
 
         # Schema should be a Pydantic model
         assert hasattr(DebateRequest, "model_fields"), "DebateRequest should be a Pydantic model"
@@ -145,31 +145,31 @@ class TestToolImplementations:
 
     def test_codereview_impl_exists(self):
         """Codereview implementation function exists."""
-        from src.tools.codereview import codereview_impl
+        from multi_mcp.tools.codereview import codereview_impl
 
         assert callable(codereview_impl), "codereview_impl should be callable"
 
     def test_chat_impl_exists(self):
         """Chat implementation function exists."""
-        from src.tools.chat import chat_impl
+        from multi_mcp.tools.chat import chat_impl
 
         assert callable(chat_impl), "chat_impl should be callable"
 
     def test_compare_impl_exists(self):
         """Compare implementation function exists."""
-        from src.tools.compare import compare_impl
+        from multi_mcp.tools.compare import compare_impl
 
         assert callable(compare_impl), "compare_impl should be callable"
 
     def test_debate_impl_exists(self):
         """Debate implementation function exists."""
-        from src.tools.debate import debate_impl
+        from multi_mcp.tools.debate import debate_impl
 
         assert callable(debate_impl), "debate_impl should be callable"
 
     def test_models_impl_exists(self):
         """Models implementation function exists."""
-        from src.tools.models import models_impl
+        from multi_mcp.tools.models import models_impl
 
         assert callable(models_impl), "models_impl should be callable"
 
@@ -179,13 +179,13 @@ class TestConfigurationLoading:
 
     def test_config_imports(self):
         """Config module imports successfully."""
-        from src.config import settings
+        from multi_mcp.config import settings
 
         assert settings is not None, "settings should be loaded"
 
     def test_model_config_loads(self):
         """Model configuration loads successfully."""
-        from src.models.config import load_models_config
+        from multi_mcp.models.config import load_models_config
 
         config = load_models_config()
         assert config is not None, "Model config should load"
@@ -193,7 +193,7 @@ class TestConfigurationLoading:
 
     def test_prompts_load(self):
         """System prompts load successfully."""
-        from src.prompts import CHAT_PROMPT, CODEREVIEW_PROMPT
+        from multi_mcp.prompts import CHAT_PROMPT, CODEREVIEW_PROMPT
 
         assert len(CHAT_PROMPT) > 0, "Chat prompt should be loaded"
         assert len(CODEREVIEW_PROMPT) > 0, "Codereview prompt should be loaded"

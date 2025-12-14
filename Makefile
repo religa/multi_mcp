@@ -59,7 +59,7 @@ verify:
 	fi
 	@echo "✓ Virtual environment exists"
 	@echo "✓ .env file exists"
-	@.venv/bin/python -c "import sys; sys.path.insert(0, '.'); from src.server import mcp; print('✓ Server module loads correctly')" || \
+	@.venv/bin/python -c "from multi_mcp.server import mcp; print('✓ Server module loads correctly')" || \
 		(echo "ERROR: Server module failed to load"; exit 1)
 	@echo ""
 	@echo "Installation verified! Next steps:"

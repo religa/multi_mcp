@@ -1,6 +1,6 @@
 """Tests for JSON parser."""
 
-from src.utils.json_parser import parse_llm_json
+from multi_mcp.utils.json_parser import parse_llm_json
 
 
 def test_parse_simple_json():

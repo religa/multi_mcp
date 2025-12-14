@@ -229,16 +229,16 @@ For detailed architecture documentation, see `CLAUDE.md`.
 
 Follow this pattern (see CLAUDE.md for details):
 
-1. **Create Pydantic schema** in `src/schemas/` (inherit from `BaseToolRequest` or `SingleToolRequest`)
-2. **Create implementation function** in `src/tools/` (e.g., `my_tool_impl()`)
-3. **Add factory-generated wrapper** in `src/server.py`:
+1. **Create Pydantic schema** in `multi_mcp/schemas/` (inherit from `BaseToolRequest` or `SingleToolRequest`)
+2. **Create implementation function** in `multi_mcp/tools/` (e.g., `my_tool_impl()`)
+3. **Add factory-generated wrapper** in `multi_mcp/server.py`:
    ```python
    my_tool = create_mcp_wrapper(MyToolRequest, my_tool_impl, "Description")
    my_tool = mcp.tool()(mcp_monitor(my_tool))
    ```
 4. **Add unit tests** in `tests/unit/test_my_tool.py`
 5. **Add integration test** in `tests/integration/test_e2e_my_tool.py`
-6. **Add system prompt** (if needed) in `src/prompts/my_tool.md`
+6. **Add system prompt** (if needed) in `multi_mcp/prompts/my_tool.md`
 
 ### Debugging
 
@@ -253,7 +253,7 @@ cat logs/*.llm.json | jq .
 tail -f logs/server.log
 
 # Enable verbose logging
-LOG_LEVEL=DEBUG uv run python src/server.py
+LOG_LEVEL=DEBUG uv run python multi_mcp/server.py
 ```
 
 ### Cleanup
@@ -275,12 +275,12 @@ This removes:
 
 Multi-MCP has comprehensive logging for development and debugging:
 
-**MCP Tool Logging** (`src/utils/mcp_logger.py`):
+**MCP Tool Logging** (`multi_mcp/utils/mcp_logger.py`):
 - Logs all MCP tool requests and responses
 - Format: `logs/TIMESTAMP.THREAD_ID.mcp.json`
 - Tracks: tool_name, direction (request/response), data, thread_id
 
-**LLM API Logging** (`src/utils/request_logger.py`):
+**LLM API Logging** (`multi_mcp/utils/request_logger.py`):
 - Logs all LiteLLM API calls
 - Format: `logs/TIMESTAMP.THREAD_ID.llm.json`
 - Tracks: model, messages, temperature, usage, response
@@ -301,7 +301,7 @@ logs/
 ## Common Development Tasks
 
 **Updating Prompts:**
-- Edit files in `src/prompts/*.md`
+- Edit files in `multi_mcp/prompts/*.md`
 - Changes take effect on server restart
 - Test with: `RUN_E2E=1 uv run pytest tests/integration/`
 

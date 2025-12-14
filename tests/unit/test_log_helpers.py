@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from src.utils.log_helpers import write_log_file
+from multi_mcp.utils.log_helpers import write_log_file
 
 
 class TestWriteLogFile:
@@ -16,7 +16,7 @@ class TestWriteLogFile:
         log_data = {"test": "data", "value": 123}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 filepath = write_log_file(log_data, "test", thread_id="thread123")
 
                 assert filepath is not None
@@ -29,7 +29,7 @@ class TestWriteLogFile:
         log_data = {"test": "data", "value": 123}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 filepath = write_log_file(log_data, "test", thread_id="thread123")
 
                 assert filepath is not None
@@ -45,7 +45,7 @@ class TestWriteLogFile:
         log_data = {"test": "data"}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 filepath = write_log_file(log_data, "test")
 
                 assert filepath is not None
@@ -61,7 +61,7 @@ class TestWriteLogFile:
         log_data = {"test": "data"}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 filepath = write_log_file(log_data, "test", thread_id="thread123")
 
                 assert filepath is not None
@@ -72,7 +72,7 @@ class TestWriteLogFile:
         log_data = {"test": "data"}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 filepath = write_log_file(log_data, "test")
 
                 assert filepath is not None
@@ -87,7 +87,7 @@ class TestWriteLogFile:
         unsafe_id = "thread@123#with$unsafe%chars!"
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 filepath = write_log_file(log_data, "test", thread_id=unsafe_id)
 
                 assert filepath is not None
@@ -104,7 +104,7 @@ class TestWriteLogFile:
         log_data = {"test": "data"}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 mcp_file = write_log_file(log_data, "mcp")
                 llm_file = write_log_file(log_data, "llm")
 
@@ -118,7 +118,7 @@ class TestWriteLogFile:
         log_data = {"test": "data"}
 
         # Use invalid directory to trigger error
-        with patch("src.utils.log_helpers.LOGS_DIR", Path("/invalid/nonexistent/dir")):
+        with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path("/invalid/nonexistent/dir")):
             filepath = write_log_file(log_data, "test")
 
             assert filepath is None
@@ -128,7 +128,7 @@ class TestWriteLogFile:
         log_data = {"test": "data"}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 filepath = write_log_file(log_data, "test")
 
                 assert filepath is not None
@@ -149,7 +149,7 @@ class TestWriteLogFile:
         }
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 filepath = write_log_file(log_data, "test")
 
                 assert filepath is not None
@@ -165,7 +165,7 @@ class TestWriteLogFile:
         log_data = {"test": "data", "nested": {"key": "value"}}
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("src.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
+            with patch("multi_mcp.utils.log_helpers.LOGS_DIR", Path(tmpdir)):
                 filepath = write_log_file(log_data, "test")
 
                 assert filepath is not None

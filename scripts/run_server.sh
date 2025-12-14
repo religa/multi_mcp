@@ -14,4 +14,4 @@ if [ ! -f .env ]; then
 fi
 
 # Run the server
-exec uv run python src/server.py
+exec uv run python -m multi_mcp.server

@@ -232,7 +232,7 @@ multi --base-path /path/to/project src/
 
 **"No API key found"**
 - Add at least one API key to your `.env` file
-- Verify it's loaded: `uv run python -c "from src.config import settings; print(settings.openai_api_key)"`
+- Verify it's loaded: `uv run python -c "from multi_mcp.config import settings; print(settings.openai_api_key)"`
 
 **Integration tests fail**
 - Set `RUN_E2E=1` environment variable
@@ -241,7 +241,7 @@ multi --base-path /path/to/project src/
 **Debug mode:**
 ```bash
 export LOG_LEVEL=DEBUG # INFO is default
-uv run python src/server.py
+uv run python -m multi_mcp.server
 ```
 
 Check logs in `logs/server.log` for detailed information.

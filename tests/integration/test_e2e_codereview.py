@@ -28,7 +28,7 @@ async def test_codereview_finds_sql_injection(integration_test_model, test_repo_
     """Test that codereview identifies SQL injection vulnerabilities."""
     import uuid
 
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -97,7 +97,7 @@ async def test_codereview_continuation(integration_test_model, test_repo_path, a
     # Step 1: Start review (returns checklist since next_action != "stop")
     import uuid
 
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     thread_id_step1 = str(uuid.uuid4())
     response1 = await codereview_impl(
@@ -153,7 +153,7 @@ async def test_codereview_continuation(integration_test_model, test_repo_path, a
 @pytest.mark.timeout(30)
 async def test_models(integration_test_model):
     """Test models tool returns available models."""
-    from src.tools.models import models_impl
+    from multi_mcp.tools.models import models_impl
 
     response = await models_impl()
 
@@ -188,7 +188,7 @@ async def test_codereview_token_budget(integration_test_model, test_repo_path, a
     """Test that token budget is respected."""
     import uuid
 
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -232,7 +232,7 @@ async def test_codereview_repository_context(integration_test_model, auth_file_p
     """Test that repository context (CLAUDE.md) is loaded if present."""
     import uuid
 
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     # Create a temporary test repo with CLAUDE.md
     test_repo = tmp_path / "test_repo"
@@ -297,7 +297,7 @@ async def test_codereview_multi_model_parallel(test_repo_path, auth_file_path):
     """Test multi-model code review with 2 models in parallel."""
     import uuid
 
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -392,7 +392,7 @@ async def test_codereview_multi_model_consensus(test_repo_path, auth_file_path):
     """Test that multi-model review aggregates issues correctly."""
     import uuid
 
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     thread_id = str(uuid.uuid4())
 

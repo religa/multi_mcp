@@ -5,9 +5,9 @@ from unittest.mock import patch
 import pytest
 from pydantic import ValidationError
 
-from src.config import settings
-from src.schemas.base import ModelResponse, ModelResponseMetadata
-from src.tools.codereview import codereview_impl
+from multi_mcp.config import settings
+from multi_mcp.schemas.base import ModelResponse, ModelResponseMetadata
+from multi_mcp.tools.codereview import codereview_impl
 
 
 def mock_llm_response(content: str, model: str = "gpt-5-mini") -> ModelResponse:
@@ -71,7 +71,7 @@ class TestCodeReviewStepLogic:
     async def test_no_files_returns_continue(self):
         """Test that no relevant files returns continue action with reason to add files."""
         # Create thread first to get past step 1
-        with patch("src.utils.llm_runner._litellm_client.execute") as mock_llm:
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute") as mock_llm:
             # Step 1: Get checklist
             result1 = await codereview_impl(
                 name="Review",
@@ -105,7 +105,7 @@ class TestCodeReviewStepLogic:
     @pytest.mark.asyncio
     async def test_too_many_files_returns_continue(self):
         """Test file count limit enforcement via Pydantic validator."""
-        from src.schemas.codereview import CodeReviewRequest
+        from multi_mcp.schemas.codereview import CodeReviewRequest
 
         # Create many file paths
         too_many_files = [f"/tmp/file{i}.py" for i in range(settings.max_files_per_review + 1)]
@@ -136,11 +136,11 @@ class TestCodeReviewStepLogic:
 
         with (
             patch(
-                "src.utils.llm_runner._litellm_client.execute",
+                "multi_mcp.utils.llm_runner._litellm_client.execute",
                 return_value=mock_llm_response('{"status": "no_issues_found", "message": "All good"}'),
             ) as mock_llm,
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(
                 name="Review",
@@ -195,9 +195,9 @@ class TestCodeReviewLLMResponseParsing:
             }"""
 
         with (
-            patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             # Create thread first
             result1 = await codereview_impl(**{**base_params, "step_number": 1, "thread_id": "test-thread"})
@@ -226,9 +226,9 @@ class TestCodeReviewLLMResponseParsing:
             }"""
 
         with (
-            patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(**{**base_params, "step_number": 1, "thread_id": "test-thread"})
             thread_id = result1["thread_id"]
@@ -250,9 +250,9 @@ class TestCodeReviewLLMResponseParsing:
             }"""
 
         with (
-            patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(**{**base_params, "step_number": 1, "thread_id": "test-thread"})
             thread_id = result1["thread_id"]
@@ -274,9 +274,9 @@ class TestCodeReviewLLMResponseParsing:
             }"""
 
         with (
-            patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(**{**base_params, "step_number": 1, "thread_id": "test-thread"})
             thread_id = result1["thread_id"]
@@ -303,9 +303,9 @@ class TestCodeReviewLLMResponseParsing:
             }"""
 
         with (
-            patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(**{**base_params, "step_number": 1, "thread_id": "test-thread"})
             thread_id = result1["thread_id"]
@@ -347,9 +347,9 @@ class TestCodeReviewErrorHandling:
         plain_text = "This is plain text, not JSON"
 
         with (
-            patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(plain_text)),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(plain_text)),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(**{**base_params, "step_number": 1, "thread_id": "test-thread"})
             thread_id = result1["thread_id"]
@@ -370,9 +370,9 @@ class TestCodeReviewErrorHandling:
         json_response = '{"message": "Missing status field"}'
 
         with (
-            patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(**{**base_params, "step_number": 1, "thread_id": "test-thread"})
             thread_id = result1["thread_id"]
@@ -389,11 +389,11 @@ class TestCodeReviewErrorHandling:
         """Test that unknown status value is handled gracefully."""
         with (
             patch(
-                "src.utils.llm_runner._litellm_client.execute",
+                "multi_mcp.utils.llm_runner._litellm_client.execute",
                 return_value=mock_llm_response('{"status": "unknown_status_value", "message": "Unknown"}'),
             ),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(**{**base_params, "step_number": 1, "thread_id": "test-thread"})
             thread_id = result1["thread_id"]
@@ -410,11 +410,11 @@ class TestCodeReviewErrorHandling:
         """Test 'review_complete' without issues_found field."""
         with (
             patch(
-                "src.utils.llm_runner._litellm_client.execute",
+                "multi_mcp.utils.llm_runner._litellm_client.execute",
                 return_value=mock_llm_response('{"status": "review_complete", "message": "Done"}'),
             ),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(**{**base_params, "step_number": 1, "thread_id": "test-thread"})
             thread_id = result1["thread_id"]
@@ -430,9 +430,9 @@ class TestCodeReviewErrorHandling:
         json_response = '{"status": "no_issues_found", "message": "All good"}'
 
         with (
-            patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(**{**base_params, "step_number": 1, "thread_id": "test-thread"})
             thread_id = result1["thread_id"]
@@ -453,9 +453,9 @@ class TestCodeReviewErrorHandling:
         json_response = '{"status": "no_issues_found", "message": "All good"}'  # Empty usage data
 
         with (
-            patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(**{**base_params, "step_number": 1, "thread_id": "test-thread"})
             thread_id = result1["thread_id"]
@@ -477,7 +477,7 @@ class TestCodeReviewContextBuilding:
         """Test that LLM is called with files via MessageBuilder."""
         json_response = '{"status": "no_issues_found", "message": "Good"}'
 
-        with patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)) as mock_llm:
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)) as mock_llm:
             # Step 1 always returns checklist, regardless of next_action or files
             result = await codereview_impl(
                 name="Review",
@@ -503,9 +503,9 @@ class TestCodeReviewContextBuilding:
         issues = [{"severity": "high", "location": "auth.py:10", "description": "Security issue"}]
 
         with (
-            patch("src.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)) as mock_llm,
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.utils.llm_runner._litellm_client.execute", return_value=mock_llm_response(json_response)) as mock_llm,
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
         ):
             result1 = await codereview_impl(
                 name="Review",
@@ -541,7 +541,7 @@ class TestModelStatusSummary:
 
     def test_extract_exception_names(self):
         """Test that exception names are extracted correctly from error strings."""
-        from src.tools.codereview import _build_model_status_summary
+        from multi_mcp.tools.codereview import _build_model_status_summary
 
         # Test various error formats
         test_cases = [
@@ -589,7 +589,7 @@ class TestModelStatusSummary:
 
     def test_success_with_issue_counts(self):
         """Test that successful models show issue counts."""
-        from src.tools.codereview import _build_model_status_summary
+        from multi_mcp.tools.codereview import _build_model_status_summary
 
         # Create mock successful result
         mock_result = type(
@@ -607,7 +607,7 @@ class TestModelStatusSummary:
 
     def test_mixed_results(self):
         """Test mixed success and error results."""
-        from src.tools.codereview import _build_model_status_summary
+        from multi_mcp.tools.codereview import _build_model_status_summary
 
         mock_success = type(
             "MockResult",
@@ -665,8 +665,8 @@ class TestConsolidationValidation:
         ]
 
         # Mock the consolidation to return consolidated result
-        from src.schemas.base import ModelResponseMetadata
-        from src.schemas.codereview import CodeReviewModelResult
+        from multi_mcp.schemas.base import ModelResponseMetadata
+        from multi_mcp.schemas.codereview import CodeReviewModelResult
 
         mock_consolidated_result = CodeReviewModelResult(
             content=mock_consolidated["message"],
@@ -684,12 +684,12 @@ class TestConsolidationValidation:
         )
 
         with (
-            patch("src.utils.llm_runner.execute_parallel", return_value=mock_raw_results),
-            patch("src.utils.consolidation.consolidate_model_results", return_value=mock_consolidated_result),
-            patch("src.utils.prompts.build_expert_context", return_value="<expert context>"),
-            patch("src.utils.repository.build_repository_context", return_value=None),
-            patch("src.memory.store.store_conversation_turn"),
-            patch("src.config.settings.max_codereview_response_size", 100),  # Force consolidation
+            patch("multi_mcp.utils.llm_runner.execute_parallel", return_value=mock_raw_results),
+            patch("multi_mcp.utils.consolidation.consolidate_model_results", return_value=mock_consolidated_result),
+            patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
+            patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
+            patch("multi_mcp.memory.store.store_conversation_turn"),
+            patch("multi_mcp.config.settings.max_codereview_response_size", 100),  # Force consolidation
         ):
             result = await codereview_impl(
                 name="Test Review",

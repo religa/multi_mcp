@@ -45,7 +45,7 @@ RUN_E2E=1 uv run pytest tests/ -v
 
 # Run the MCP server
 ./scripts/run_server.sh
-# or: uv run python src/server.py
+# or: uv run python multi_mcp/server.py
 
 # View MCP logs (request/response)
 ls -lh logs/*.mcp.json
@@ -64,19 +64,19 @@ See README.md for CLI usage examples. Note: CLI is experimental.
 
 ### Core Components
 
-**`src/server.py`**: FastMCP server implementation with factory-generated tool wrappers
+**`multi_mcp/server.py`**: FastMCP server implementation with factory-generated tool wrappers
 - Uses `create_mcp_wrapper()` factory to auto-generate tools from schemas
 - Tool wrappers decorated with `@mcp.tool()` and `@mcp_monitor` for logging
-- Calls `*_impl()` functions from `src/tools/` for actual implementation
+- Calls `*_impl()` functions from `multi_mcp/tools/` for actual implementation
 
-**`src/tools/`**: Tool implementation functions
+**`multi_mcp/tools/`**: Tool implementation functions
 - `codereview.py` - Code review workflow with checklist guidance and expert validation
 - `chat.py` - Interactive chat for development questions
 - `compare.py` - Multi-model parallel analysis
 - `debate.py` - Two-step debate workflow (independent + critique)
 - `models.py` - Model listing implementation
 
-**`src/models/`**: Model configuration and LLM integration
+**`multi_mcp/models/`**: Model configuration and LLM integration
 - `config.py` - YAML-based model config with Pydantic validation (`ModelConfig`, `ModelsConfiguration`)
 - `resolver.py` - Model alias resolution with LiteLLM fallback (`ModelResolver`)
 - `litellm_client.py` - API model execution via LiteLLM responses API (~260 lines)
@@ -88,12 +88,12 @@ See README.md for CLI usage examples. Note: CLI is experimental.
 - Use-case defaults (`fast`, `smart`, `cheap`)
 - Temperature constraints per model
 
-**`src/config.py`**: Environment-based configuration using Pydantic Settings
+**`multi_mcp/config.py`**: Environment-based configuration using Pydantic Settings
 - API keys, model defaults (`default_model`, `default_model_list`), server settings
 - `default_model_list`: Default models for multi-model compare (comma-separated or JSON array in .env)
 - Loads from `.env` file
 
-**`src/schemas/`**: Pydantic models for request validation
+**`multi_mcp/schemas/`**: Pydantic models for request validation
 - `base.py` - Base `BaseToolRequest`, `SingleToolRequest`, `ModelResponseMetadata`
 - `codereview.py` - `CodeReviewRequest`, `CodeReviewResponse`
 - `chat.py` - `ChatRequest`, `ChatResponse`
@@ -102,10 +102,10 @@ See README.md for CLI usage examples. Note: CLI is experimental.
 - **Single source of truth**: Field descriptions defined once in Pydantic models
 - **DRY principle**: Factory auto-generates tools from schemas
 
-**`src/memory/`**: Conversation state management
+**`multi_mcp/memory/`**: Conversation state management
 - `store.py` - `ThreadStore` class for request/response storage with 6-hour TTL
 
-**`src/prompts/`**: System prompts loaded from markdown files
+**`multi_mcp/prompts/`**: System prompts loaded from markdown files
 - `codereview.md` - Code review instructions with OWASP Top 10, performance patterns
 - `chat.md` - Chat system prompt for development assistance
 - `compare.md` - Multi-model compare instructions
@@ -113,7 +113,7 @@ See README.md for CLI usage examples. Note: CLI is experimental.
 - `debate-step2.md` - Debate and voting phase instructions
 - `__init__.py` - Loads prompts into constants
 
-**`src/utils/`**: Utility functions
+**`multi_mcp/utils/`**: Utility functions
 - `context.py` - ContextVar-based request context management (thread_id, workflow, step_number, base_path)
 - `mcp_decorator.py` - MCP tool decorator that sets context at request entry
 - `mcp_factory.py` - Factory for auto-generating MCP tools from Pydantic schemas
@@ -132,7 +132,7 @@ See README.md for CLI usage examples. Note: CLI is experimental.
 
 ### Schema Design Pattern
 
-**Factory-Based Tool Generation**: Tools are auto-generated from Pydantic schemas using `create_mcp_wrapper()` factory (`src/utils/mcp_factory.py`).
+**Factory-Based Tool Generation**: Tools are auto-generated from Pydantic schemas using `create_mcp_wrapper()` factory (`multi_mcp/utils/mcp_factory.py`).
 
 **Process**: Define Pydantic schema → Use factory to generate wrapper → Factory auto-generates function signature
 
@@ -141,7 +141,7 @@ See README.md for CLI usage examples. Note: CLI is experimental.
 ### Request Context Management
 
 Uses Python's `contextvars` module for request-scoped data (`thread_id`, `workflow`, `step_number`, `base_path`).
-- **Implementation**: `src/utils/context.py`
+- **Implementation**: `multi_mcp/utils/context.py`
 - **Entry**: `mcp_decorator` sets context from request params
 - **Usage**: Utility functions call `get_thread_id()`, `get_base_path()`, etc.
 - **Cleanup**: `clear_context()` prevents leaks
@@ -197,14 +197,14 @@ Models are defined in `config/models.yaml`. See README.md for model aliases and 
 ## Common Development Tasks
 
 ### Adding a New MCP Tool
-1. Create Pydantic schema in `src/schemas/`
-2. Create `*_impl()` function in `src/tools/`
-3. Add factory wrapper in `src/server.py`: `create_mcp_wrapper(Schema, impl, "Description")`
+1. Create Pydantic schema in `multi_mcp/schemas/`
+2. Create `*_impl()` function in `multi_mcp/tools/`
+3. Add factory wrapper in `multi_mcp/server.py`: `create_mcp_wrapper(Schema, impl, "Description")`
 4. Add tests in `tests/unit/` and `tests/integration/`
-5. Add system prompt (if needed) in `src/prompts/`
+5. Add system prompt (if needed) in `multi_mcp/prompts/`
 
 **Debugging**: Check logs in `logs/` directory, use `LOG_LEVEL=DEBUG` in `.env`
-**Prompts**: Edit `src/prompts/*.md`, changes take effect on server restart
+**Prompts**: Edit `multi_mcp/prompts/*.md`, changes take effect on server restart
 
 ## Design Principles
 

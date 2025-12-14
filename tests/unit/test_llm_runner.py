@@ -4,9 +4,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from src.schemas.base import ModelResponse, ModelResponseMetadata
-from src.utils.context import set_request_context
-from src.utils.llm_runner import execute_parallel, execute_single
+from multi_mcp.schemas.base import ModelResponse, ModelResponseMetadata
+from multi_mcp.utils.context import set_request_context
+from multi_mcp.utils.llm_runner import execute_parallel, execute_single
 
 
 @pytest.mark.asyncio
@@ -35,7 +35,7 @@ async def test_execute_parallel_all_success():
         {"role": "user", "content": "Test prompt"},
     ]
 
-    with patch("src.utils.llm_runner._litellm_client.execute", side_effect=mock_call_async):
+    with patch("multi_mcp.utils.llm_runner._litellm_client.execute", side_effect=mock_call_async):
         results = await execute_parallel(
             models=["gpt-5-mini", "haiku"],
             messages=messages,
@@ -72,7 +72,7 @@ async def test_execute_parallel_partial_failure():
 
     messages = [{"role": "user", "content": "Test prompt"}]
 
-    with patch("src.utils.llm_runner._litellm_client.execute", side_effect=mock_call_async):
+    with patch("multi_mcp.utils.llm_runner._litellm_client.execute", side_effect=mock_call_async):
         results = await execute_parallel(models=["gpt-5-mini", "haiku"], messages=messages)
 
     assert len(results) == 2
@@ -95,7 +95,7 @@ async def test_execute_parallel_uses_provided_messages():
 
     messages = [{"role": "user", "content": "Test prompt"}]
 
-    with patch("src.utils.llm_runner._litellm_client.execute", side_effect=mock_call_async):
+    with patch("multi_mcp.utils.llm_runner._litellm_client.execute", side_effect=mock_call_async):
         results = await execute_parallel(models=["gpt-5-mini"], messages=messages)
 
     assert len(results) == 1
@@ -127,8 +127,8 @@ async def test_execute_single_success_with_artifacts():
         ),
     )
 
-    with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
-        with patch("src.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock) as mock_save_artifacts:
+    with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock) as mock_save_artifacts:
             mock_call.return_value = mock_response
             mock_save_artifacts.return_value = ["/test/artifact1.md", "/test/artifact2.json"]
 
@@ -172,8 +172,8 @@ async def test_execute_single_with_messages():
         ),
     )
 
-    with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
-        with patch("src.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock) as mock_save_artifacts:
+    with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock) as mock_save_artifacts:
             mock_call.return_value = mock_response
             mock_save_artifacts.return_value = ["/test/artifact.md"]
 
@@ -200,8 +200,8 @@ async def test_execute_single_error_no_artifacts():
         metadata=ModelResponseMetadata(model="gpt-5-mini"),
     )
 
-    with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
-        with patch("src.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock) as mock_save_artifacts:
+    with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock) as mock_save_artifacts:
             mock_call.return_value = error_response
 
             result = await execute_single(
@@ -233,8 +233,8 @@ async def test_execute_single_no_artifacts_returned():
         ),
     )
 
-    with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
-        with patch("src.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock) as mock_save_artifacts:
+    with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock) as mock_save_artifacts:
             mock_call.return_value = mock_response
             mock_save_artifacts.return_value = None
 
@@ -266,8 +266,8 @@ async def test_execute_single_preserves_issues_in_content():
         ),
     )
 
-    with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
-        with patch("src.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock) as mock_save_artifacts:
+    with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock) as mock_save_artifacts:
             mock_call.return_value = response_with_issues
             mock_save_artifacts.return_value = ["/test/review.json"]
 
@@ -294,7 +294,7 @@ async def test_execute_single_preserves_issues_in_content():
 @pytest.mark.asyncio
 async def test_execute_single_routes_api_model():
     """Test that API models are routed to litellm_client."""
-    from src.models.config import ModelConfig
+    from multi_mcp.models.config import ModelConfig
 
     messages = [{"role": "user", "content": "Test"}]
 
@@ -305,10 +305,10 @@ async def test_execute_single_routes_api_model():
     )
 
     with (
-        patch("src.utils.llm_runner._resolver.resolve") as mock_resolve,
-        patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_api_call,
-        patch("src.utils.llm_runner._cli_executor.execute", new_callable=AsyncMock) as mock_cli_execute,
-        patch("src.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock, return_value=None),
+        patch("multi_mcp.utils.llm_runner._resolver.resolve") as mock_resolve,
+        patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_api_call,
+        patch("multi_mcp.utils.llm_runner._cli_executor.execute", new_callable=AsyncMock) as mock_cli_execute,
+        patch("multi_mcp.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock, return_value=None),
     ):
         # Configure mock resolver to return API model config
         api_config = ModelConfig(litellm_model="openai/gpt-5-mini")
@@ -332,7 +332,7 @@ async def test_execute_single_routes_api_model():
 @pytest.mark.asyncio
 async def test_execute_single_routes_cli_model():
     """Test that CLI models are routed to CLI executor."""
-    from src.models.config import ModelConfig
+    from multi_mcp.models.config import ModelConfig
 
     messages = [{"role": "user", "content": "Test"}]
 
@@ -343,10 +343,10 @@ async def test_execute_single_routes_cli_model():
     )
 
     with (
-        patch("src.utils.llm_runner._resolver.resolve") as mock_resolve,
-        patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_api_call,
-        patch("src.utils.llm_runner._cli_executor.execute", new_callable=AsyncMock) as mock_cli_execute,
-        patch("src.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock, return_value=None),
+        patch("multi_mcp.utils.llm_runner._resolver.resolve") as mock_resolve,
+        patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_api_call,
+        patch("multi_mcp.utils.llm_runner._cli_executor.execute", new_callable=AsyncMock) as mock_cli_execute,
+        patch("multi_mcp.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock, return_value=None),
     ):
         # Configure mock resolver to return CLI model config
         cli_config = ModelConfig(provider="cli", cli_command="gemini", cli_args=["chat"], cli_parser="json")
@@ -371,7 +371,7 @@ async def test_execute_single_routes_cli_model():
 @pytest.mark.asyncio
 async def test_execute_parallel_routes_mixed_models():
     """Test that execute_parallel routes API and CLI models correctly."""
-    from src.models.config import ModelConfig
+    from multi_mcp.models.config import ModelConfig
 
     set_request_context(thread_id="test-thread")
 
@@ -396,10 +396,10 @@ async def test_execute_parallel_routes_mixed_models():
             return ("gemini-cli", ModelConfig(provider="cli", cli_command="gemini", cli_args=["chat"], cli_parser="json"))
 
     with (
-        patch("src.utils.llm_runner._resolver.resolve", side_effect=mock_resolve),
-        patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock, return_value=api_response),
-        patch("src.utils.llm_runner._cli_executor.execute", new_callable=AsyncMock, return_value=cli_response),
-        patch("src.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock, return_value=None),
+        patch("multi_mcp.utils.llm_runner._resolver.resolve", side_effect=mock_resolve),
+        patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock, return_value=api_response),
+        patch("multi_mcp.utils.llm_runner._cli_executor.execute", new_callable=AsyncMock, return_value=cli_response),
+        patch("multi_mcp.utils.artifacts.save_tool_artifacts", new_callable=AsyncMock, return_value=None),
     ):
         results = await execute_parallel(models=["gpt-5-mini", "gemini-cli"], messages=messages)
 

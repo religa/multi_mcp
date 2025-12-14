@@ -4,8 +4,8 @@ import os
 
 import pytest
 
-from src.models.resolver import ModelResolver
-from src.utils.llm_runner import execute_single
+from multi_mcp.models.resolver import ModelResolver
+from multi_mcp.utils.llm_runner import execute_single
 
 
 @pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="Integration test")

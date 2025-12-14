@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, Field
 
-from src.utils.helpers import get_field_description, get_version
+from multi_mcp.utils.helpers import get_field_description, get_version
 
 
 class TestGetVersion:

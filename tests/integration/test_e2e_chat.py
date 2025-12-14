@@ -15,7 +15,7 @@ async def test_chat_basic_conversation(integration_test_model):
     """Test basic chat interaction with real API."""
     import uuid
 
-    from src.tools.chat import chat_impl
+    from multi_mcp.tools.chat import chat_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -49,7 +49,7 @@ async def test_chat_with_conversation_history(integration_test_model):
     """Test chat maintains context across multiple turns."""
     import uuid
 
-    from src.tools.chat import chat_impl
+    from multi_mcp.tools.chat import chat_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -98,7 +98,7 @@ async def test_chat_with_files(integration_test_model, tmp_path):
     """Test chat can analyze provided files."""
     import uuid
 
-    from src.tools.chat import chat_impl
+    from multi_mcp.tools.chat import chat_impl
 
     # Create test file
     test_file = tmp_path / "example.py"
@@ -139,7 +139,7 @@ async def test_chat_repository_context(integration_test_model, tmp_path):
     """Test chat loads CLAUDE.md context."""
     import uuid
 
-    from src.tools.chat import chat_impl
+    from multi_mcp.tools.chat import chat_impl
 
     # Create repo with CLAUDE.md
     claude_md = tmp_path / "CLAUDE.md"

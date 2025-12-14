@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from src.utils.context import clear_context, set_request_context
-from src.utils.repository import build_repository_context
+from multi_mcp.utils.context import clear_context, set_request_context
+from multi_mcp.utils.repository import build_repository_context
 
 
 class TestBuildRepositoryContext:

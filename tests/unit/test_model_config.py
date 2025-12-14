@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from src.models.config import (
+from multi_mcp.models.config import (
     ModelConfig,
     ModelsConfiguration,
     get_models_config,
@@ -36,7 +36,7 @@ class TestModelConfig:
 
         assert config.get_provider() == "gemini"
 
-    @patch("src.models.config.litellm")
+    @patch("multi_mcp.models.config.litellm")
     def test_model_config_get_provider_from_litellm_db(self, mock_litellm):
         """Test provider lookup from LiteLLM database."""
         mock_litellm.model_cost = {"test-model": {"litellm_provider": "test-provider"}}
@@ -46,7 +46,7 @@ class TestModelConfig:
 
         assert provider == "test-provider"
 
-    @patch("src.models.config.litellm")
+    @patch("multi_mcp.models.config.litellm")
     def test_model_config_get_provider_unknown(self, mock_litellm):
         """Test that unknown models return 'unknown' provider."""
         mock_litellm.model_cost = {}
@@ -235,11 +235,11 @@ class TestGetModelsConfig:
     def test_get_models_config_caching(self):
         """Test that get_models_config caches the configuration."""
         # Reset cache
-        import src.models.config
+        import multi_mcp.models.config
 
-        src.models.config._config = None
+        multi_mcp.models.config._config = None
 
-        with patch("src.models.config.load_models_config") as mock_load:
+        with patch("multi_mcp.models.config.load_models_config") as mock_load:
             mock_config = ModelsConfiguration(
                 version="1.0",
                 default_model="gpt-5-mini",
@@ -260,4 +260,4 @@ class TestGetModelsConfig:
             assert config1 is config2
 
         # Reset cache for other tests
-        src.models.config._config = None
+        multi_mcp.models.config._config = None

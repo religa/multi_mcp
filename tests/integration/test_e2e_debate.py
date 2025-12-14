@@ -5,7 +5,7 @@ import uuid
 
 import pytest
 
-from src.tools.debate import debate_impl
+from multi_mcp.tools.debate import debate_impl
 
 # Only run if RUN_E2E=1
 pytestmark = pytest.mark.skipif(

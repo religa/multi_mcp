@@ -1,6 +1,6 @@
 """Unit tests for prompt building functions (stateless)."""
 
-from src.utils.prompts import build_expert_context, build_issues_section
+from multi_mcp.utils.prompts import build_expert_context, build_issues_section
 
 
 class TestBuildIssuesSection:

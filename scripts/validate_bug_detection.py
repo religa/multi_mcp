@@ -7,7 +7,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.tools.codereview import codereview_impl
+from multi_mcp.tools.codereview import codereview_impl
 
 
 async def validate_sql_injection_detection():

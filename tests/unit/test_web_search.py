@@ -4,9 +4,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.models.config import ModelConfig
-from src.models.litellm_client import LiteLLMClient
-from src.models.resolver import ModelResolver
+from multi_mcp.models.config import ModelConfig
+from multi_mcp.models.litellm_client import LiteLLMClient
+from multi_mcp.models.resolver import ModelResolver
 
 
 def test_has_provider_web_search():
@@ -38,8 +38,8 @@ async def test_web_search_disabled_by_default():
 
     # Mock credential validation to always pass
     with (
-        patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-        patch("src.models.litellm_client.LiteLLMClient._validate_provider_credentials", return_value=None),
+        patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+        patch("multi_mcp.models.litellm_client.LiteLLMClient._validate_provider_credentials", return_value=None),
     ):
         mock_completion.return_value = mock_response
 
@@ -80,8 +80,8 @@ async def test_web_search_unsupported_model_silent():
 
     # Mock credential validation to always pass
     with (
-        patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-        patch("src.models.litellm_client.LiteLLMClient._validate_provider_credentials", return_value=None),
+        patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+        patch("multi_mcp.models.litellm_client.LiteLLMClient._validate_provider_credentials", return_value=None),
     ):
         mock_completion.return_value = mock_response
 
@@ -123,8 +123,8 @@ async def test_web_search_openai_provider():
 
     # Mock credential validation to always pass
     with (
-        patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-        patch("src.models.litellm_client.LiteLLMClient._validate_provider_credentials", return_value=None),
+        patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+        patch("multi_mcp.models.litellm_client.LiteLLMClient._validate_provider_credentials", return_value=None),
     ):
         mock_completion.return_value = mock_response
 

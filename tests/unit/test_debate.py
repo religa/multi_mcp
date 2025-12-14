@@ -5,9 +5,9 @@ from unittest.mock import patch
 import pytest
 from pydantic import ValidationError
 
-from src.schemas.base import ModelResponse, ModelResponseMetadata
-from src.schemas.debate import DebateRequest, DebateResponse
-from src.tools.debate import _format_debate_prompt, debate_impl
+from multi_mcp.schemas.base import ModelResponse, ModelResponseMetadata
+from multi_mcp.schemas.debate import DebateRequest, DebateResponse
+from multi_mcp.tools.debate import _format_debate_prompt, debate_impl
 
 
 class TestFormatDebatePrompt:
@@ -191,7 +191,7 @@ class TestDebateImpl:
                     ),
                 ]
 
-        with patch("src.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
+        with patch("multi_mcp.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
             result = await debate_impl(
                 name="Test Debate",
                 content="What is the best approach?",
@@ -241,7 +241,7 @@ class TestDebateImpl:
                     )
                 ]
 
-        with patch("src.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
+        with patch("multi_mcp.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
             result = await debate_impl(
                 name="Test",
                 content="Question?",
@@ -267,7 +267,7 @@ class TestDebateImpl:
                 ModelResponse(content="", status="error", error="Error 2", metadata=ModelResponseMetadata(model="haiku")),
             ]
 
-        with patch("src.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
+        with patch("multi_mcp.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
             result = await debate_impl(
                 name="Test",
                 content="Question?",
@@ -294,7 +294,7 @@ class TestDebateImpl:
                 ModelResponse(content="Answer 2", status="success", metadata=ModelResponseMetadata(model="haiku")),
             ]
 
-        with patch("src.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
+        with patch("multi_mcp.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
             result = await debate_impl(
                 name="Test",
                 content="Question?",
@@ -318,7 +318,7 @@ class TestDebateImpl:
                 ModelResponse(content="Answer 2", status="success", metadata=ModelResponseMetadata(model="haiku")),
             ]
 
-        with patch("src.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
+        with patch("multi_mcp.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
             result = await debate_impl(
                 name="Test",
                 content="Question?",
@@ -364,7 +364,7 @@ class TestDebateImpl:
                     ModelResponse(content="", status="error", error="Timeout", metadata=ModelResponseMetadata(model="haiku")),
                 ]
 
-        with patch("src.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
+        with patch("multi_mcp.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
             result = await debate_impl(
                 name="Test",
                 content="Question?",
@@ -382,7 +382,7 @@ class TestDebateImpl:
     @pytest.mark.asyncio
     async def test_too_many_files_error(self, tmp_path):
         """Test file count limit enforcement via Pydantic validator."""
-        from src.config import settings
+        from multi_mcp.config import settings
 
         # Create too many files
         files = []
@@ -421,7 +421,7 @@ class TestDebateImpl:
                 )
             ]
 
-        with patch("src.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
+        with patch("multi_mcp.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
             result = await debate_impl(
                 name="Test",
                 content="Review these files",
@@ -464,7 +464,7 @@ class TestDebateImpl:
                     ModelResponse(content="Error", status="error", metadata=ModelResponseMetadata(model="haiku")),
                 ]
 
-        with patch("src.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
+        with patch("multi_mcp.tools.debate.execute_parallel", side_effect=mock_execute_parallel):
             result = await debate_impl(
                 name="Test",
                 content="Question?",

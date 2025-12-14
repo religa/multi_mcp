@@ -15,7 +15,7 @@ async def test_codereview_with_nonexistent_files(integration_test_model, tmp_pat
     """Test codereview handles non-existent files gracefully."""
     import uuid
 
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -50,7 +50,7 @@ async def test_codereview_with_empty_files_list(integration_test_model, tmp_path
     """Test codereview handles empty files list."""
     import uuid
 
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -87,7 +87,7 @@ async def test_codereview_exceeds_file_limit(integration_test_model, tmp_path):
 
     from pydantic import ValidationError
 
-    from src.schemas.codereview import CodeReviewRequest
+    from multi_mcp.schemas.codereview import CodeReviewRequest
 
     # Create 101 files (assuming max is 100)
     files = []
@@ -126,7 +126,7 @@ async def test_compare_with_invalid_model(integration_test_model):
     """Test compare handles invalid model gracefully."""
     import uuid
 
-    from src.tools.compare import compare_impl
+    from multi_mcp.tools.compare import compare_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -166,7 +166,7 @@ async def test_debate_with_all_invalid_models(integration_test_model):
     """Test debate handles complete failure gracefully."""
     import uuid
 
-    from src.tools.debate import debate_impl
+    from multi_mcp.tools.debate import debate_impl
 
     thread_id = str(uuid.uuid4())
 
@@ -204,7 +204,7 @@ async def test_chat_with_binary_file(integration_test_model, tmp_path):
     """Test chat handles binary files gracefully."""
     import uuid
 
-    from src.tools.chat import chat_impl
+    from multi_mcp.tools.chat import chat_impl
 
     # Create a binary file (simulated with null bytes)
     binary_file = tmp_path / "binary.dat"

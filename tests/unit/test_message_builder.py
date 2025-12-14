@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.utils.message_builder import MessageBuilder
+from multi_mcp.utils.message_builder import MessageBuilder
 
 
 @pytest.mark.asyncio

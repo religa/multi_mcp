@@ -5,10 +5,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from pydantic import ValidationError
 
-from src.schemas.base import ModelResponse, ModelResponseMetadata, MultiToolRequest, MultiToolResponse
-from src.schemas.compare import CompareRequest
-from src.tools.compare import compare_impl
-from src.utils.context import set_request_context
+from multi_mcp.schemas.base import ModelResponse, ModelResponseMetadata, MultiToolRequest, MultiToolResponse
+from multi_mcp.schemas.compare import CompareRequest
+from multi_mcp.tools.compare import compare_impl
+from multi_mcp.utils.context import set_request_context
 
 
 def mock_model_response(content="Response", model="test-model", error=None):
@@ -122,7 +122,7 @@ class TestCompareImpl:
             ),
         )
 
-        with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
             mock_call.return_value = mock_response
 
             result = await compare_impl(
@@ -150,7 +150,7 @@ class TestCompareImpl:
             else:
                 return mock_model_response(model="model-b", error="Model B failed")
 
-        with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call_async:
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call_async:
             mock_call_async.side_effect = mock_call
 
             result = await compare_impl(
@@ -170,7 +170,7 @@ class TestCompareImpl:
     @pytest.mark.asyncio
     async def test_all_models_fail(self):
         """Test compare with all models failing."""
-        with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
             mock_call.return_value = mock_model_response(error="All failed")
 
             result = await compare_impl(
@@ -191,7 +191,7 @@ class TestCompareImpl:
         """Test that thread_id is passed through correctly."""
         mock_response = mock_model_response(content="ok")
 
-        with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
             mock_call.return_value = mock_response
 
             result = await compare_impl(
@@ -207,7 +207,7 @@ class TestCompareImpl:
         set_request_context(thread_id="test-thread")
         mock_response = mock_model_response(content="ok")
 
-        with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
             mock_call.return_value = mock_response
 
             result = await compare_impl(
@@ -234,7 +234,7 @@ class TestCompareImpl:
         set_request_context(thread_id="test-thread")
         mock_response = mock_model_response(content="ok")
 
-        with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
             mock_call.return_value = mock_response
 
             await compare_impl(
@@ -266,7 +266,7 @@ class TestCompareImpl:
         """Test compare handles None/empty files identically."""
         mock_response = mock_model_response(content="Response", model="gpt-5-mini")
 
-        with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
             mock_call.return_value = mock_response
 
             result = await compare_impl(
@@ -298,7 +298,7 @@ class TestCompareImpl:
 
         mock_response = mock_model_response(content="Looks good", model="gpt-5-mini")
 
-        with patch("src.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
+        with patch("multi_mcp.utils.llm_runner._litellm_client.execute", new_callable=AsyncMock) as mock_call:
             mock_call.return_value = mock_response
 
             result = await compare_impl(
@@ -328,7 +328,7 @@ class TestCompareImpl:
     @pytest.mark.asyncio
     async def test_too_many_files(self, tmp_path):
         """Test file count limit enforcement via Pydantic validator."""
-        from src.config import settings
+        from multi_mcp.config import settings
 
         # Create too many files
         files = []

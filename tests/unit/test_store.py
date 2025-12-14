@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.memory.store import Message, add_messages, get_messages, get_thread_store, store_conversation_turn
+from multi_mcp.memory.store import Message, add_messages, get_messages, get_thread_store, store_conversation_turn
 
 
 @pytest.mark.asyncio

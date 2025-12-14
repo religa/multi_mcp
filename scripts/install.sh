@@ -356,8 +356,9 @@ update_claude_code_allowlist() {
 update_mcp_config_file() {
     local config_path="$1"
     local python_path="$2"
-    local server_path="$3"
-    local config_name="$4"  # "Claude Desktop" or "Claude Code"
+    local server_module="$3"  # "-m" for module mode
+    local server_path="$4"    # "multi_mcp.server" module name
+    local config_name="$5"    # "Claude Desktop" or "Claude Code"
 
     if [[ -z "$config_path" ]]; then
         print_warning "Could not detect $config_name config path for this OS"
@@ -391,8 +392,8 @@ update_mcp_config_file() {
     if [[ ! -f "$config_path" ]]; then
         # Create new config file using jq --arg for safe escaping
         print_info "Creating new $config_name config at $config_path"
-        if ! echo '{"mcpServers": {}}' | jq --arg cmd "$python_path" --arg script "$server_path" \
-            '.mcpServers.multi = {type: "stdio", command: $cmd, args: [$script]}' > "$temp_config"; then
+        if ! echo '{"mcpServers": {}}' | jq --arg cmd "$python_path" --arg mod "$server_module" --arg pkg "$server_path" \
+            '.mcpServers.multi = {type: "stdio", command: $cmd, args: [$mod, $pkg]}' > "$temp_config"; then
             print_error "Failed to create $config_name config (jq error)"
             rm -f "$temp_config"
             return 1
@@ -416,8 +417,8 @@ update_mcp_config_file() {
         fi
 
         # Merge new config into existing file using jq --arg for safe escaping
-        if ! jq --arg cmd "$python_path" --arg script "$server_path" \
-            '.mcpServers.multi = {type: "stdio", command: $cmd, args: [$script]}' \
+        if ! jq --arg cmd "$python_path" --arg mod "$server_module" --arg pkg "$server_path" \
+            '.mcpServers.multi = {type: "stdio", command: $cmd, args: [$mod, $pkg]}' \
             "$config_path" > "$temp_config"; then
             print_error "Failed to update $config_name config (invalid JSON or jq error)"
             print_info "Your original config file has been preserved"
@@ -449,17 +450,8 @@ add_mcp_config_to_claude() {
     esac
 
     local python_path="$project_dir/$VENV_PATH/$venv_bin/$python_exe"
-    local server_path="$project_dir/src/server.py"
-
-    # Convert to Windows native paths for Claude Desktop on Windows
-    case "$(uname -s)" in
-        CYGWIN*|MINGW*|MSYS*)
-            if command -v cygpath &>/dev/null; then
-                python_path=$(cygpath -w "$python_path")
-                server_path=$(cygpath -w "$server_path")
-            fi
-            ;;
-    esac
+    local server_module="-m"
+    local server_path="multi_mcp.server"
 
     local success_count=0
     local desktop_config claude_code_config
@@ -469,7 +461,7 @@ add_mcp_config_to_claude() {
     if [[ -n "$desktop_config" ]]; then
         echo "" >&2
         print_info "Configuring Claude Desktop..."
-        if update_mcp_config_file "$desktop_config" "$python_path" "$server_path" "Claude Desktop"; then
+        if update_mcp_config_file "$desktop_config" "$python_path" "$server_module" "$server_path" "Claude Desktop"; then
             ((success_count++))
         fi
     fi
@@ -479,7 +471,7 @@ add_mcp_config_to_claude() {
     if [[ -n "$claude_code_config" ]]; then
         echo "" >&2
         print_info "Configuring Claude Code..."
-        if update_mcp_config_file "$claude_code_config" "$python_path" "$server_path" "Claude Code"; then
+        if update_mcp_config_file "$claude_code_config" "$python_path" "$server_module" "$server_path" "Claude Code"; then
             ((success_count++))
         fi
     fi
@@ -515,17 +507,8 @@ generate_mcp_config() {
     esac
 
     local python_path="$project_dir/$VENV_PATH/$venv_bin/$python_exe"
-    local server_path="$project_dir/src/server.py"
-
-    # Convert to Windows native paths for Claude Desktop on Windows
-    case "$(uname -s)" in
-        CYGWIN*|MINGW*|MSYS*)
-            if command -v cygpath &>/dev/null; then
-                python_path=$(cygpath -w "$python_path")
-                server_path=$(cygpath -w "$server_path")
-            fi
-            ;;
-    esac
+    local server_module="-m"
+    local server_path="multi_mcp.server"
 
     print_header "MCP Client Configuration"
 
@@ -554,6 +537,7 @@ generate_mcp_config() {
       "type": "stdio",
       "command": "$python_path",
       "args": [
+        "$server_module",
         "$server_path"
       ]
     }
@@ -585,12 +569,12 @@ test_installation() {
 
     local python_path="$VENV_PATH/$venv_bin/$python_exe"
 
-    # Test that server.py can be imported
-    if "$python_path" -c "import sys; sys.path.insert(0, '.'); from src.server import mcp" 2>/dev/null; then
+    # Test that server module can be imported
+    if "$python_path" -c "from multi_mcp.server import mcp" 2>/dev/null; then
         print_success "Server module loads correctly"
     else
         print_error "Server module failed to load"
-        print_info "Try running: $python_path src/server.py"
+        print_info "Try running: $python_path -m multi_mcp.server"
         return 1
     fi
 

@@ -15,7 +15,7 @@ pytestmark = pytest.mark.skipif(not os.getenv("RUN_E2E"), reason="Integration te
 @pytest.mark.timeout(180)
 async def test_thread_isolation_between_reviews(integration_test_model, tmp_path):
     """Test that different threads don't leak state between reviews."""
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     # Create test file
     test_file = tmp_path / "test.py"
@@ -75,7 +75,7 @@ async def test_thread_isolation_between_reviews(integration_test_model, tmp_path
 @pytest.mark.timeout(300)
 async def test_concurrent_threads(integration_test_model, tmp_path):
     """Test multiple parallel reviews with different thread_ids."""
-    from src.tools.codereview import codereview_impl
+    from multi_mcp.tools.codereview import codereview_impl
 
     # Create multiple test files
     file1 = tmp_path / "module1.py"

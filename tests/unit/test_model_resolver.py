@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import pytest
 
-from src.models.config import ModelConfig, ModelsConfiguration
-from src.models.resolver import ModelResolver
+from multi_mcp.models.config import ModelConfig, ModelsConfiguration
+from multi_mcp.models.resolver import ModelResolver
 
 
 class TestModelResolver:
@@ -100,7 +100,7 @@ class TestModelResolver:
         with pytest.raises(ValueError, match="disabled"):
             resolver.resolve("disabled")
 
-    @patch("src.models.resolver.litellm")
+    @patch("multi_mcp.models.resolver.litellm")
     def test_resolve_litellm_fallback_exact(self, mock_litellm, resolver):
         """Test LiteLLM fallback with exact match."""
         mock_litellm.model_cost = {"gpt-4": {"max_input_tokens": 8000, "max_output_tokens": 4000}}
@@ -113,7 +113,7 @@ class TestModelResolver:
         assert config.max_tokens == 4000
         assert "Auto-generated" in config.notes
 
-    @patch("src.models.resolver.litellm")
+    @patch("multi_mcp.models.resolver.litellm")
     def test_resolve_litellm_fallback_with_prefix(self, mock_litellm, resolver):
         """Test LiteLLM fallback finds model with prefix."""
         mock_litellm.model_cost = {"anthropic/claude-3-opus": {"max_input_tokens": 200000, "max_output_tokens": 4000}}
@@ -124,7 +124,7 @@ class TestModelResolver:
         assert config.litellm_model == "anthropic/claude-3-opus"
         assert config.context_window == 200000
 
-    @patch("src.models.resolver.litellm")
+    @patch("multi_mcp.models.resolver.litellm")
     def test_resolve_litellm_fallback_without_prefix(self, mock_litellm, resolver):
         """Test LiteLLM fallback removes prefix to find model."""
         mock_litellm.model_cost = {"gpt-4-turbo": {"max_input_tokens": 128000, "max_output_tokens": 4000}}
@@ -134,7 +134,7 @@ class TestModelResolver:
         assert canonical == "openai/gpt-4-turbo"
         assert config.litellm_model == "gpt-4-turbo"
 
-    @patch("src.models.resolver.litellm")
+    @patch("multi_mcp.models.resolver.litellm")
     def test_resolve_litellm_fallback_not_found(self, mock_litellm, resolver):
         """Test LiteLLM fallback with model not in database."""
         mock_litellm.model_cost = {}
@@ -181,7 +181,7 @@ class TestModelResolver:
         disabled = next(m for m in models if m["name"] == "disabled-model")
         assert disabled["disabled"] is True
 
-    @patch("src.models.resolver.litellm")
+    @patch("multi_mcp.models.resolver.litellm")
     def test_list_models_fills_metadata_from_litellm(self, mock_litellm, sample_config):
         """Test list_models fills missing metadata from LiteLLM."""
         mock_litellm.model_cost = {"openai/gpt-5-nano": {"max_input_tokens": 64000, "max_output_tokens": 8000}}
@@ -218,7 +218,7 @@ class TestModelResolver:
     def test_model_config_get_provider_from_litellm_db(self):
         """Test provider lookup from LiteLLM database."""
         # Need to patch at the point where it's imported in config.py
-        with patch("src.models.config.litellm") as mock_litellm:
+        with patch("multi_mcp.models.config.litellm") as mock_litellm:
             mock_litellm.model_cost = {"test-model": {"litellm_provider": "test-provider"}}
 
             config = ModelConfig(litellm_model="test-model")

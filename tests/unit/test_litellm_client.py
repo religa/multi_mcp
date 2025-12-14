@@ -4,10 +4,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.models.config import ModelConfig, ModelConstraints, ModelsConfiguration
-from src.models.litellm_client import LiteLLMClient
-from src.models.resolver import ModelResolver
-from src.schemas.base import ModelResponse
+from multi_mcp.models.config import ModelConfig, ModelConstraints, ModelsConfiguration
+from multi_mcp.models.litellm_client import LiteLLMClient
+from multi_mcp.models.resolver import ModelResolver
+from multi_mcp.schemas.base import ModelResponse
 
 
 class TestLiteLLMClient:
@@ -63,8 +63,8 @@ class TestLiteLLMClient:
     async def test_call_async_success(self, client, mock_llm_response):
         """Test successful LLM call."""
         with (
-            patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-            patch("src.models.litellm_client.log_llm_interaction"),
+            patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+            patch("multi_mcp.models.litellm_client.log_llm_interaction"),
             patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
@@ -88,8 +88,8 @@ class TestLiteLLMClient:
     async def test_call_async_with_model_resolution(self, client, mock_llm_response):
         """Test that model aliases are resolved correctly."""
         with (
-            patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-            patch("src.models.litellm_client.log_llm_interaction"),
+            patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+            patch("multi_mcp.models.litellm_client.log_llm_interaction"),
             patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
@@ -110,8 +110,8 @@ class TestLiteLLMClient:
     async def test_call_async_uses_default_model_when_none_specified(self, client, mock_llm_response):
         """Test that default model is used when no model specified."""
         with (
-            patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-            patch("src.models.litellm_client.log_llm_interaction"),
+            patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+            patch("multi_mcp.models.litellm_client.log_llm_interaction"),
             patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
@@ -130,8 +130,8 @@ class TestLiteLLMClient:
     async def test_call_async_temperature_uses_default(self, client, mock_llm_response):
         """Test that default temperature is used when no constraint."""
         with (
-            patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-            patch("src.models.litellm_client.log_llm_interaction"),
+            patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+            patch("multi_mcp.models.litellm_client.log_llm_interaction"),
             patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
@@ -147,8 +147,8 @@ class TestLiteLLMClient:
     async def test_call_async_temperature_constraint_enforced(self, client, mock_llm_response):
         """Test that model temperature constraints override default temperature."""
         with (
-            patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-            patch("src.models.litellm_client.log_llm_interaction"),
+            patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+            patch("multi_mcp.models.litellm_client.log_llm_interaction"),
             patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
@@ -164,8 +164,8 @@ class TestLiteLLMClient:
     async def test_call_async_logging(self, client, mock_llm_response):
         """Test that LLM interactions are logged."""
         with (
-            patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-            patch("src.models.litellm_client.log_llm_interaction") as mock_log,
+            patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+            patch("multi_mcp.models.litellm_client.log_llm_interaction") as mock_log,
             patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
@@ -186,8 +186,8 @@ class TestLiteLLMClient:
     async def test_call_async_api_error_handling(self, client):
         """Test that API errors return error response."""
         with (
-            patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-            patch("src.models.litellm_client.log_llm_interaction"),
+            patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+            patch("multi_mcp.models.litellm_client.log_llm_interaction"),
             patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.side_effect = Exception("API error")
@@ -206,8 +206,8 @@ class TestLiteLLMClient:
     async def test_call_async_timeout_handling(self, client):
         """Test that timeout errors return error response."""
         with (
-            patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-            patch("src.models.litellm_client.log_llm_interaction"),
+            patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+            patch("multi_mcp.models.litellm_client.log_llm_interaction"),
             patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.side_effect = TimeoutError()
@@ -231,8 +231,8 @@ class TestLiteLLMClient:
         ]
 
         with (
-            patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-            patch("src.models.litellm_client.log_llm_interaction"),
+            patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+            patch("multi_mcp.models.litellm_client.log_llm_interaction"),
             patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
@@ -263,8 +263,8 @@ class TestLiteLLMClient:
         client = LiteLLMClient(resolver=resolver)
 
         with (
-            patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-            patch("src.models.litellm_client.log_llm_interaction"),
+            patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+            patch("multi_mcp.models.litellm_client.log_llm_interaction"),
             patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
@@ -284,8 +284,8 @@ class TestLiteLLMClient:
         client = LiteLLMClient(resolver=resolver)
 
         with (
-            patch("src.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
-            patch("src.models.litellm_client.log_llm_interaction"),
+            patch("multi_mcp.models.litellm_client.litellm.aresponses", new_callable=AsyncMock) as mock_completion,
+            patch("multi_mcp.models.litellm_client.log_llm_interaction"),
             patch.object(client, "_validate_provider_credentials", return_value=None),
         ):
             mock_completion.return_value = mock_llm_response
@@ -327,7 +327,7 @@ class TestLiteLLMClient:
         resolver = ModelResolver(config=config)
         client = LiteLLMClient(resolver=resolver)
 
-        with patch("src.models.litellm_client.settings") as mock_settings:
+        with patch("multi_mcp.models.litellm_client.settings") as mock_settings:
             mock_settings.azure_api_key = None
             mock_settings.azure_api_base = "https://example.azure.com"
 
@@ -354,7 +354,7 @@ class TestLiteLLMClient:
         resolver = ModelResolver(config=config)
         client = LiteLLMClient(resolver=resolver)
 
-        with patch("src.models.litellm_client.settings") as mock_settings:
+        with patch("multi_mcp.models.litellm_client.settings") as mock_settings:
             mock_settings.azure_api_key = "test-key"
             mock_settings.azure_api_base = None
 
@@ -381,7 +381,7 @@ class TestLiteLLMClient:
         resolver = ModelResolver(config=config)
         client = LiteLLMClient(resolver=resolver)
 
-        with patch("src.models.litellm_client.settings") as mock_settings:
+        with patch("multi_mcp.models.litellm_client.settings") as mock_settings:
             mock_settings.azure_api_key = None
             mock_settings.azure_api_base = None
 
@@ -408,7 +408,7 @@ class TestLiteLLMClient:
         resolver = ModelResolver(config=config)
         client = LiteLLMClient(resolver=resolver)
 
-        with patch("src.models.litellm_client.settings") as mock_settings:
+        with patch("multi_mcp.models.litellm_client.settings") as mock_settings:
             mock_settings.gemini_api_key = None
 
             canonical_name, model_config = client.resolver.resolve("gemini-2.5-flash")
@@ -433,7 +433,7 @@ class TestLiteLLMClient:
         resolver = ModelResolver(config=config)
         client = LiteLLMClient(resolver=resolver)
 
-        with patch("src.models.litellm_client.settings") as mock_settings:
+        with patch("multi_mcp.models.litellm_client.settings") as mock_settings:
             mock_settings.anthropic_api_key = None
 
             canonical_name, model_config = client.resolver.resolve("claude-sonnet-4.5")
@@ -458,7 +458,7 @@ class TestLiteLLMClient:
         resolver = ModelResolver(config=config)
         client = LiteLLMClient(resolver=resolver)
 
-        with patch("src.models.litellm_client.settings") as mock_settings:
+        with patch("multi_mcp.models.litellm_client.settings") as mock_settings:
             mock_settings.openrouter_api_key = None
 
             canonical_name, model_config = client.resolver.resolve("openrouter-model")
@@ -483,7 +483,7 @@ class TestLiteLLMClient:
         resolver = ModelResolver(config=config)
         client = LiteLLMClient(resolver=resolver)
 
-        with patch("src.models.litellm_client.settings") as mock_settings:
+        with patch("multi_mcp.models.litellm_client.settings") as mock_settings:
             mock_settings.openai_api_key = None
 
             canonical_name, model_config = client.resolver.resolve("gpt-5-mini")
@@ -508,7 +508,7 @@ class TestLiteLLMClient:
         resolver = ModelResolver(config=config)
         client = LiteLLMClient(resolver=resolver)
 
-        with patch("src.models.litellm_client.settings") as mock_settings:
+        with patch("multi_mcp.models.litellm_client.settings") as mock_settings:
             mock_settings.aws_access_key_id = None
             mock_settings.aws_secret_access_key = None
             mock_settings.aws_region_name = None
@@ -537,7 +537,7 @@ class TestLiteLLMClient:
         resolver = ModelResolver(config=config)
         client = LiteLLMClient(resolver=resolver)
 
-        with patch("src.models.litellm_client.settings") as mock_settings:
+        with patch("multi_mcp.models.litellm_client.settings") as mock_settings:
             mock_settings.aws_access_key_id = "AKIAIOSFODNN7EXAMPLE"
             mock_settings.aws_secret_access_key = None
             mock_settings.aws_region_name = "us-east-1"

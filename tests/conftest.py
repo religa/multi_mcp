@@ -29,7 +29,7 @@ async def clear_conversation_store():
     yield  # Run the test first
 
     # Clear the global store after each test
-    from src.memory.store import _threads
+    from multi_mcp.memory.store import _threads
 
     _threads.clear()
 
@@ -269,10 +269,10 @@ def mock_cli_success(mocker):
 
     def _setup(stdout=b"", stderr=b"", returncode=0, cli_path="/usr/bin/cli"):
         # Mock subprocess execution
-        mock_exec = mocker.patch("src.models.litellm_client.asyncio.create_subprocess_exec")
+        mock_exec = mocker.patch("multi_mcp.models.litellm_client.asyncio.create_subprocess_exec")
 
         # Mock which() to indicate CLI is installed
-        mocker.patch("src.models.litellm_client.shutil.which", return_value=cli_path)
+        mocker.patch("multi_mcp.models.litellm_client.shutil.which", return_value=cli_path)
 
         # Create mock process
         mock_process = mocker.Mock()
@@ -316,13 +316,13 @@ def mock_cli_failure(mocker):
     def _setup(error_type="not_found", stderr=b"Command failed", exit_code=1):
         if error_type == "not_found":
             # CLI not installed
-            mocker.patch("src.models.litellm_client.shutil.which", return_value=None)
+            mocker.patch("multi_mcp.models.litellm_client.shutil.which", return_value=None)
             return None, None
 
         elif error_type == "timeout":
             # CLI execution times out
-            mock_exec = mocker.patch("src.models.litellm_client.asyncio.create_subprocess_exec")
-            mocker.patch("src.models.litellm_client.shutil.which", return_value="/usr/bin/cli")
+            mock_exec = mocker.patch("multi_mcp.models.litellm_client.asyncio.create_subprocess_exec")
+            mocker.patch("multi_mcp.models.litellm_client.shutil.which", return_value="/usr/bin/cli")
 
             mock_process = mocker.Mock()
             mock_process.communicate = mocker.AsyncMock(side_effect=TimeoutError())
@@ -331,8 +331,8 @@ def mock_cli_failure(mocker):
 
         elif error_type == "exit_code":
             # CLI returns non-zero exit code
-            mock_exec = mocker.patch("src.models.litellm_client.asyncio.create_subprocess_exec")
-            mocker.patch("src.models.litellm_client.shutil.which", return_value="/usr/bin/cli")
+            mock_exec = mocker.patch("multi_mcp.models.litellm_client.asyncio.create_subprocess_exec")
+            mocker.patch("multi_mcp.models.litellm_client.shutil.which", return_value="/usr/bin/cli")
 
             mock_process = mocker.Mock()
             mock_process.communicate = mocker.AsyncMock(return_value=(b"", stderr))

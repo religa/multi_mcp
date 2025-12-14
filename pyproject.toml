@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
-multi = "src.cli:main"
+multi = "multi_mcp.cli:main"
 
 [project.optional-dependencies]
 dev = [
@@ -47,8 +47,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*"]
-exclude = ["tests*", "docs*", "ref*"]
+include = ["multi_mcp*"]
+exclude = ["tests*", "docs*", "ref*", "tmp*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -100,7 +100,7 @@ ignore = [
 known-first-party = ["multi_mcp"]
 
 [tool.pyright]
-include = ["src"]
+include = ["multi_mcp"]
 exclude = ["**/__pycache__", "**/.pytest_cache", "tests/data/"]
 typeCheckingMode = "basic"
 reportMissingImports = true

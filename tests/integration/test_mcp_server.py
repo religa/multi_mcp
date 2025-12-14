@@ -22,7 +22,7 @@ class TestMCPServerInitialization:
     def test_server_module_imports(self):
         """Server module should import without errors."""
         try:
-            import src.server as server_module
+            import multi_mcp.server as server_module
 
             assert server_module is not None
         except Exception as e:
@@ -30,14 +30,14 @@ class TestMCPServerInitialization:
 
     def test_mcp_instance_exists(self):
         """MCP server instance should exist."""
-        from src.server import mcp
+        from multi_mcp.server import mcp
 
         assert mcp is not None
         assert hasattr(mcp, "name")
 
     def test_all_tools_registered(self):
         """All expected tools should be registered."""
-        from src.server import chat, codereview, compare, debate, models, version
+        from multi_mcp.server import chat, codereview, compare, debate, models, version
 
         # All tools should be accessible
         assert chat is not None
@@ -53,7 +53,7 @@ class TestToolSignatures:
 
     def test_codereview_signature_valid(self):
         """Codereview tool should have valid parameter signature."""
-        from src.server import codereview
+        from multi_mcp.server import codereview
 
         # Extract the actual function from FastMCP wrapper
         if hasattr(codereview, "fn"):
@@ -76,7 +76,7 @@ class TestToolSignatures:
 
     def test_chat_signature_valid(self):
         """Chat tool should have valid parameter signature."""
-        from src.server import chat
+        from multi_mcp.server import chat
 
         if hasattr(chat, "fn"):
             func = chat.fn
@@ -98,7 +98,7 @@ class TestToolSignatures:
 
     def test_compare_signature_valid(self):
         """Compare tool should have valid parameter signature."""
-        from src.server import compare
+        from multi_mcp.server import compare
 
         if hasattr(compare, "fn"):
             func = compare.fn
@@ -120,7 +120,7 @@ class TestToolSignatures:
 
     def test_debate_signature_valid(self):
         """Debate tool should have valid parameter signature."""
-        from src.server import debate
+        from multi_mcp.server import debate
 
         if hasattr(debate, "fn"):
             func = debate.fn
@@ -146,7 +146,7 @@ class TestToolDescriptions:
 
     def test_codereview_has_description(self):
         """Codereview tool should have description."""
-        from src.server import codereview
+        from multi_mcp.server import codereview
 
         # Check if tool has description
         if hasattr(codereview, "description"):
@@ -159,7 +159,7 @@ class TestToolDescriptions:
 
     def test_chat_has_description(self):
         """Chat tool should have description."""
-        from src.server import chat
+        from multi_mcp.server import chat
 
         if hasattr(chat, "description"):
             assert chat.description is not None
@@ -170,7 +170,7 @@ class TestToolDescriptions:
 
     def test_compare_has_description(self):
         """Compare tool should have description."""
-        from src.server import compare
+        from multi_mcp.server import compare
 
         if hasattr(compare, "description"):
             assert compare.description is not None
@@ -181,7 +181,7 @@ class TestToolDescriptions:
 
     def test_debate_has_description(self):
         """Debate tool should have description."""
-        from src.server import debate
+        from multi_mcp.server import debate
 
         if hasattr(debate, "description"):
             assert debate.description is not None
@@ -198,7 +198,7 @@ class TestToolInvocation:
     @pytest.mark.asyncio
     async def test_models_tool_invocation(self):
         """Models tool should be invocable and return results."""
-        from src.tools.models import models_impl
+        from multi_mcp.tools.models import models_impl
 
         # Call the implementation directly
         result = await models_impl()
@@ -210,7 +210,7 @@ class TestToolInvocation:
     @pytest.mark.asyncio
     async def test_version_tool_invocation(self):
         """Version tool should be invocable and return results."""
-        from src.server import version
+        from multi_mcp.server import version
 
         # Get the underlying function
         if hasattr(version, "fn"):
@@ -229,7 +229,7 @@ class TestToolInvocation:
         """Chat tool should accept valid parameters."""
         import uuid
 
-        from src.tools.chat import chat_impl
+        from multi_mcp.tools.chat import chat_impl
 
         # Test with minimal required parameters
         try:
@@ -261,7 +261,7 @@ class TestServerStartup:
         """Server script should have valid Python syntax."""
         import ast
 
-        with open("src/server.py") as f:
+        with open("multi_mcp/server.py") as f:
             code = f.read()
 
         try:
@@ -273,7 +273,7 @@ class TestServerStartup:
         """MCP factory should have valid Python syntax."""
         import ast
 
-        with open("src/utils/mcp_factory.py") as f:
+        with open("multi_mcp/utils/mcp_factory.py") as f:
             code = f.read()
 
         try:
@@ -287,15 +287,15 @@ class TestParameterOrdering:
 
     def test_no_syntax_error_in_generated_code(self):
         """Generated wrapper functions should not have syntax errors."""
-        from src.schemas.chat import ChatRequest
-        from src.schemas.codereview import CodeReviewRequest
-        from src.schemas.compare import CompareRequest
-        from src.schemas.debate import DebateRequest
-        from src.tools.chat import chat_impl
-        from src.tools.codereview import codereview_impl
-        from src.tools.compare import compare_impl
-        from src.tools.debate import debate_impl
-        from src.utils.mcp_factory import create_mcp_wrapper
+        from multi_mcp.schemas.chat import ChatRequest
+        from multi_mcp.schemas.codereview import CodeReviewRequest
+        from multi_mcp.schemas.compare import CompareRequest
+        from multi_mcp.schemas.debate import DebateRequest
+        from multi_mcp.tools.chat import chat_impl
+        from multi_mcp.tools.codereview import codereview_impl
+        from multi_mcp.tools.compare import compare_impl
+        from multi_mcp.tools.debate import debate_impl
+        from multi_mcp.utils.mcp_factory import create_mcp_wrapper
 
         # Test all tool schemas
         test_cases = [
