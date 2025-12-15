@@ -2,10 +2,10 @@
 
 import logging
 
-from multi_mcp.config import settings
 from multi_mcp.prompts import CODEREVIEW_CONSOLIDATION_PROMPT
 from multi_mcp.schemas.base import ModelResponse, ModelResponseMetadata
 from multi_mcp.schemas.codereview import CodeReviewModelResult
+from multi_mcp.settings import settings
 from multi_mcp.utils.json_parser import parse_llm_json
 from multi_mcp.utils.llm_runner import execute_single
 

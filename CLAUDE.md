@@ -11,9 +11,9 @@ The server is built with FastMCP and uses a streamlined workflow architecture op
 ## Current Status
 
 **Production Ready** ✅
-- **Unit Tests**: ✅ 534 tests passing (~13s) - All tests passing (includes 24 mocked CLI tests for parsing/error handling)
-- **Integration Tests**: ✅ 67 tests passing (~8-10min) - All tests passing (includes 6 CLI smoke tests, 8 CLI workflow tests)
-- **Total Coverage**: ✅ 601 tests passing (~85% code coverage)
+- **Unit Tests**: ✅ 511 tests passing (~2s) - All tests passing (includes 24 mocked CLI tests for parsing/error handling)
+- **Integration Tests**: ✅ 93 tests passing (~8-10min) - All tests passing (includes 6 CLI smoke tests, 8 CLI workflow tests)
+- **Total Coverage**: ✅ 604 tests passing (~85% code coverage)
 - **Model Config**: YAML-based model configuration with aliases and use-case defaults
 - **Logging**: MCP tool request/response logging enabled
 - **Implementation**: Checklist-based workflow with expert validation enabled
@@ -29,10 +29,10 @@ uv run pyright
 uv run ruff check .
 uv run ruff format .
 
-# Run all unit tests (401 tests, ~2s, all passing ✅)
+# Run all unit tests (511 tests, ~2s, all passing ✅)
 uv run pytest tests/unit/ -v
 
-# Run integration tests (74 tests, ~5-7min with parallel, all passing ✅)
+# Run integration tests (93 tests, ~5-7min with parallel, all passing ✅)
 # Note: Requires real API keys (OPENAI_API_KEY, etc.)
 # CLI tests will skip gracefully if CLIs not installed
 RUN_E2E=1 uv run pytest tests/integration/ -n auto -v
@@ -40,7 +40,7 @@ RUN_E2E=1 uv run pytest tests/integration/ -n auto -v
 # Or run sequentially (slower, ~15min)
 RUN_E2E=1 uv run pytest tests/integration/ -v
 
-# Run all tests (475 total)
+# Run all tests (604 total)
 RUN_E2E=1 uv run pytest tests/ -v
 
 # Run the MCP server
@@ -77,21 +77,22 @@ See README.md for CLI usage examples. Note: CLI is experimental.
 - `models.py` - Model listing implementation
 
 **`multi_mcp/models/`**: Model configuration and LLM integration
-- `config.py` - YAML-based model config with Pydantic validation (`ModelConfig`, `ModelsConfiguration`)
+- `config.py` - YAML-based model config with Pydantic validation (`ModelConfig`, `ModelsConfiguration`, `PROVIDERS`)
 - `resolver.py` - Model alias resolution with LiteLLM fallback (`ModelResolver`)
 - `litellm_client.py` - API model execution via LiteLLM responses API (~260 lines)
 - `cli_executor.py` - CLI model execution via subprocess (~270 lines)
 
-**`config/models.yaml`**: Model definitions
+**`multi_mcp/config/config.yaml`**: Model definitions
 - Canonical model names with LiteLLM model strings
 - Aliases (e.g., `mini` → `gpt-5-mini`, `sonnet` → `claude-sonnet-4.5`)
-- Use-case defaults (`fast`, `smart`, `cheap`)
 - Temperature constraints per model
+- User overrides: `~/.multi_mcp/config.yaml` (optional)
 
-**`multi_mcp/config.py`**: Environment-based configuration using Pydantic Settings
-- API keys, model defaults (`default_model`, `default_model_list`), server settings
+**`multi_mcp/settings.py`**: Environment-based configuration using Pydantic Settings
+- API keys loaded from `.env` files (cascading: project .env > ~/.multi_mcp/.env)
+- Runtime defaults (`default_model`, `default_model_list`, `default_temperature`)
+- Server settings (`max_retries`, `model_timeout_seconds`, etc.)
 - `default_model_list`: Default models for multi-model compare (comma-separated or JSON array in .env)
-- Loads from `.env` file
 
 **`multi_mcp/schemas/`**: Pydantic models for request validation
 - `base.py` - Base `BaseToolRequest`, `SingleToolRequest`, `ModelResponseMetadata`
@@ -158,13 +159,14 @@ Uses Python's `contextvars` module for request-scoped data (`thread_id`, `workfl
 
 ## Model Configuration
 
-Models are defined in `config/models.yaml`. See README.md for model aliases and use-case defaults.
+Models are defined in `multi_mcp/config/config.yaml`. See README.md for model aliases.
 
 **Key Features:**
 - Aliases resolve to full model names (e.g., `mini` → `gpt-5-mini`)
-- Use-case defaults: request by purpose (`fast`, `smart`, `cheap`)
 - Temperature constraints enforced per model
 - LiteLLM fallback for unknown models
+- User overrides via `~/.multi_mcp/config.yaml` (optional, merged with package defaults)
+- Runtime defaults (model, temperature) in Settings class via `.env` files
 
 **LiteLLM Responses API:**
 - Uses `litellm.aresponses()` instead of `litellm.acompletion()` for unified web search across providers
@@ -174,13 +176,13 @@ Models are defined in `config/models.yaml`. See README.md for model aliases and 
 
 ## Testing Strategy
 
-### Unit Tests (534 tests) ✅
+### Unit Tests (511 tests) ✅
 **Location:** `tests/unit/`
 - Mock LiteLLM with fixtures, test `*_impl()` functions directly
 - No real API calls, Runtime: ~2 seconds, Coverage: ~85%
 - Tests: schemas, tools (codereview/chat/compare/debate), models, MCP factory, CLI, utils
 
-### Integration Tests (67 tests) ✅
+### Integration Tests (93 tests) ✅
 **Location:** `tests/integration/`
 - End-to-end tests with real APIs (codereview, chat, compare, debate, web search)
 - MCP server integration, CLI workflows, error handling, thread management

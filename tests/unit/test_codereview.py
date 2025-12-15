@@ -5,8 +5,8 @@ from unittest.mock import patch
 import pytest
 from pydantic import ValidationError
 
-from multi_mcp.config import settings
 from multi_mcp.schemas.base import ModelResponse, ModelResponseMetadata
+from multi_mcp.settings import settings
 from multi_mcp.tools.codereview import codereview_impl
 
 
@@ -689,7 +689,7 @@ class TestConsolidationValidation:
             patch("multi_mcp.utils.prompts.build_expert_context", return_value="<expert context>"),
             patch("multi_mcp.utils.repository.build_repository_context", return_value=None),
             patch("multi_mcp.memory.store.store_conversation_turn"),
-            patch("multi_mcp.config.settings.max_codereview_response_size", 100),  # Force consolidation
+            patch("multi_mcp.settings.settings.max_codereview_response_size", 100),  # Force consolidation
         ):
             result = await codereview_impl(
                 name="Test Review",

@@ -2,6 +2,7 @@
 
 import logging
 from dataclasses import dataclass
+from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any, Final
 
@@ -9,9 +10,12 @@ import litellm
 import yaml
 from pydantic import BaseModel, Field, model_validator
 
-from multi_mcp.utils.paths import PROJECT_ROOT
-
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# Provider Configuration
+# =============================================================================
 
 
 @dataclass(frozen=True)
@@ -79,6 +83,34 @@ PROVIDERS: Final[dict[str, ProviderConfig]] = {
 }
 
 
+# =============================================================================
+# Path Helpers
+# =============================================================================
+
+
+def get_package_config_path() -> Any:
+    """Get path to bundled package config (safe for wheels/zips).
+
+    Returns a Traversable that can be used with as_file() context manager.
+    """
+    return files("multi_mcp.config").joinpath("config.yaml")
+
+
+def get_user_config_path() -> Path:
+    """Get path to user config (~/.multi_mcp/config.yaml)."""
+    return Path.home() / ".multi_mcp" / "config.yaml"
+
+
+def get_user_config_dir() -> Path:
+    """Get path to user config directory (~/.multi_mcp/)."""
+    return Path.home() / ".multi_mcp"
+
+
+# =============================================================================
+# Model Configuration Schema
+# =============================================================================
+
+
 class ModelConstraints(BaseModel):
     """Temperature and other model constraints."""
 
@@ -129,11 +161,13 @@ class ModelConfig(BaseModel):
 
 
 class ModelsConfiguration(BaseModel):
-    """Root configuration schema."""
+    """Model definitions loaded from config.yaml.
+
+    Runtime defaults are in Settings class (multi_mcp/settings.py).
+    """
 
     version: str
-    default_model: str
-    models: dict[str, ModelConfig]
+    models: dict[str, ModelConfig] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def validate_aliases_unique(self) -> "ModelsConfiguration":
@@ -154,51 +188,149 @@ class ModelsConfiguration(BaseModel):
 
         return self
 
-    @model_validator(mode="after")
-    def validate_default_resolves(self) -> "ModelsConfiguration":
-        """Ensure default_model resolves to a valid model or alias."""
-        if not self._resolves(self.default_model):
-            raise ValueError(f"default_model '{self.default_model}' does not resolve to any model")
-        return self
 
-    def _resolves(self, name_or_alias: str) -> bool:
-        """Check if a name/alias resolves to a model."""
-        name_lower = name_or_alias.lower()
+# =============================================================================
+# Merge Strategy (Semantic)
+# =============================================================================
 
-        for name in self.models:
-            if name.lower() == name_lower:
-                return True
 
-        for config in self.models.values():
-            if name_lower in [a.lower() for a in config.aliases]:
-                return True
+def semantic_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    """Semantic merge: override values take precedence.
 
-        return False
+    - models: merge by model name (key-level merge)
+    - aliases: user aliases override package aliases (user can "steal" an alias)
+    - other keys: replaced entirely
+    """
+    result = base.copy()
+
+    # Merge models by name (key-level merge)
+    if "models" in override:
+        result.setdefault("models", {})
+
+        # Collect all aliases from user config (these take precedence)
+        user_aliases: set[str] = set()
+        for model_val in override["models"].values():
+            if "aliases" in model_val:
+                user_aliases.update(a.lower() for a in model_val["aliases"])
+
+        # Remove conflicting aliases from base models (that aren't being overridden)
+        # This allows user to "steal" an alias from a package model
+        for model_name in result["models"]:
+            if model_name not in override["models"]:
+                model_config = result["models"][model_name]
+                if "aliases" in model_config:
+                    model_config["aliases"] = [a for a in model_config["aliases"] if a.lower() not in user_aliases]
+
+        # Merge models
+        for model_name, model_val in override["models"].items():
+            if model_name in result["models"]:
+                # Merge model config fields
+                merged_model = result["models"][model_name].copy()
+                merged_model.update(model_val)
+                result["models"][model_name] = merged_model
+            else:
+                # Add new model
+                result["models"][model_name] = model_val
+
+    # Other keys: replace entirely
+    for key, value in override.items():
+        if key != "models":
+            result[key] = value
+
+    return result
+
+
+# =============================================================================
+# Configuration Loading
+# =============================================================================
+
+
+def load_package_config() -> dict[str, Any]:
+    """Load package config using importlib.resources (safe for wheels)."""
+    pkg_file = get_package_config_path()
+    with as_file(pkg_file) as path:
+        with open(path, encoding="utf-8") as f:
+            return yaml.safe_load(f)
+
+
+def load_user_config() -> dict[str, Any] | None:
+    """Load user config if it exists. Returns None if not found."""
+    user_config = get_user_config_path()
+    if not user_config.exists():
+        return None
+
+    try:
+        with open(user_config, encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+    except yaml.YAMLError as e:
+        error_msg = f"""
+Configuration Error: Invalid YAML in user config
+
+File: {user_config}
+Error: {e}
+
+To fix:
+1. Validate YAML syntax: python -c "import yaml; yaml.safe_load(open('{user_config}'))"
+2. Or delete the file to use package defaults: rm {user_config}
+3. Restart the server
+
+For help, see: https://github.com/religa/multi_mcp
+"""
+        logger.error(error_msg)
+        raise ValueError(error_msg) from e
 
 
 def load_models_config(config_path: Path | None = None) -> ModelsConfiguration:
-    """Load models configuration from YAML file.
+    """Load models configuration from YAML files.
+
+    Loads package defaults and merges with user overrides if present.
 
     Args:
-        config_path: Path to config file. Defaults to config/models.yaml
+        config_path: Optional explicit path to config file (for testing).
+                     If provided, loads only from this path (no merge).
 
     Returns:
         Validated ModelsConfiguration
 
     Raises:
-        FileNotFoundError: If config file is missing (fail fast)
+        FileNotFoundError: If package config is missing
         ValueError: If config validation fails
     """
-    if config_path is None:
-        config_path = PROJECT_ROOT / "config" / "models.yaml"
+    # If explicit path provided, load only from that path (for testing)
+    if config_path is not None:
+        if not config_path.exists():
+            raise FileNotFoundError(f"Model config not found: {config_path}")
+        with open(config_path, encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+        return ModelsConfiguration(**data)
 
-    if not config_path.exists():
-        raise FileNotFoundError(f"Model config not found: {config_path}\nCreate config/models.yaml or set MODELS_CONFIG_PATH")
+    # Load package config (required)
+    config_data = load_package_config()
 
-    with open(config_path, encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+    # Merge user config if exists (optional)
+    user_data = load_user_config()
+    if user_data:
+        config_data = semantic_merge(config_data, user_data)
 
-    return ModelsConfiguration(**data)
+    # Validate and return
+    try:
+        return ModelsConfiguration(**config_data)
+    except Exception as e:
+        user_config = get_user_config_path()
+        error_msg = f"""
+Configuration Error: Validation failed
+
+{e}
+
+To fix:
+1. Check {user_config} for invalid settings (if it exists)
+2. Ensure model aliases are unique
+3. Or delete user config: rm {user_config}
+
+For help, see: https://github.com/religa/multi_mcp
+"""
+        logger.error(error_msg)
+        raise ValueError(error_msg) from e
 
 
 _config: ModelsConfiguration | None = None
@@ -209,4 +341,11 @@ def get_models_config() -> ModelsConfiguration:
     global _config
     if _config is None:
         _config = load_models_config()
+    return _config
+
+
+def reload_models_config() -> ModelsConfiguration:
+    """Force reload of models configuration (clears cache)."""
+    global _config
+    _config = load_models_config()
     return _config

@@ -1,6 +1,6 @@
 """Unit tests for configuration management."""
 
-from multi_mcp.config import Settings
+from multi_mcp.settings import Settings
 
 
 class TestDefaultModelListParsing:

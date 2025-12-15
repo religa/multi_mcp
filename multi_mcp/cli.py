@@ -9,7 +9,7 @@ import sys
 import warnings
 from pathlib import Path
 
-from multi_mcp.config import settings
+from multi_mcp.settings import settings
 from multi_mcp.tools.codereview import codereview_impl
 
 # Suppress LiteLLM async cleanup warning (harmless)

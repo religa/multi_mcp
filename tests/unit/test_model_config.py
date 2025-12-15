@@ -64,7 +64,6 @@ class TestModelsConfiguration:
         """Test that valid configuration passes validation."""
         config = ModelsConfiguration(
             version="1.0",
-            default_model="gpt-5-mini",
             models={
                 "gpt-5-mini": ModelConfig(
                     litellm_model="openai/gpt-5-mini",
@@ -73,7 +72,7 @@ class TestModelsConfiguration:
             },
         )
 
-        assert config.default_model == "gpt-5-mini"
+        assert config.version == "1.0"
         assert "gpt-5-mini" in config.models
 
     def test_models_configuration_unique_aliases_validation(self):
@@ -81,7 +80,6 @@ class TestModelsConfiguration:
         with pytest.raises(ValueError, match="collides"):
             ModelsConfiguration(
                 version="1.0",
-                default_model="model1",
                 models={
                     "model1": ModelConfig(
                         litellm_model="provider/model1",
@@ -99,7 +97,6 @@ class TestModelsConfiguration:
         with pytest.raises(ValueError, match="collides"):
             ModelsConfiguration(
                 version="1.0",
-                default_model="model1",
                 models={
                     "model1": ModelConfig(
                         litellm_model="provider/model1",
@@ -117,36 +114,9 @@ class TestModelsConfiguration:
         with pytest.raises(ValueError, match="collides"):
             ModelsConfiguration(
                 version="1.0",
-                default_model="GPT-Mini",
                 models={
                     "gpt-mini": ModelConfig(litellm_model="provider/gpt-mini"),
                     "GPT-Mini": ModelConfig(litellm_model="provider/GPT-Mini"),
-                },
-            )
-
-    def test_models_configuration_default_model_resolves(self):
-        """Test that default_model must resolve to a valid model."""
-        config = ModelsConfiguration(
-            version="1.0",
-            default_model="mini",  # Alias
-            models={
-                "gpt-5-mini": ModelConfig(
-                    litellm_model="openai/gpt-5-mini",
-                    aliases=["mini"],
-                ),
-            },
-        )
-
-        assert config.default_model == "mini"
-
-    def test_models_configuration_invalid_default_raises(self):
-        """Test that invalid default_model raises validation error."""
-        with pytest.raises(ValueError, match="does not resolve"):
-            ModelsConfiguration(
-                version="1.0",
-                default_model="nonexistent",
-                models={
-                    "gpt-5-mini": ModelConfig(litellm_model="openai/gpt-5-mini"),
                 },
             )
 
@@ -158,7 +128,6 @@ class TestLoadModelsConfig:
         """Test loading valid YAML configuration."""
         yaml_content = """
 version: "1.0"
-default_model: gpt-5-mini
 
 models:
   gpt-5-mini:
@@ -176,7 +145,6 @@ models:
             config = load_models_config(config_path)
 
             assert config.version == "1.0"
-            assert config.default_model == "gpt-5-mini"
             assert "gpt-5-mini" in config.models
             assert config.models["gpt-5-mini"].context_window == 128000
         finally:
@@ -191,7 +159,6 @@ models:
         """Test that invalid YAML raises error."""
         yaml_content = """
 version: "1.0"
-default_model: gpt-5-mini
 models:
   gpt-5-mini:
     litellm_model: openai/gpt-5-mini
@@ -209,21 +176,26 @@ models:
             config_path.unlink()
 
     def test_load_models_config_validation_error_raises(self):
-        """Test that validation errors are raised."""
+        """Test that validation errors are raised (e.g., alias collision)."""
         yaml_content = """
 version: "1.0"
-default_model: nonexistent
 
 models:
   gpt-5-mini:
     litellm_model: openai/gpt-5-mini
+    aliases:
+      - mini
+  other-model:
+    litellm_model: openai/other
+    aliases:
+      - mini
 """
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write(yaml_content)
             config_path = Path(f.name)
 
         try:
-            with pytest.raises(ValueError, match="does not resolve"):
+            with pytest.raises(ValueError, match="collides"):
                 load_models_config(config_path)
         finally:
             config_path.unlink()
@@ -242,7 +214,6 @@ class TestGetModelsConfig:
         with patch("multi_mcp.models.config.load_models_config") as mock_load:
             mock_config = ModelsConfiguration(
                 version="1.0",
-                default_model="gpt-5-mini",
                 models={
                     "gpt-5-mini": ModelConfig(litellm_model="openai/gpt-5-mini"),
                 },

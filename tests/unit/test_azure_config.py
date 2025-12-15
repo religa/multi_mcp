@@ -5,7 +5,7 @@ import os
 import pytest
 
 # Import config to trigger load_dotenv()
-from multi_mcp.config import settings  # noqa: F401
+from multi_mcp.settings import settings  # noqa: F401
 
 
 @pytest.mark.skipif(

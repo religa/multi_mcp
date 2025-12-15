@@ -16,7 +16,6 @@ class TestModelsImpl:
         """Create sample configuration for testing."""
         return ModelsConfiguration(
             version="1.0",
-            default_model="gpt-5-mini",
             models={
                 "gpt-5-mini": ModelConfig(
                     litellm_model="openai/gpt-5-mini",
@@ -40,6 +39,7 @@ class TestModelsImpl:
         with (
             patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
             patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.settings") as mock_settings,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -69,6 +69,9 @@ class TestModelsImpl:
             # Mock credential validation to return None (valid)
             mock_validate.return_value = None
 
+            # Mock settings.default_model
+            mock_settings.default_model = "gpt-5-mini"
+
             result = await models_impl()
 
             assert "models" in result
@@ -93,6 +96,7 @@ class TestModelsImpl:
         with (
             patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
             patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.settings") as mock_settings,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -111,6 +115,7 @@ class TestModelsImpl:
 
             # Mock credential validation
             mock_validate.return_value = None
+            mock_settings.default_model = "gpt-5-mini"
 
             result = await models_impl()
 
@@ -131,6 +136,7 @@ class TestModelsImpl:
         with (
             patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
             patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.settings") as mock_settings,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -160,6 +166,7 @@ class TestModelsImpl:
 
             # Mock credential validation
             mock_validate.return_value = None
+            mock_settings.default_model = "gpt-5-mini"
 
             result = await models_impl()
 
@@ -176,6 +183,7 @@ class TestModelsImpl:
         with (
             patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
             patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.settings") as mock_settings,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -194,6 +202,7 @@ class TestModelsImpl:
 
             # Mock credential validation to return an error
             mock_validate.return_value = "OpenAI models require OPENAI_API_KEY to be set"
+            mock_settings.default_model = "gpt-5-mini"
 
             result = await models_impl()
 
@@ -208,6 +217,7 @@ class TestModelsImpl:
         with (
             patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
             patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.settings") as mock_settings,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -235,6 +245,7 @@ class TestModelsImpl:
 
             # Mock credential validation
             mock_validate.return_value = None
+            mock_settings.default_model = "gpt-5-mini"
 
             result = await models_impl()
 
@@ -255,6 +266,7 @@ class TestModelsImpl:
         with (
             patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
             patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.settings") as mock_settings,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -273,6 +285,7 @@ class TestModelsImpl:
 
             # Mock credential validation to raise an exception
             mock_validate.side_effect = AttributeError("Test error")
+            mock_settings.default_model = "gpt-5-mini"
 
             result = await models_impl()
 
@@ -287,6 +300,7 @@ class TestModelsImpl:
         with (
             patch("multi_mcp.tools.models.ModelResolver") as mock_resolver_class,
             patch("multi_mcp.tools.models.validate_model_credentials") as mock_validate,
+            patch("multi_mcp.tools.models.settings") as mock_settings,
         ):
             mock_resolver = mock_resolver_class.return_value
             mock_resolver.config = sample_config
@@ -302,6 +316,8 @@ class TestModelsImpl:
                     "litellm_model": None,  # Missing!
                 },
             ]
+
+            mock_settings.default_model = "gpt-5-mini"
 
             result = await models_impl()
 

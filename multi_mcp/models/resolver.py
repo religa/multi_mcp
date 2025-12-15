@@ -6,6 +6,7 @@ from typing import Any
 import litellm
 
 from multi_mcp.models.config import ModelConfig, ModelsConfiguration, get_models_config
+from multi_mcp.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +47,13 @@ class ModelResolver:
             Tuple of (canonical_name, ModelConfig)
 
         Raises:
-            ValueError: If model is disabled
+            ValueError: If model name is empty/invalid or model is disabled
         """
-        name_lower = name_or_alias.lower()
+        # Validate input to avoid generating misleading fallback configs
+        if not isinstance(name_or_alias, str) or not name_or_alias.strip():
+            raise ValueError("Model name or alias must be a non-empty string")
+
+        name_lower = name_or_alias.strip().lower()
 
         # Step 1 & 2: Check config (primary names and aliases)
         canonical = self.alias_map.get(name_lower)
@@ -145,12 +150,12 @@ class ModelResolver:
         return config.litellm_model
 
     def get_default(self) -> str:
-        """Get the default model.
+        """Get the default model from Settings.
 
         Returns:
-            Default model name from configuration
+            Default model name from settings
         """
-        return self.config.default_model
+        return settings.default_model
 
     def list_models(self, include_disabled: bool = False) -> list[dict]:
         """List all models with their metadata."""

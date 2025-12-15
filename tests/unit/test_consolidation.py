@@ -103,7 +103,7 @@ class TestConsolidateModelResults:
             assert consolidated.metadata.latency_ms == 10000
 
             # Consolidation model should be the default model from settings
-            from multi_mcp.config import settings
+            from multi_mcp.settings import settings
 
             assert consolidated.metadata.consolidation_model == settings.default_model
 

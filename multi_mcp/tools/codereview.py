@@ -157,7 +157,7 @@ Complete this checklist, then call step 2 with your findings and relevant_files.
             break
 
     # Check if consolidation is needed based on response size AND number of successful models
-    from multi_mcp.config import settings
+    from multi_mcp.settings import settings
 
     total_size = sum(len(r.content.encode("utf-8")) for r in raw_results)
     total_models = len(models)

@@ -1,10 +1,12 @@
-# Multi-MCP Model Configuration
+# Multi-MCP Model Definitions
+# Runtime defaults are in Settings class (multi_mcp/settings.py)
+# API keys should be in .env file
 
 version: "1.0"
 
-# Default model
-default_model: gpt-5-mini
-
+# =============================================================================
+# Model Definitions
+# =============================================================================
 models:
   # ============================================
   # OpenAI Models

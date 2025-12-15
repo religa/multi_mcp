@@ -3,6 +3,7 @@
 import logging
 
 from multi_mcp.models.resolver import ModelResolver
+from multi_mcp.settings import settings
 from multi_mcp.utils.llm_runner import validate_model_credentials
 
 logger = logging.getLogger(__name__)
@@ -45,6 +46,6 @@ async def models_impl() -> dict:
 
     return {
         "models": models,
-        "default_model": resolver.config.default_model,
+        "default_model": settings.default_model,
         "count": len(models),
     }

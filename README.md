@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/religa/multi_mcp/workflows/CI/badge.svg)](https://github.com/religa/multi_mcp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
 A **multi-model AI orchestration MCP server** for **automated code review** and **LLM-powered analysis**. Multi-MCP integrates with **Claude Code CLI** to orchestrate multiple AI models (OpenAI GPT, Anthropic Claude, Google Gemini) for **code quality checks**, **security analysis** (OWASP Top 10), and **multi-agent consensus**. Built on the **Model Context Protocol (MCP)**, this tool enables Python developers and DevOps teams to automate code reviews with AI-powered insights directly in their development workflow.
 
@@ -39,7 +39,7 @@ Multi-MCP acts as an **MCP server** that Claude Code connects to, providing AI-p
 ## Quick Start
 
 **Prerequisites:**
-- Python 3.13+
+- Python 3.11+
 - [uv package manager](https://github.com/astral-sh/uv)
 - API key for at least one provider (OpenAI, Anthropic, Google, or OpenRouter)
 
@@ -53,7 +53,7 @@ make install
 
 # The installer will:
 # 1. Install dependencies (uv sync)
-# 2. Configure your .env file (from .env.example)
+# 2. Generate your .env file
 # 3. Automatically add to Claude Code config (requires jq)
 # 4. Test the installation
 ```
@@ -148,7 +148,7 @@ Multi-MCP can execute **CLI-based AI models** (like Gemini CLI or Codex CLI) alo
 
 **Configuration:**
 
-CLI models are defined in `config/models.yaml` with `provider: cli`:
+CLI models are defined in `multi_mcp/config/config.yaml` with `provider: cli`:
 
 ```yaml
 gemini-cli:
@@ -232,7 +232,7 @@ multi --base-path /path/to/project src/
 
 **"No API key found"**
 - Add at least one API key to your `.env` file
-- Verify it's loaded: `uv run python -c "from multi_mcp.config import settings; print(settings.openai_api_key)"`
+- Verify it's loaded: `uv run python -c "from multi_mcp.settings import settings; print(settings.openai_api_key)"`
 
 **Integration tests fail**
 - Set `RUN_E2E=1` environment variable

@@ -1,0 +1,51 @@
+# Multi-MCP User Configuration Overrides
+# ============================================================================
+# Copy this file to ~/.multi_mcp/config.yaml to customize model definitions.
+#
+# For the full list of available models and their settings, see:
+#   multi_mcp/config/config.yaml (in the package or repo)
+#
+# For runtime settings (API keys, defaults), use .env file instead.
+# ============================================================================
+
+version: "1.0"
+
+models:
+  # ----------------------------------------
+  # Example: Add a custom model
+  # ----------------------------------------
+  # my-custom-model:
+  #   litellm_model: openai/gpt-4o
+  #   aliases:
+  #     - custom
+  #     - mymodel
+  #   notes: "My custom model configuration"
+
+  # ----------------------------------------
+  # Example: Override an existing model's settings
+  # ----------------------------------------
+  # gpt-5-mini:
+  #   constraints:
+  #     temperature: 0.5  # Override default temperature
+  #   notes: "Modified gpt-5-mini with custom temperature"
+
+  # ----------------------------------------
+  # Example: Add a CLI model
+  # ----------------------------------------
+  # my-cli-model:
+  #   provider: cli
+  #   cli_command: my-llm-cli
+  #   cli_args:
+  #     - "--json"
+  #     - "--model"
+  #     - "default"
+  #   cli_parser: json
+  #   aliases:
+  #     - mycli
+  #   notes: "Custom CLI model"
+
+  # ----------------------------------------
+  # Example: Disable a built-in model
+  # ----------------------------------------
+  # azure-gpt-5-mini:
+  #   disabled: true

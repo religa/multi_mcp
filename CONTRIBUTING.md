@@ -21,9 +21,9 @@ cd multi_mcp
 # Install dependencies with dev extras (required for testing and linting)
 uv sync --extra dev
 
-# Create .env file
+# Create .env from template and add your API keys
 cp .env.example .env
-# Add at least one API key to .env (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENROUTER_API_KEY)
+# Edit .env and add at least one API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENROUTER_API_KEY)
 ```
 
 ## Before Submitting a PR
@@ -36,7 +36,7 @@ make check && make test
 
 # 2. Run full integration tests (REQUIRED before PR submission)
 make test-integration
-# This runs 25 integration tests (~10min) with real API calls
+# This runs 93 integration tests (~8-10min) with real API calls
 # Requires at least one API key in .env
 
 # Or run everything at once:
@@ -56,11 +56,11 @@ make typecheck
 make lint
 # or: uv run ruff check .
 
-# Unit tests (364 tests, ~2s)
+# Unit tests (511 tests, ~2s)
 make test
 # or: uv run pytest tests/unit/ -v
 
-# Integration tests (25 tests, ~2-3min with parallel execution, REQUIRED before PR)
+# Integration tests (93 tests, ~8-10min with parallel execution, REQUIRED before PR)
 make test-integration
 # or: RUN_E2E=1 uv run pytest tests/integration/ -n auto -v
 ```
@@ -88,10 +88,10 @@ make test-integration
 ## Project Structure
 
 ```
-src/
+multi_mcp/
 ├── server.py          # FastMCP server with factory-generated tools
 ├── cli.py             # CLI tool (experimental)
-├── config.py          # Environment-based configuration
+├── settings.py        # Environment-based configuration (Pydantic Settings)
 ├── schemas/           # Pydantic models for request validation
 │   ├── base.py        # Base classes, ModelResponseMetadata
 │   ├── codereview.py  # CodeReview request/response
@@ -126,14 +126,14 @@ src/
 
 ## Testing
 
-We have 510 total tests: 436 unit tests (~2s) and 74 integration tests (~10-15min with real API calls).
+We have 604 total tests: 511 unit tests (~2s) and 93 integration tests (~8-10min with real API calls).
 
 ```bash
-# Unit tests only (436 tests, ~2s, fast - run before every commit)
+# Unit tests only (511 tests, ~2s, fast - run before every commit)
 make test
 # or: uv run pytest tests/unit/ -v
 
-# Integration tests (74 tests, ~10-15min, requires real API keys)
+# Integration tests (93 tests, ~8-10min, requires real API keys)
 make test-integration
 # or: RUN_E2E=1 uv run pytest tests/integration/ -n auto -v
 
@@ -143,12 +143,12 @@ RUN_E2E=1 uv run pytest tests/integration/ -v
 # Run with specific number of workers
 RUN_E2E=1 uv run pytest tests/integration/ -n 4 -v
 
-# All tests (510 total)
+# All tests (604 total)
 make test-all
 # or: RUN_E2E=1 uv run pytest -v
 
 # Run with coverage report
-uv run pytest tests/unit/ --cov=src --cov-report=html
+uv run pytest tests/unit/ --cov=multi_mcp --cov-report=html
 ```
 
 **Note:** Integration tests require at least one API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENROUTER_API_KEY) and make real API calls which cost money. They are **disabled in CI** to save costs. We use low-cost models (gpt-5-mini, gemini-2.5-flash) for testing.
@@ -187,8 +187,8 @@ Found a bug or have a feature request? [Open an issue](https://github.com/religa
    ```
 5. **Update docs** if you change APIs (README.md, CLAUDE.md, or docs/)
 6. **Ensure all checks pass**:
-   - ✅ Unit tests (364 tests)
-   - ✅ Integration tests (25 tests) - **REQUIRED locally before PR**
+   - ✅ Unit tests (511 tests)
+   - ✅ Integration tests (93 tests) - **REQUIRED locally before PR**
    - ✅ Type checking (pyright)
    - ✅ Linting (ruff check)
    - ✅ Format check (ruff format --check)
@@ -216,9 +216,9 @@ Multi-MCP uses a clean, factory-based architecture:
 - Enables clean APIs without explicit parameter passing
 
 **Model Configuration:**
-- YAML-based model config (`config/models.yaml`)
+- YAML-based model config (`multi_mcp/config/config.yaml`)
 - Aliases resolve to full model names (e.g., `mini` → `gpt-5-mini`)
-- Use-case defaults: `fast`, `smart`, `cheap`
+- Runtime defaults in Settings class (`multi_mcp/settings.py` via `.env` files)
 - Supports both API models (via LiteLLM) and CLI models (subprocess execution)
 
 For detailed architecture documentation, see `CLAUDE.md`.
@@ -306,7 +306,7 @@ logs/
 - Test with: `RUN_E2E=1 uv run pytest tests/integration/`
 
 **Adding New Models:**
-- Edit `config/models.yaml`
+- Edit `multi_mcp/config/config.yaml`
 - Add aliases, temperature constraints, provider info
 - Update tests if model behavior differs
 - See `CLAUDE.md` for model configuration details

@@ -22,18 +22,10 @@ readonly NC='\033[0m' # No Color
 # Configuration
 readonly VENV_PATH=".venv"
 readonly ENV_FILE=".env"
-readonly ENV_EXAMPLE=".env.example"
-readonly REQUIRED_PYTHON_VERSION="3.13"
+readonly REQUIRED_PYTHON_VERSION="3.11"
 
-readonly API_KEYS=(
-    "OPENAI_API_KEY"
-    "ANTHROPIC_API_KEY"
-    "GEMINI_API_KEY"
-    "OPENROUTER_API_KEY"
-    "AZURE_API_KEY"
-    "AZURE_API_BASE"
-    "AZURE_API_VERSION"
-)
+# Note: API_KEYS is now generated dynamically from PROVIDERS dict (DRY principle)
+# See get_provider_env_vars() function below
 
 # ----------------------------------------------------------------------------
 # Utility Functions
@@ -65,6 +57,25 @@ print_header() {
 
 get_script_dir() {
     cd "$(dirname "$0")/.." && pwd
+}
+
+# ----------------------------------------------------------------------------
+# User Config Directory
+# ----------------------------------------------------------------------------
+
+get_user_config_dir() {
+    echo "$HOME/.multi_mcp"
+}
+
+# ----------------------------------------------------------------------------
+# Provider Environment Variables (DRY - from PROVIDERS dict)
+# ----------------------------------------------------------------------------
+
+get_provider_env_vars() {
+    # Dynamically get env var names from PROVIDERS dict (single source of truth)
+    # This replaces the hardcoded API_KEYS array
+    # Note: Single-line Python for cross-platform compatibility (Windows Git Bash, macOS, Linux)
+    uv run python -c 'from multi_mcp.models.config import PROVIDERS; print(" ".join(env_var for pc in PROVIDERS.values() for _, env_var in pc.credentials))'
 }
 
 # ----------------------------------------------------------------------------
@@ -100,7 +111,7 @@ check_python_version() {
     python_version=$($py_cmd --version 2>&1 | awk '{print $2}')
 
     # Use Python itself for version checking (portable across all platforms)
-    if ! $py_cmd -c "import sys; sys.exit(0 if sys.version_info >= (3, 13) else 1)" 2>/dev/null; then
+    if ! $py_cmd -c "import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)" 2>/dev/null; then
         print_warning "System Python $python_version found (Python $REQUIRED_PYTHON_VERSION+ recommended)"
         print_info "uv will manage Python versions automatically"
     else
@@ -151,13 +162,14 @@ setup_env_file() {
         fi
     fi
 
-    if [[ ! -f "$ENV_EXAMPLE" ]]; then
-        print_error "Template file $ENV_EXAMPLE not found"
+    # Copy .env from static example file
+    print_info "Creating .env from example..."
+    if cp .env.example .env && chmod 600 .env; then
+        print_success "Created $ENV_FILE"
+    else
+        print_error "Failed to create $ENV_FILE (is .env.example missing?)"
         exit 1
     fi
-
-    cp "$ENV_EXAMPLE" "$ENV_FILE"
-    print_success "Created $ENV_FILE from template"
 
     sync_env_keys "$ENV_FILE"
 
@@ -190,7 +202,12 @@ sync_env_keys() {
     local count=0
     local -a available_keys=()
 
-    for key in "${API_KEYS[@]}"; do
+    # Get env var names dynamically from PROVIDERS dict (DRY)
+    # Uses word splitting (space-separated output) for cross-platform compatibility
+    local provider_env_vars
+    provider_env_vars=$(get_provider_env_vars)
+
+    for key in $provider_env_vars; do
         local val
         val=$(get_env_value "$key")
         if [[ -n "$val" ]]; then
@@ -582,11 +599,14 @@ test_installation() {
     if [[ -f "$ENV_FILE" ]]; then
         local keys_found=0
 
-        # Use global API_KEYS array (DRY)
-        for key in "${API_KEYS[@]}"; do
-            # Check for non-placeholder values
-            # Match: starts with KEY=, then sk- followed by non-dot OR any two non-dots
-            if grep -qE "^${key}=sk-[^.]|^${key}=[^.][^.]" "$ENV_FILE"; then
+        # Get env var names dynamically from PROVIDERS dict (DRY)
+        # Uses word splitting (space-separated output) for cross-platform compatibility
+        local provider_env_vars
+        provider_env_vars=$(get_provider_env_vars)
+
+        for key in $provider_env_vars; do
+            # Check for non-empty values (KEY=something where something is not empty)
+            if grep -qE "^${key}=.+" "$ENV_FILE"; then
                 ((keys_found++))
             fi
         done
@@ -615,6 +635,126 @@ test_model_providers() {
     else
         print_warning "Some model providers are not working"
         print_info "Check your API keys in $ENV_FILE"
+    fi
+}
+
+# ----------------------------------------------------------------------------
+# User Config Setup (Optional - YAGNI by default)
+# ----------------------------------------------------------------------------
+
+setup_user_env() {
+    local user_config_dir
+    user_config_dir=$(get_user_config_dir)
+    local user_env_file="$user_config_dir/.env"
+
+    # Skip if --no-user-config flag passed
+    if [[ "${SKIP_USER_CONFIG:-}" == "1" ]]; then
+        print_info "Skipping user .env creation (--no-user-config)"
+        return 0
+    fi
+
+    # Check if exists
+    if [[ -f "$user_env_file" ]]; then
+        print_info "User .env already exists at $user_env_file"
+        return 0
+    fi
+
+    # For git clone installs, project .env is preferred
+    if [[ -f ".env" ]]; then
+        print_info "Using project .env (git clone install)"
+        print_info "User .env at $user_env_file not needed"
+        return 0
+    fi
+
+    # Ask user (skip in non-interactive mode)
+    if [[ "${NON_INTERACTIVE:-}" != "1" ]]; then
+        echo "" >&2
+        print_info "User .env stores API keys for pip install users"
+        read -p "Create user .env at $user_env_file? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            print_info "Skipping user .env (you can create it later)"
+            return 0
+        fi
+    fi
+
+    # Copy .env template from static example file
+    print_info "Creating user .env template..."
+    mkdir -p "$user_config_dir"
+    chmod 700 "$user_config_dir"
+
+    if cp .env.example "$user_env_file" && chmod 600 "$user_env_file"; then
+        print_success "Created user .env template at $user_env_file"
+        print_info "Edit $user_env_file to add your API keys"
+    else
+        print_warning "Failed to create user .env template"
+    fi
+}
+
+setup_user_config() {
+    local user_config_dir
+    user_config_dir=$(get_user_config_dir)
+    local user_config_file="$user_config_dir/config.yaml"
+
+    # Skip if --no-user-config flag passed
+    if [[ "${SKIP_USER_CONFIG:-}" == "1" ]]; then
+        print_info "Skipping user config creation (--no-user-config)"
+        return 0
+    fi
+
+    # Check if exists
+    if [[ -f "$user_config_file" ]]; then
+        print_info "User config already exists at $user_config_file"
+        return 0
+    fi
+
+    # Ask user (skip in non-interactive mode)
+    if [[ "${NON_INTERACTIVE:-}" != "1" ]]; then
+        echo "" >&2
+        print_info "User config allows customizing models and settings"
+        read -p "Create user config template at $user_config_file? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            print_info "Skipping user config (you can create it later)"
+            return 0
+        fi
+    fi
+
+    # Copy config template from static example file
+    print_info "Creating user config template..."
+
+    if cp multi_mcp/config/config.override.example.yaml "$user_config_file" && chmod 600 "$user_config_file"; then
+        print_success "Created user config template at $user_config_file"
+        print_info "Edit $user_config_file to customize models"
+    else
+        print_warning "Failed to create user config template"
+    fi
+}
+
+# ----------------------------------------------------------------------------
+# Argument Parsing
+# ----------------------------------------------------------------------------
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --non-interactive|--yes|-y)
+                export NON_INTERACTIVE=1
+                shift
+                ;;
+            --no-user-config)
+                export SKIP_USER_CONFIG=1
+                shift
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+
+    # Auto-detect CI environment
+    if [[ -n "${CI:-}" ]]; then
+        export NON_INTERACTIVE=1
     fi
 }
 
@@ -651,6 +791,9 @@ show_next_steps() {
 # ----------------------------------------------------------------------------
 
 main() {
+    # Parse command line arguments first
+    parse_args "$@"
+
     local project_dir
     project_dir=$(get_script_dir)
 
@@ -670,6 +813,12 @@ main() {
     install_dependencies
     setup_env_file
 
+    # Optional: Create user .env (for pip install users)
+    setup_user_env
+
+    # Optional: Create user config (for model overrides)
+    setup_user_config
+
     # Configuration
     generate_mcp_config
 
@@ -677,11 +826,13 @@ main() {
     test_installation
 
     # Test model providers (optional - asks user)
-    echo "" >&2
-    read -p "Test model providers now? (Y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-        test_model_providers
+    if [[ "${NON_INTERACTIVE:-}" != "1" ]]; then
+        echo "" >&2
+        read -p "Test model providers now? (Y/n): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+            test_model_providers
+        fi
     fi
 
     # Completion

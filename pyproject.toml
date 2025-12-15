@@ -3,7 +3,7 @@ name = "multi"
 version = "0.1.0"
 description = "Multi-model AI orchestration server"
 readme = "README.md"
-requires-python = ">=3.13.0, <3.14"
+requires-python = ">=3.11"
 license = "MIT"
 authors = [
     {name = "Multi-MCP Team"}
@@ -50,6 +50,9 @@ where = ["."]
 include = ["multi_mcp*"]
 exclude = ["tests*", "docs*", "ref*", "tmp*"]
 
+[tool.setuptools.package-data]
+multi_mcp = ["config/*.yaml", "prompts/*.md"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
@@ -77,7 +80,7 @@ filterwarnings = [
 
 [tool.ruff]
 line-length = 140
-target-version = "py313"
+target-version = "py311"
 exclude = ["tests/data/**", ".venv/**", "build/**", "dist/**", "ref/**", "tmp/**"]
 
 [tool.ruff.lint]
@@ -105,5 +108,5 @@ exclude = ["**/__pycache__", "**/.pytest_cache", "tests/data/"]
 typeCheckingMode = "basic"
 reportMissingImports = true
 reportMissingTypeStubs = false
-pythonVersion = "3.13"
+pythonVersion = "3.11"
 pythonPlatform = "All"

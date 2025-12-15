@@ -54,7 +54,7 @@ verify:
 		exit 1; \
 	fi
 	@if [ ! -f ".env" ]; then \
-		echo "ERROR: .env file not found. Copy .env.example and add API keys."; \
+		echo "ERROR: .env file not found. Run 'make install' to generate it."; \
 		exit 1; \
 	fi
 	@echo "✓ Virtual environment exists"
@@ -87,7 +87,7 @@ test:
 
 test-cov:
 	@echo "Running unit tests with coverage report..."
-	uv run pytest tests/unit/ --cov=src --cov-report=term-missing --cov-report=html
+	uv run pytest tests/unit/ --cov=multi_mcp --cov-report=term-missing --cov-report=html
 	@echo "✓ Coverage report generated at htmlcov/index.html"
 
 test-integration:

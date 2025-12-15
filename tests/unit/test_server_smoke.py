@@ -179,7 +179,7 @@ class TestConfigurationLoading:
 
     def test_config_imports(self):
         """Config module imports successfully."""
-        from multi_mcp.config import settings
+        from multi_mcp.settings import settings
 
         assert settings is not None, "settings should be loaded"
 

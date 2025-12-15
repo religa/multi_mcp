@@ -3,7 +3,7 @@
 import logging
 import os
 
-from multi_mcp.config import settings
+from multi_mcp.settings import settings
 from multi_mcp.utils.paths import resolve_path
 
 logger = logging.getLogger(__name__)

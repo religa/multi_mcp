@@ -2,8 +2,8 @@
 
 from pydantic import Field
 
-from multi_mcp.config import settings
 from multi_mcp.schemas.base import ModelResponse, MultiToolRequest, MultiToolResponse
+from multi_mcp.settings import settings
 
 
 class DebateRequest(MultiToolRequest):

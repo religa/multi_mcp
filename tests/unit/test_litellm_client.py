@@ -18,11 +18,6 @@ class TestLiteLLMClient:
         """Create sample configuration for testing."""
         return ModelsConfiguration(
             version="1.0",
-            default_model="gpt-5-mini",
-            default_models={
-                "fast": "gpt-5-mini",
-                "smart": "gpt-5-pro",
-            },
             models={
                 "gpt-5-mini": ModelConfig(
                     litellm_model="openai/gpt-5-mini", aliases=["mini"], constraints=ModelConstraints(temperature=1.0)
@@ -250,7 +245,6 @@ class TestLiteLLMClient:
         # Create config with custom params and explicit max_tokens
         config = ModelsConfiguration(
             version="1.0",
-            default_model="custom-model",
             models={
                 "custom-model": ModelConfig(
                     litellm_model="provider/custom-model",
@@ -319,7 +313,6 @@ class TestLiteLLMClient:
         """Test that Azure models fail with explicit error when AZURE_API_KEY is missing."""
         config = ModelsConfiguration(
             version="1.0",
-            default_model="azure-gpt-5-mini",
             models={
                 "azure-gpt-5-mini": ModelConfig(litellm_model="azure/gpt-5-mini", aliases=["azure-mini"]),
             },
@@ -346,7 +339,6 @@ class TestLiteLLMClient:
         """Test that Azure models fail with explicit error when AZURE_API_BASE is missing."""
         config = ModelsConfiguration(
             version="1.0",
-            default_model="azure-gpt-5-mini",
             models={
                 "azure-gpt-5-mini": ModelConfig(litellm_model="azure/gpt-5-mini", aliases=["azure-mini"]),
             },
@@ -373,7 +365,6 @@ class TestLiteLLMClient:
         """Test that Azure models show both missing credentials."""
         config = ModelsConfiguration(
             version="1.0",
-            default_model="azure-gpt-5-mini",
             models={
                 "azure-gpt-5-mini": ModelConfig(litellm_model="azure/gpt-5-mini", aliases=["azure-mini"]),
             },
@@ -400,7 +391,6 @@ class TestLiteLLMClient:
         """Test that Gemini models fail with explicit error when GEMINI_API_KEY is missing."""
         config = ModelsConfiguration(
             version="1.0",
-            default_model="gemini-2.5-flash",
             models={
                 "gemini-2.5-flash": ModelConfig(litellm_model="gemini/gemini-2.5-flash", aliases=["flash"]),
             },
@@ -425,7 +415,6 @@ class TestLiteLLMClient:
         """Test that Anthropic models fail with explicit error when ANTHROPIC_API_KEY is missing."""
         config = ModelsConfiguration(
             version="1.0",
-            default_model="claude-sonnet-4.5",
             models={
                 "claude-sonnet-4.5": ModelConfig(litellm_model="anthropic/claude-sonnet-4-5-20250929", aliases=["sonnet"]),
             },
@@ -450,7 +439,6 @@ class TestLiteLLMClient:
         """Test that OpenRouter models fail with explicit error when OPENROUTER_API_KEY is missing."""
         config = ModelsConfiguration(
             version="1.0",
-            default_model="openrouter-model",
             models={
                 "openrouter-model": ModelConfig(litellm_model="openrouter/some-model", aliases=["or"]),
             },
@@ -475,7 +463,6 @@ class TestLiteLLMClient:
         """Test that OpenAI models fail with explicit error when OPENAI_API_KEY is missing."""
         config = ModelsConfiguration(
             version="1.0",
-            default_model="gpt-5-mini",
             models={
                 "gpt-5-mini": ModelConfig(litellm_model="openai/gpt-5-mini", aliases=["mini"]),
             },
@@ -500,7 +487,6 @@ class TestLiteLLMClient:
         """Test that Bedrock models fail with explicit error when all AWS credentials are missing."""
         config = ModelsConfiguration(
             version="1.0",
-            default_model="bedrock-model",
             models={
                 "bedrock-model": ModelConfig(litellm_model="bedrock/anthropic.claude-sonnet-4-5-v2", aliases=["bedrock"]),
             },
@@ -529,7 +515,6 @@ class TestLiteLLMClient:
         """Test that Bedrock shows which AWS credentials are already set."""
         config = ModelsConfiguration(
             version="1.0",
-            default_model="bedrock-model",
             models={
                 "bedrock-model": ModelConfig(litellm_model="bedrock/anthropic.claude-sonnet-4-5-v2", aliases=["bedrock"]),
             },
@@ -556,7 +541,6 @@ class TestLiteLLMClient:
         """Test that call_async rejects CLI models."""
         config = ModelsConfiguration(
             version="1.0",
-            default_model="gemini-cli",
             models={
                 "gemini-cli": ModelConfig(provider="cli", cli_command="gemini", cli_args=["chat"], cli_parser="json"),
             },

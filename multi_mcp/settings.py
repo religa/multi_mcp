@@ -1,16 +1,56 @@
 """
 Configuration management using Pydantic Settings.
-Loads from environment variables and .env file.
+Loads from environment variables and .env files (cascading).
+
+.env Precedence (highest to lowest):
+1. Environment variables (already set in os.environ)
+2. Project .env (current directory / project root)
+3. User .env (~/.multi_mcp/.env) - fallback for pip installs
 """
 
 import json
+import logging
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, EnvSettingsSource, PydanticBaseSettingsSource, SettingsConfigDict
 
-load_dotenv()
+logger = logging.getLogger(__name__)
+
+
+def get_user_env_path() -> Path:
+    """Get path to user .env file (~/.multi_mcp/.env)."""
+    return Path.home() / ".multi_mcp" / ".env"
+
+
+def load_env_files() -> None:
+    """Load .env files in precedence order.
+
+    Precedence (highest to lowest):
+    1. Environment variables (already set in os.environ)
+    2. Project .env (current directory / project root)
+    3. User .env (~/.multi_mcp/.env) - fallback for pip installs
+
+    Note: With override=False, the FIRST value loaded wins (subsequent
+    loads are ignored for already-set keys). So we load highest priority first.
+    """
+    # Load project .env first (higher priority)
+    # load_dotenv() without path checks multiple locations:
+    # - Current working directory
+    # - Parent directories (finds project root)
+    load_dotenv(override=False)
+
+    # Load user .env second (fallback for pip installs)
+    user_env = get_user_env_path()
+    if user_env.exists():
+        load_dotenv(user_env, override=False)
+        logger.debug(f"Loaded fallback user .env from {user_env}")
+
+
+# Load .env files at module import
+load_env_files()
 
 
 class CustomEnvSettingsSource(EnvSettingsSource):

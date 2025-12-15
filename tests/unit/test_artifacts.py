@@ -118,7 +118,7 @@ async def test_save_artifact_files_disabled(tmp_path, monkeypatch):
     monkeypatch.setenv("ARTIFACTS_DIR", "")
 
     # Reload settings
-    from multi_mcp.config import Settings
+    from multi_mcp.settings import Settings
     from multi_mcp.utils import artifacts
 
     artifacts.settings = Settings()
@@ -153,7 +153,7 @@ async def test_save_artifact_files_markdown(tmp_path, monkeypatch):
     monkeypatch.setenv("ARTIFACTS_DIR", "tmp")
 
     # Reload settings to pick up env var
-    from multi_mcp.config import Settings
+    from multi_mcp.settings import Settings
     from multi_mcp.utils import artifacts
 
     artifacts.settings = Settings()
@@ -206,7 +206,7 @@ async def test_save_artifact_files_json(tmp_path, monkeypatch):
     monkeypatch.setenv("ARTIFACTS_DIR", "tmp")
 
     # Reload settings
-    from multi_mcp.config import Settings
+    from multi_mcp.settings import Settings
     from multi_mcp.utils import artifacts
 
     artifacts.settings = Settings()
@@ -248,7 +248,7 @@ async def test_save_artifact_files_both(tmp_path, monkeypatch):
     monkeypatch.setenv("ARTIFACTS_DIR", "tmp")
 
     # Reload settings
-    from multi_mcp.config import Settings
+    from multi_mcp.settings import Settings
     from multi_mcp.utils import artifacts
 
     artifacts.settings = Settings()
@@ -288,7 +288,7 @@ async def test_save_artifact_files_absolute_path(tmp_path, monkeypatch):
     monkeypatch.setenv("ARTIFACTS_DIR", str(abs_artifacts_dir))
 
     # Reload settings
-    from multi_mcp.config import Settings
+    from multi_mcp.settings import Settings
     from multi_mcp.utils import artifacts
 
     artifacts.settings = Settings()
@@ -327,7 +327,7 @@ async def test_save_artifact_files_rejects_path_traversal(tmp_path, monkeypatch)
     monkeypatch.setenv("ARTIFACTS_DIR", "../../../tmp")
 
     # Reload settings
-    from multi_mcp.config import Settings
+    from multi_mcp.settings import Settings
     from multi_mcp.utils import artifacts
 
     artifacts.settings = Settings()
@@ -361,7 +361,7 @@ async def test_save_artifact_files_creates_directory(tmp_path, monkeypatch):
     monkeypatch.setenv("ARTIFACTS_DIR", "artifacts/logs")
 
     # Reload settings
-    from multi_mcp.config import Settings
+    from multi_mcp.settings import Settings
     from multi_mcp.utils import artifacts
 
     artifacts.settings = Settings()

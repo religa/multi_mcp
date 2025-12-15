@@ -328,7 +328,7 @@ class TestCompareImpl:
     @pytest.mark.asyncio
     async def test_too_many_files(self, tmp_path):
         """Test file count limit enforcement via Pydantic validator."""
-        from multi_mcp.config import settings
+        from multi_mcp.settings import settings
 
         # Create too many files
         files = []

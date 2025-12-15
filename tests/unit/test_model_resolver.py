@@ -16,12 +16,6 @@ class TestModelResolver:
         """Create a sample configuration for testing."""
         return ModelsConfiguration(
             version="1.0",
-            default_model="gpt-5-mini",
-            default_models={
-                "fast": "gpt-5-mini",
-                "smart": "haiku",
-                "cheap": ["gpt-5-nano", "gemini-2.5-flash"],
-            },
             models={
                 "gpt-5-mini": ModelConfig(
                     litellm_model="openai/gpt-5-mini",
@@ -158,8 +152,10 @@ class TestModelResolver:
         assert result == "openai/gpt-5-mini"
 
     def test_get_default(self, resolver):
-        """Test get_default returns default_model."""
-        result = resolver.get_default()
+        """Test get_default returns default_model from settings."""
+        with patch("multi_mcp.models.resolver.settings") as mock_settings:
+            mock_settings.default_model = "gpt-5-mini"
+            result = resolver.get_default()
 
         assert result == "gpt-5-mini"
 
@@ -231,3 +227,30 @@ class TestModelResolver:
         config = ModelConfig(litellm_model="openai/gpt-5-mini", provider="custom-provider")
 
         assert config.get_provider() == "custom-provider"
+
+    def test_resolve_empty_string_raises_error(self, resolver):
+        """Test that resolving an empty string raises ValueError."""
+        with pytest.raises(ValueError, match="non-empty string"):
+            resolver.resolve("")
+
+    def test_resolve_whitespace_only_raises_error(self, resolver):
+        """Test that resolving whitespace-only string raises ValueError."""
+        with pytest.raises(ValueError, match="non-empty string"):
+            resolver.resolve("   ")
+
+    def test_resolve_none_raises_error(self, resolver):
+        """Test that resolving None raises ValueError."""
+        with pytest.raises(ValueError, match="non-empty string"):
+            resolver.resolve(None)  # type: ignore
+
+    def test_resolve_non_string_raises_error(self, resolver):
+        """Test that resolving non-string type raises ValueError."""
+        with pytest.raises(ValueError, match="non-empty string"):
+            resolver.resolve(123)  # type: ignore
+
+    def test_resolve_with_leading_trailing_whitespace(self, resolver):
+        """Test that model name with whitespace is trimmed and resolved correctly."""
+        canonical, config = resolver.resolve("  mini  ")
+
+        assert canonical == "gpt-5-mini"
+        assert config.litellm_model == "openai/gpt-5-mini"

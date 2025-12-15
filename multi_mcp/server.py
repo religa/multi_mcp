@@ -4,11 +4,11 @@ import logging
 
 from fastmcp import FastMCP
 
-from multi_mcp.config import settings
 from multi_mcp.schemas.chat import ChatRequest
 from multi_mcp.schemas.codereview import CodeReviewRequest
 from multi_mcp.schemas.compare import CompareRequest
 from multi_mcp.schemas.debate import DebateRequest
+from multi_mcp.settings import settings
 from multi_mcp.tools.chat import chat_impl
 from multi_mcp.tools.codereview import codereview_impl
 from multi_mcp.tools.compare import compare_impl

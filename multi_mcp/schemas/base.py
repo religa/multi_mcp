@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from multi_mcp.config import settings
+from multi_mcp.settings import settings
 
 
 class ModelResponseMetadata(BaseModel):

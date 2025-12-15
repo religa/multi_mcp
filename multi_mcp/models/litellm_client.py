@@ -7,10 +7,10 @@ from typing import Any
 
 import litellm
 
-from multi_mcp.config import settings
 from multi_mcp.models.config import PROVIDERS, ModelConfig
 from multi_mcp.models.resolver import ModelResolver
 from multi_mcp.schemas.base import ModelResponse, ModelResponseMetadata
+from multi_mcp.settings import settings
 from multi_mcp.utils.request_logger import log_llm_interaction
 
 logger = logging.getLogger(__name__)

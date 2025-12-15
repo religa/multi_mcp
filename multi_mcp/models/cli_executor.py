@@ -8,9 +8,9 @@ import re
 import shutil
 import time
 
-from multi_mcp.config import settings
 from multi_mcp.models.config import ModelConfig
 from multi_mcp.schemas.base import ModelResponse, ModelResponseMetadata
+from multi_mcp.settings import settings
 from multi_mcp.utils.json_parser import parse_llm_json
 from multi_mcp.utils.request_logger import log_llm_interaction
 
