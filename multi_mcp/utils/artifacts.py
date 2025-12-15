@@ -13,6 +13,7 @@ from typing import Any
 
 import yaml
 
+from multi_mcp.constants import ARTIFACT_NAME_MAX_LENGTH, ARTIFACT_NAME_MAX_WORDS
 from multi_mcp.schemas.base import ModelResponse
 from multi_mcp.settings import settings
 
@@ -44,9 +45,9 @@ def generate_filename(
         name_parts = name_parts[1:]
         name_slug = "-".join(name_parts) if name_parts else "request"
 
-    # Shorten name to first 2 words (max 15 chars)
-    name_words = name_slug.split("-")[:2]
-    name_slug = "-".join(name_words)[:15].rstrip("-")
+    # Shorten name to first N words (max M chars)
+    name_words = name_slug.split("-")[:ARTIFACT_NAME_MAX_WORDS]
+    name_slug = "-".join(name_words)[:ARTIFACT_NAME_MAX_LENGTH].rstrip("-")
 
     parts = [name_slug, workflow, model_slug, timestamp]
 

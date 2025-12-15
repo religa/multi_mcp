@@ -7,6 +7,7 @@ from typing import Any
 
 import litellm
 
+from multi_mcp.constants import DEFAULT_MAX_TOKENS
 from multi_mcp.models.config import PROVIDERS, ModelConfig
 from multi_mcp.models.resolver import ModelResolver
 from multi_mcp.schemas.base import ModelResponse, ModelResponseMetadata
@@ -193,9 +194,8 @@ class LiteLLMClient:
                 "timeout": timeout,
             }
 
-            # Set max_tokens: config value > sensible default (32768)
-            # Default 32k allows for very long code review responses with many issues and detailed fixes
-            max_tokens = model_config.max_tokens if model_config.max_tokens is not None else 32768
+            # Set max_tokens: config value > sensible default
+            max_tokens = model_config.max_tokens if model_config.max_tokens is not None else DEFAULT_MAX_TOKENS
             kwargs["max_tokens"] = max_tokens
             logger.debug(f"[MODEL_CALL] Using max_tokens={max_tokens} ({'config' if model_config.max_tokens else 'default'})")
 

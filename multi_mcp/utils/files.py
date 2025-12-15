@@ -3,6 +3,7 @@
 import logging
 import os
 
+from multi_mcp.constants import BYTES_PER_KB
 from multi_mcp.settings import settings
 from multi_mcp.utils.paths import resolve_path
 
@@ -23,7 +24,7 @@ def embed_files_for_expert(files: list[str], base_path: str | None = None) -> st
     if not files:
         return "<EDITABLE_FILES>\nNo files to embed\n</EDITABLE_FILES>"
 
-    max_size = settings.max_file_size_kb * 1024
+    max_size = settings.max_file_size_kb * BYTES_PER_KB
     embedded_parts = ["<EDITABLE_FILES>"]
 
     for file_path in files:

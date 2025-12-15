@@ -8,6 +8,7 @@ import re
 import shutil
 import time
 
+from multi_mcp.constants import DEBUG_LOG_MAX_LENGTH, ERROR_PREVIEW_MAX_LENGTH
 from multi_mcp.models.config import ModelConfig
 from multi_mcp.schemas.base import ModelResponse, ModelResponseMetadata
 from multi_mcp.settings import settings
@@ -120,17 +121,18 @@ class CLIExecutor:
 
                 # Use stderr if available, otherwise use stdout (some CLIs write errors to stdout)
                 error_output = stderr if stderr else stdout
-                error_preview = error_output[:500] if error_output else "(no output)"
+                error_preview = error_output[:ERROR_PREVIEW_MAX_LENGTH] if error_output else "(no output)"
 
                 install_hint = self._get_install_hint(cli_command)
                 logger.error(f"[CLI_CALL] {canonical_name} failed with exit code {process.returncode}")
-                logger.debug(f"[CLI_CALL] stderr: {stderr[:1000]}")
-                logger.debug(f"[CLI_CALL] stdout: {stdout[:1000]}")
+                logger.debug(f"[CLI_CALL] stderr: {stderr[:DEBUG_LOG_MAX_LENGTH]}")
+                logger.debug(f"[CLI_CALL] stdout: {stdout[:DEBUG_LOG_MAX_LENGTH]}")
                 return ModelResponse.error_response(
                     error=f"CLI '{cli_command}' failed with exit code {process.returncode}. "
                     f"Error: {error_preview}\n\n"
                     f"Troubleshooting: {install_hint}",
                     model=canonical_name,
+                    latency_ms=latency_ms,
                 )
 
             # Parse output
@@ -180,6 +182,7 @@ class CLIExecutor:
                 f"The command took longer than expected. "
                 f"Consider using a faster model or increasing MODEL_TIMEOUT_SECONDS in config.",
                 model=canonical_name,
+                latency_ms=latency_ms,
             )
 
         except FileNotFoundError as e:
@@ -190,6 +193,7 @@ class CLIExecutor:
             return ModelResponse.error_response(
                 error=f"CLI command '{cli_command}' not found. {install_hint}",
                 model=canonical_name,
+                latency_ms=latency_ms,
             )
 
         except Exception as e:
@@ -208,6 +212,7 @@ class CLIExecutor:
             return ModelResponse.error_response(
                 error=f"CLI execution failed: {type(e).__name__}: {str(e)}",
                 model=canonical_name,
+                latency_ms=latency_ms,
             )
 
     def _get_install_hint(self, cli_command: str) -> str:

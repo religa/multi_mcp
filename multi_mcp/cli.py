@@ -9,6 +9,7 @@ import sys
 import warnings
 from pathlib import Path
 
+from multi_mcp.constants import BYTES_PER_KB
 from multi_mcp.settings import settings
 from multi_mcp.tools.codereview import codereview_impl
 
@@ -47,7 +48,7 @@ CODE_EXTENSIONS = {
 def collect_files(paths: list[str]) -> list[str]:
     """Collect code files from paths."""
     files = []
-    max_size = settings.max_file_size_kb * 1024
+    max_size = settings.max_file_size_kb * BYTES_PER_KB
 
     for p in paths:
         path = Path(p).resolve()

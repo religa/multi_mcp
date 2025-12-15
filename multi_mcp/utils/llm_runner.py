@@ -3,6 +3,7 @@
 import asyncio
 import logging
 
+from multi_mcp.constants import DEFAULT_MAX_CONCURRENCY
 from multi_mcp.models.cli_executor import CLIExecutor
 from multi_mcp.models.config import ModelConfig
 from multi_mcp.models.litellm_client import LiteLLMClient
@@ -105,7 +106,7 @@ async def execute_single(
 async def execute_parallel(
     models: list[str],
     messages: list[dict],
-    max_concurrency: int = 5,
+    max_concurrency: int = DEFAULT_MAX_CONCURRENCY,
     enable_web_search: bool = False,
 ) -> list[ModelResponse]:
     """
