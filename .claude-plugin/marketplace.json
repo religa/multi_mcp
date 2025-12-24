@@ -1,0 +1,49 @@
+{
+  "name": "multi_mcp",
+  "owner": {
+    "name": "Multi-MCP Team",
+    "email": "multi.mcp.team@gmail.com"
+  },
+  "metadata": {
+    "description": "Multi-model AI orchestration MCP server",
+    "version": "0.1.1",
+    "homepage": "https://github.com/religa/multi_mcp"
+  },
+  "plugins": [
+    {
+      "name": "multi-mcp",
+      "source": "./",
+      "description": "Code review, compare, and debate tools using multiple AI models",
+      "version": "0.1.1",
+      "license": "MIT",
+      "category": "code-review",
+      "keywords": [
+        "mcp",
+        "code-review",
+        "multi-model",
+        "llm",
+        "ai",
+        "ai-code-review",
+        "anthropic",
+        "claude",
+        "claude-mcp",
+        "code-analysis",
+        "developer-tools",
+        "gemini",
+        "gpt",
+        "llm-orchestration",
+        "model-context-protocol",
+        "multi-agent",
+        "openai"
+      ],
+      "mcpServers": {
+        "multi": {
+          "command": "uvx",
+          "args": [
+            "multi-mcp"
+          ]
+        }
+      }
+    }
+  ]
+}

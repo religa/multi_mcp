@@ -1,4 +1,4 @@
-.PHONY: help install install-hooks verify test test-integration test-all clean lint format format-check typecheck check pre-commit server build publish publish-test publish-mcp
+.PHONY: help install install-hooks verify test test-integration test-all clean lint format format-check typecheck check pre-commit server build publish publish-test publish-mcp sync-plugin-version
 
 # Load .env file if it exists
 ifneq (,$(wildcard .env))
@@ -35,6 +35,7 @@ help:
 	@echo "  make publish-test        Upload to TestPyPI (for testing)"
 	@echo "  make publish             Upload to PyPI (production release)"
 	@echo "  make publish-mcp         Publish to MCP Registry (requires mcp-publisher)"
+	@echo "  make sync-plugin-version Sync plugin version from pyproject.toml"
 	@echo "  make clean               Remove build artifacts and cache"
 
 install:
@@ -161,6 +162,13 @@ publish-mcp:
 	@echo "✓ Published to MCP Registry!"
 	@echo ""
 	@echo "View at: https://registry.modelcontextprotocol.io"
+
+sync-plugin-version:
+	@echo "Syncing plugin version from pyproject.toml..."
+	@VERSION=$$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/'); \
+	jq --arg v "$$VERSION" '.metadata.version = $$v | .plugins[0].version = $$v' \
+		.claude-plugin/marketplace.json > tmp.json && mv tmp.json .claude-plugin/marketplace.json
+	@echo "✓ Plugin version synced!"
 
 clean:
 	@echo "Cleaning build artifacts and cache..."

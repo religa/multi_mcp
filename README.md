@@ -46,6 +46,22 @@ Multi-MCP acts as an **MCP server** that Claude Code connects to, providing AI-p
 
 ### Installation
 
+<!-- Claude Code Plugin - Coming Soon
+#### Option 1: Claude Code Plugin (Recommended)
+
+```bash
+# Add the marketplace
+/plugin marketplace add religa/multi_mcp
+
+# Install the plugin
+/plugin install multi-mcp@multi_mcp
+```
+
+Then configure API keys in `~/.multi_mcp/.env` (see [Configuration](#configuration)).
+-->
+
+#### Option 1: From Source
+
 ```bash
 # Clone and install
 git clone https://github.com/religa/multi_mcp.git
@@ -60,7 +76,9 @@ make install
 # 4. Test the installation
 ```
 
-**Manual configuration** (if you prefer not to run `make install`):
+#### Option 2: Manual Configuration
+
+If you prefer not to run `make install`:
 
 ```bash
 # Install dependencies
