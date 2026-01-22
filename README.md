@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-A **multi-model AI orchestration MCP server** for **automated code review** and **LLM-powered analysis**. Multi-MCP integrates with **Claude Code CLI** to orchestrate multiple AI models (OpenAI GPT, Anthropic Claude, Google Gemini) for **code quality checks**, **security analysis** (OWASP Top 10), and **multi-agent consensus**. Built on the **Model Context Protocol (MCP)**, this tool enables Python developers and DevOps teams to automate code reviews with AI-powered insights directly in their development workflow.
+A **multi-model AI orchestration MCP server** for **automated code review** and **LLM-powered analysis**. Multi-MCP integrates with **Claude Code CLI** and **OpenCode** to orchestrate multiple AI models (OpenAI GPT, Anthropic Claude, Google Gemini) for **code quality checks**, **security analysis** (OWASP Top 10), and **multi-agent consensus**. Built on the **Model Context Protocol (MCP)**, this tool enables Python developers and DevOps teams to automate code reviews with AI-powered insights directly in their development workflow.
 
 ![Demo Video](https://github.com/user-attachments/assets/39c3f100-e20d-4c3d-8130-b01c401f2d29)
 
@@ -23,10 +23,10 @@ A **multi-model AI orchestration MCP server** for **automated code review** and 
 
 ## How It Works
 
-Multi-MCP acts as an **MCP server** that Claude Code connects to, providing AI-powered code analysis tools:
+Multi-MCP acts as an **MCP server** that Claude Code or OpenCode connects to, providing AI-powered code analysis tools:
 
 1. **Install** the MCP server and configure your AI model API keys
-2. **Integrate** with Claude Code CLI automatically via `make install`
+2. **Integrate** with Claude Code or OpenCode automatically via `make install`
 3. **Invoke** tools using natural language (e.g., "multi codereview this file")
 4. **Get Results** from multiple AI models orchestrated in parallel
 
@@ -72,7 +72,7 @@ make install
 # The installer will:
 # 1. Install dependencies (uv sync)
 # 2. Generate your .env file
-# 3. Automatically add to Claude Code config (requires jq)
+# 3. Automatically add to Claude Code / OpenCode config (requires jq)
 # 4. Test the installation
 ```
 
@@ -89,7 +89,9 @@ cp .env.example .env
 # Edit .env with your API keys
 ```
 
-Add to Claude Code (`~/.claude.json`), replacing `/path/to/multi_mcp` with your actual clone path:
+Add to Claude Code (`~/.claude.json`) or OpenCode (`~/.opencode/opencode.json`), replacing `/path/to/multi_mcp` with your actual clone path:
+
+**Claude Code:**
 
 ```json
 {
@@ -98,6 +100,20 @@ Add to Claude Code (`~/.claude.json`), replacing `/path/to/multi_mcp` with your 
       "type": "stdio",
       "command": "/path/to/multi_mcp/.venv/bin/python",
       "args": ["-m", "multi_mcp.server"]
+    }
+  }
+}
+```
+
+**OpenCode:**
+
+```json
+{
+  "mcp": {
+    "multi": {
+      "type": "local",
+      "command": ["/path/to/multi_mcp/.venv/bin/python", "-m", "multi_mcp.server"],
+      "enabled": true
     }
   }
 }
@@ -179,7 +195,7 @@ models:
 
 ## Usage Examples
 
-Once installed in Claude Code, you can use these commands:
+Once installed in your MCP client (Claude Code or OpenCode), you can use these commands:
 
 **💬 Chat** - Interactive development assistance:
 ```

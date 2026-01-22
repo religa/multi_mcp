@@ -338,6 +338,11 @@ get_claude_code_settings_path() {
     echo "$HOME/.claude/settings.json"
 }
 
+get_opencode_config_path() {
+    # OpenCode config path
+    echo "$HOME/.opencode/opencode.json"
+}
+
 update_claude_code_allowlist() {
     # Add multi-mcp tools to Claude Code allowlist if settings.json exists with permissions key
     local settings_path
@@ -493,7 +498,85 @@ update_mcp_config_file() {
     print_success "MCP server configured at: $config_path"
 }
 
-add_mcp_config_to_claude() {
+update_opencode_config_file() {
+    local config_path="$1"
+    local python_path="$2"
+    local server_module="$3"  # "-m" for module mode
+    local server_path="$4"    # "multi_mcp.server" module name
+
+    # Check if jq is installed
+    if ! command -v jq &> /dev/null; then
+        print_warning "jq not found - cannot automatically configure OpenCode"
+        return 1
+    fi
+
+    # Create config directory if it doesn't exist
+    local config_dir
+    config_dir=$(dirname "$config_path")
+    if [[ ! -d "$config_dir" ]]; then
+        print_info "Creating OpenCode config directory: $config_dir"
+        if ! mkdir -p "$config_dir"; then
+            print_error "Failed to create directory: $config_dir"
+            return 1
+        fi
+    fi
+
+    # Prepare for atomic config file update
+    local temp_config
+    temp_config=$(mktemp)
+    # Cleanup temp file on function exit (use ${var:-} to avoid unbound variable errors with set -u)
+    trap 'rm -f "${temp_config:-}" 2>/dev/null || true; trap - RETURN' RETURN
+
+    if [[ ! -f "$config_path" ]]; then
+        # Create new config file
+        print_info "Creating new OpenCode config at $config_path"
+        if ! echo '{"$schema": "https://opencode.ai/config.json", "mcp": {}}' | jq --arg cmd "$python_path" --arg mod "$server_module" --arg pkg "$server_path" \
+            '.mcp.multi = {type: "local", command: [$cmd, $mod, $pkg], enabled: true}' > "$temp_config"; then
+            print_error "Failed to create OpenCode config (jq error)"
+            rm -f "$temp_config"
+            return 1
+        fi
+        mv "$temp_config" "$config_path"
+        rm -f "$temp_config" 2>/dev/null || true
+        print_success "Added multi-mcp to OpenCode config"
+    else
+        # Update existing config file
+        print_info "Updating OpenCode config at $config_path"
+
+        # Check if multi server already exists
+        if jq -e '.mcp.multi' "$config_path" &> /dev/null; then
+            print_warning "Found existing 'multi' server in OpenCode config"
+            # In CI/non-interactive mode, or when stdin isn't a terminal, keep existing config
+            if [[ "${NON_INTERACTIVE:-}" == "1" ]] || [[ ! -t 0 ]]; then
+                print_info "Keeping existing configuration"
+                return 0
+            fi
+            read -p "Overwrite existing configuration? (y/N): " -n 1 -r </dev/tty
+            echo
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                print_info "Keeping existing configuration"
+                return 0
+            fi
+        fi
+
+        # Merge new config into existing file
+        if ! jq --arg cmd "$python_path" --arg mod "$server_module" --arg pkg "$server_path" \
+            '.mcp.multi = {type: "local", command: [$cmd, $mod, $pkg], enabled: true}' \
+            "$config_path" > "$temp_config"; then
+            print_error "Failed to update OpenCode config (invalid JSON or jq error)"
+            print_info "Your original config file has been preserved"
+            rm -f "$temp_config"
+            return 1
+        fi
+        mv "$temp_config" "$config_path"
+        rm -f "$temp_config" 2>/dev/null || true
+        print_success "Updated multi-mcp in OpenCode config"
+    fi
+
+    print_success "OpenCode MCP server configured at: $config_path"
+}
+
+add_mcp_config_to_clients() {
     local project_dir
     project_dir=$(get_script_dir)
 
@@ -504,7 +587,7 @@ add_mcp_config_to_claude() {
     local server_path="multi_mcp.server"
 
     local success_count=0
-    local desktop_config claude_code_config
+    local desktop_config claude_code_config opencode_config
 
     # Configure Claude Desktop
     desktop_config=$(get_claude_desktop_config_path)
@@ -526,6 +609,16 @@ add_mcp_config_to_claude() {
         fi
     fi
 
+    # Configure OpenCode
+    opencode_config=$(get_opencode_config_path)
+    if [[ -n "$opencode_config" ]]; then
+        echo "" >&2
+        print_info "Configuring OpenCode..."
+        if update_opencode_config_file "$opencode_config" "$python_path" "$server_module" "$server_path"; then
+            ((success_count++))
+        fi
+    fi
+
     # Update Claude Code allowlist (if settings.json exists with permissions key)
     update_claude_code_allowlist
 
@@ -535,7 +628,7 @@ add_mcp_config_to_claude() {
     fi
 
     echo "" >&2
-    print_warning "IMPORTANT: Restart Claude Desktop and/or Claude Code for changes to take effect"
+    print_warning "IMPORTANT: Restart your MCP client (Claude or OpenCode) for changes to take effect"
     echo "" >&2
     return 0
 }
@@ -558,14 +651,14 @@ generate_mcp_config() {
         return 0
     fi
 
-    # Try to automatically configure Claude Desktop
+    # Try to automatically configure clients
     echo "" >&2
-    read -p "Automatically add to Claude Desktop config? (Y/n): " -n 1 -r </dev/tty
+    read -p "Automatically configure detected MCP clients? (Y/n): " -n 1 -r </dev/tty
     echo
     echo "" >&2
 
     if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-        if add_mcp_config_to_claude; then
+        if add_mcp_config_to_clients; then
             return 0
         fi
         print_warning "Automatic configuration failed - showing manual instructions"
@@ -574,8 +667,7 @@ generate_mcp_config() {
 
     # Fallback: show manual instructions
     echo "Add this to your MCP client config:" >&2
-    echo -e "${YELLOW}(~/.claude/settings.json or ~/Library/Application Support/Claude/claude_desktop_config.json)${NC}" >&2
-    echo "" >&2
+    echo -e "${YELLOW}Claude: (~/.claude/settings.json or claude_desktop_config.json)${NC}" >&2
     cat <<EOF
 {
   "mcpServers": {
@@ -586,6 +678,19 @@ generate_mcp_config() {
         "$server_module",
         "$server_path"
       ]
+    }
+  }
+}
+EOF
+    echo "" >&2
+    echo -e "${YELLOW}OpenCode: (~/.opencode/opencode.json)${NC}" >&2
+    cat <<EOF
+{
+  "mcp": {
+    "multi": {
+      "type": "local",
+      "command": ["$python_path", "$server_module", "$server_path"],
+      "enabled": true
     }
   }
 }
