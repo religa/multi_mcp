@@ -24,6 +24,7 @@ models:
     litellm_model: openai/gpt-5-mini
     provider_web_search: true  # Native web search support (per OpenAI docs)
     aliases:
+      - gpt-mini
       - mini
     constraints:
       temperature: 1.0  # gpt-5 family only supports 1.0
@@ -55,9 +56,10 @@ models:
       temperature: 1.0
     notes: "Strong general-purpose model, temperature=1.0 only"
 
-  gpt-5.1-codex:
-    litellm_model: openai/gpt-5.1-codex
+  gpt-5.2-codex:
+    litellm_model: openai/gpt-5.2-codex
     aliases:
+      - gpt-codex
       - codex
     constraints:
       temperature: 1.0
