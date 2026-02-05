@@ -95,11 +95,15 @@ models:
       - sonnet
     notes: "Great for reasoning and analysis with native web search"
 
-  claude-opus-4.5:
-    litellm_model: anthropic/claude-opus-4-5-20251101
+  claude-opus-4.6:
+    litellm_model: anthropic/claude-opus-4-6
     aliases:
       - opus
-    notes: "Best in class from anthropic"
+    notes: "Latest and most intelligent Anthropic model, 128K output, adaptive thinking"
+
+  claude-opus-4.5:
+    litellm_model: anthropic/claude-opus-4-5-20251101
+    notes: "Previous flagship Anthropic model"
 
   # ============================================
   # Google Models
