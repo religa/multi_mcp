@@ -236,8 +236,9 @@ Use short aliases instead of full model names:
 | `codex` | gpt-5.1-codex | OpenAI |
 | `sonnet` | claude-sonnet-4.5 | Anthropic |
 | `haiku` | claude-haiku-4.5 | Anthropic |
-| `opus` | claude-opus-4.5 | Anthropic |
-| `gemini` | gemini-3-pro-preview | Google |
+| `opus` | claude-opus-4.6 | Anthropic |
+| `gemini` | gemini-3.1-pro-preview | Google |
+| `gemini-3` | gemini-3.1-pro-preview | Google |
 | `flash` | gemini-3-flash | Google |
 | `azure-mini` | azure-gpt-5-mini | Azure |
 | `bedrock-sonnet` | bedrock-claude-4-5-sonnet | AWS |

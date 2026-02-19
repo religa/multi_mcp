@@ -130,9 +130,17 @@ models:
     provider_web_search: true  # LiteLLM handles web search automatically
     aliases:
       - gemini-3-pro
+    notes: "Google Gemini 3 Pro with grounding"
+
+  gemini-3.1-pro-preview:
+    litellm_model: gemini/gemini-3.1-pro-preview
+    provider_web_search: true
+    aliases:
+      - gemini-3.1-pro
+      - gemini-3.1
       - gemini-3
       - gemini
-    notes: "Latest Google model with grounding"
+    notes: "Latest Google model, 2x reasoning over 3 Pro, 1M context"
 
   # ============================================
   # CLI Models
