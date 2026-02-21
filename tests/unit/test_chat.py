@@ -17,8 +17,6 @@ def mock_llm_response(content: str, model: str = "gpt-5-mini") -> ModelResponse:
         status="success",
         metadata=ModelResponseMetadata(
             model=model,
-            prompt_tokens=10,
-            completion_tokens=5,
             total_tokens=15,
             latency_ms=100,
         ),
@@ -119,8 +117,6 @@ class TestChatLLMCalls:
 
         assert "metadata" in result
         assert result["metadata"]["model"] == "gpt-5-mini"
-        assert result["metadata"]["prompt_tokens"] == 10
-        assert result["metadata"]["completion_tokens"] == 5
         assert result["metadata"]["total_tokens"] == 15
         assert "latency_ms" in result["metadata"]
 

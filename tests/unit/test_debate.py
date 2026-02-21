@@ -158,8 +158,6 @@ class TestDebateImpl:
                         status="success",
                         metadata=ModelResponseMetadata(
                             model="gpt-5-mini",
-                            prompt_tokens=100,
-                            completion_tokens=200,
                             total_tokens=300,
                             latency_ms=1000,
                         ),
@@ -169,8 +167,6 @@ class TestDebateImpl:
                         status="success",
                         metadata=ModelResponseMetadata(
                             model="haiku",
-                            prompt_tokens=100,
-                            completion_tokens=180,
                             total_tokens=280,
                             latency_ms=900,
                         ),

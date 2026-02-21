@@ -272,11 +272,9 @@ class TestModelResponseMetadata:
 
     def test_valid_metadata(self):
         """Test creating valid ModelResponseMetadata."""
-        metadata = ModelResponseMetadata(model="gpt-5-mini", prompt_tokens=100, completion_tokens=50, total_tokens=150, latency_ms=1234)
+        metadata = ModelResponseMetadata(model="gpt-5-mini", total_tokens=150, latency_ms=1234)
 
         assert metadata.model == "gpt-5-mini"
-        assert metadata.prompt_tokens == 100
-        assert metadata.completion_tokens == 50
         assert metadata.total_tokens == 150
         assert metadata.latency_ms == 1234
 
@@ -285,8 +283,6 @@ class TestModelResponseMetadata:
         # Only model is required - token/latency fields have defaults
         metadata = ModelResponseMetadata(model="gpt-5-mini")
         assert metadata.model == "gpt-5-mini"
-        assert metadata.prompt_tokens == 0
-        assert metadata.completion_tokens == 0
         assert metadata.total_tokens == 0
         assert metadata.latency_ms == 0
 
@@ -296,7 +292,7 @@ class TestModelResponseMetadata:
 
     def test_response_with_metadata(self):
         """Test ToolResponse with metadata."""
-        metadata = ModelResponseMetadata(model="gpt-5-mini", prompt_tokens=100, completion_tokens=50, total_tokens=150, latency_ms=500)
+        metadata = ModelResponseMetadata(model="gpt-5-mini", total_tokens=150, latency_ms=500)
         response = SingleToolResponse(thread_id="test-123", content="Review complete", status="success", metadata=metadata)
 
         assert response.metadata is not None
@@ -327,7 +323,7 @@ class TestModelResponseMetadata:
 
     def test_exclude_none_keeps_metadata(self):
         """Test that exclude_none=True keeps non-null metadata."""
-        metadata = ModelResponseMetadata(model="gpt-5-mini", prompt_tokens=100, completion_tokens=50, total_tokens=150, latency_ms=500)
+        metadata = ModelResponseMetadata(model="gpt-5-mini", total_tokens=150, latency_ms=500)
         response = SingleToolResponse(thread_id="test-123", content="Review complete", status="success", metadata=metadata)
 
         data = response.model_dump(exclude_none=True)
@@ -338,8 +334,6 @@ class TestModelResponseMetadata:
         """Test ModelResponseMetadata with artifacts field."""
         metadata = ModelResponseMetadata(
             model="gpt-5-mini",
-            prompt_tokens=100,
-            completion_tokens=50,
             total_tokens=150,
             latency_ms=500,
             artifacts=["/path/to/artifact1.md", "/path/to/artifact2.json"],

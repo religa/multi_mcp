@@ -44,8 +44,6 @@ async def consolidate_model_results(
 
         metadata = ModelResponseMetadata(
             model=model_names,
-            prompt_tokens=0,
-            completion_tokens=0,
             total_tokens=0,
             latency_ms=0,
             source_models=[r.metadata.model for r in raw_results],
@@ -80,8 +78,6 @@ async def consolidate_model_results(
 
         metadata = ModelResponseMetadata(
             model=model_names,
-            prompt_tokens=0,
-            completion_tokens=0,
             total_tokens=0,
             latency_ms=0,
             source_models=[r.metadata.model for r in successful],
@@ -127,8 +123,6 @@ async def consolidate_model_results(
 
         # Aggregate token counts (sum = total cost/resource usage)
         # Only count tokens from valid results that were actually consolidated
-        total_prompt_tokens = sum(r.metadata.prompt_tokens or 0 for r in valid_results)
-        total_completion_tokens = sum(r.metadata.completion_tokens or 0 for r in valid_results)
         total_tokens = sum(r.metadata.total_tokens or 0 for r in valid_results)
 
         # Aggregate latency (max = wall-clock time in parallel execution)
@@ -138,10 +132,6 @@ async def consolidate_model_results(
         # Add consolidation LLM metrics to aggregates
         if response.metadata.total_tokens:
             total_tokens += response.metadata.total_tokens
-        if response.metadata.prompt_tokens:
-            total_prompt_tokens += response.metadata.prompt_tokens
-        if response.metadata.completion_tokens:
-            total_completion_tokens += response.metadata.completion_tokens
 
         # Latency: max(parallel sources) + sequential consolidation
         consolidation_latency = response.metadata.latency_ms or 0
@@ -150,8 +140,6 @@ async def consolidate_model_results(
         # Build metadata with consolidated fields
         metadata = ModelResponseMetadata(
             model=model_names,
-            prompt_tokens=total_prompt_tokens,
-            completion_tokens=total_completion_tokens,
             total_tokens=total_tokens,
             latency_ms=total_latency_ms,
             artifacts=response.metadata.artifacts if hasattr(response.metadata, "artifacts") else None,
@@ -189,8 +177,6 @@ async def consolidate_model_results(
 
         metadata = ModelResponseMetadata(
             model=getattr(first.metadata, "model", "unknown"),
-            prompt_tokens=getattr(first.metadata, "prompt_tokens", 0),
-            completion_tokens=getattr(first.metadata, "completion_tokens", 0),
             total_tokens=getattr(first.metadata, "total_tokens", 0),
             latency_ms=getattr(first.metadata, "latency_ms", 0),
             artifacts=artifacts_val,

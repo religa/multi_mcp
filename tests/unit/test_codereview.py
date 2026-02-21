@@ -17,8 +17,6 @@ def mock_llm_response(content: str, model: str = "gpt-5-mini") -> ModelResponse:
         status="success",
         metadata=ModelResponseMetadata(
             model=model,
-            prompt_tokens=10,
-            completion_tokens=5,
             total_tokens=15,
             latency_ms=100,
         ),
@@ -443,8 +441,6 @@ class TestCodeReviewErrorHandling:
         assert result["status"] == "success"
         assert len(result["results"]) == 1
         # mock_llm_response provides defaults from ModelResponseMetadata
-        assert result["results"][0]["metadata"]["prompt_tokens"] == 10
-        assert result["results"][0]["metadata"]["completion_tokens"] == 5
         assert result["results"][0]["metadata"]["total_tokens"] == 15
 
     @pytest.mark.asyncio
@@ -674,8 +670,6 @@ class TestConsolidationValidation:
             issues_found=mock_consolidated["issues_found"],
             metadata=ModelResponseMetadata(
                 model="model1, model2",
-                prompt_tokens=100,
-                completion_tokens=50,
                 total_tokens=150,
                 latency_ms=1000,
                 source_models=["model1", "model2"],

@@ -25,9 +25,7 @@ async def test_execute_parallel_all_success():
         return ModelResponse(
             content=f"Response from {canonical_name}",
             status="success",
-            metadata=ModelResponseMetadata(
-                model=canonical_name, prompt_tokens=100, completion_tokens=200, total_tokens=300, latency_ms=1000
-            ),
+            metadata=ModelResponseMetadata(model=canonical_name, total_tokens=300, latency_ms=1000),
         )
 
     messages = [
@@ -64,7 +62,7 @@ async def test_execute_parallel_partial_failure():
             return ModelResponse(
                 content="Success",
                 status="success",
-                metadata=ModelResponseMetadata(model=canonical_name, prompt_tokens=100, completion_tokens=200, total_tokens=300),
+                metadata=ModelResponseMetadata(model=canonical_name, total_tokens=300),
             )
         else:
             # Second model fails
@@ -120,8 +118,6 @@ async def test_execute_single_success_with_artifacts():
         status="success",
         metadata=ModelResponseMetadata(
             model="gpt-5-mini",
-            prompt_tokens=10,
-            completion_tokens=5,
             total_tokens=15,
             latency_ms=100,
         ),
@@ -165,8 +161,6 @@ async def test_execute_single_with_messages():
         status="success",
         metadata=ModelResponseMetadata(
             model="gpt-5-mini",
-            prompt_tokens=10,
-            completion_tokens=5,
             total_tokens=15,
             latency_ms=100,
         ),
@@ -226,8 +220,6 @@ async def test_execute_single_no_artifacts_returned():
         status="success",
         metadata=ModelResponseMetadata(
             model="gpt-5-mini",
-            prompt_tokens=10,
-            completion_tokens=5,
             total_tokens=15,
             latency_ms=100,
         ),
@@ -259,8 +251,6 @@ async def test_execute_single_preserves_issues_in_content():
         status="success",
         metadata=ModelResponseMetadata(
             model="gpt-5-mini",
-            prompt_tokens=10,
-            completion_tokens=5,
             total_tokens=15,
             latency_ms=100,
         ),

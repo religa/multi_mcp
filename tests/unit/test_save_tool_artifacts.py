@@ -31,8 +31,6 @@ def success_response():
         status="success",
         metadata=ModelResponseMetadata(
             model="gpt-5-mini",
-            prompt_tokens=10,
-            completion_tokens=5,
             total_tokens=15,
             latency_ms=100,
         ),
@@ -92,8 +90,6 @@ async def test_save_tool_artifacts_success(base_request, success_response):
             assert metadata["step_number"] == 1
             assert metadata["model"] == "gpt-5-mini"
             assert "timestamp" in metadata
-            assert metadata["usage"]["prompt_tokens"] == 10
-            assert metadata["usage"]["completion_tokens"] == 5
             assert metadata["usage"]["total_tokens"] == 15
             assert metadata["duration_ms"] == 100
     finally:
@@ -223,8 +219,6 @@ async def test_save_tool_artifacts_with_zero_metadata_values(base_request):
         status="success",
         metadata=ModelResponseMetadata(
             model="gpt-5-mini",
-            prompt_tokens=0,
-            completion_tokens=0,
             total_tokens=0,
             latency_ms=0,
         ),
@@ -250,8 +244,6 @@ async def test_save_tool_artifacts_with_zero_metadata_values(base_request):
 
             # Verify zero values are preserved
             metadata = mock_save.call_args.kwargs["metadata"]
-            assert metadata["usage"]["prompt_tokens"] == 0
-            assert metadata["usage"]["completion_tokens"] == 0
             assert metadata["usage"]["total_tokens"] == 0
             assert metadata["duration_ms"] == 0
     finally:
@@ -266,8 +258,6 @@ async def test_save_tool_artifacts_preserves_issues_in_content(base_request):
         status="success",
         metadata=ModelResponseMetadata(
             model="gpt-5-mini",
-            prompt_tokens=10,
-            completion_tokens=5,
             total_tokens=15,
             latency_ms=100,
         ),

@@ -223,8 +223,6 @@ class LiteLLMClient:
 
             metadata = ModelResponseMetadata(
                 model=canonical_name,
-                prompt_tokens=0,  # Not available in responses API
-                completion_tokens=0,  # Not available in responses API
                 total_tokens=total_tokens,
                 latency_ms=latency_ms,
             )

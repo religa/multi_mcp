@@ -24,8 +24,6 @@ class TestConsolidateModelResults:
             error=None,
             metadata=Mock(
                 total_tokens=500,
-                prompt_tokens=400,
-                completion_tokens=100,
                 latency_ms=2000,
                 artifacts=None,
             ),
@@ -41,8 +39,6 @@ class TestConsolidateModelResults:
                     metadata=Mock(
                         model="gpt-5-mini",
                         total_tokens=1000,
-                        prompt_tokens=800,
-                        completion_tokens=200,
                         latency_ms=5000,
                     ),
                 ),
@@ -52,8 +48,6 @@ class TestConsolidateModelResults:
                     metadata=Mock(
                         model="claude-sonnet-4.5",
                         total_tokens=1200,
-                        prompt_tokens=900,
-                        completion_tokens=300,
                         latency_ms=8000,
                     ),
                 ),
@@ -63,8 +57,6 @@ class TestConsolidateModelResults:
                     metadata=Mock(
                         model="gemini-3-pro-preview",
                         total_tokens=1100,
-                        prompt_tokens=850,
-                        completion_tokens=250,
                         latency_ms=6000,
                     ),
                 ),
@@ -95,9 +87,6 @@ class TestConsolidateModelResults:
 
             # Verify token aggregation (sum of all tokens including consolidation)
             assert consolidated.metadata.total_tokens == 3800  # 1000 + 1200 + 1100 + 500
-            assert consolidated.metadata.prompt_tokens == 2950  # 800 + 900 + 850 + 400
-            assert consolidated.metadata.completion_tokens == 850  # 200 + 300 + 250 + 100
-
             # Verify latency calculation (max of sources + consolidation)
             # max(5000, 8000, 6000) + 2000 = 8000 + 2000 = 10000
             assert consolidated.metadata.latency_ms == 10000
@@ -138,8 +127,6 @@ class TestConsolidateModelResults:
                     metadata=Mock(
                         model="gpt-5-mini",
                         total_tokens=500,
-                        prompt_tokens=400,
-                        completion_tokens=100,
                         latency_ms=2000,
                         artifacts=None,
                     ),
@@ -163,8 +150,6 @@ class TestConsolidateModelResults:
             error=None,
             metadata=Mock(
                 total_tokens=300,
-                prompt_tokens=200,
-                completion_tokens=100,
                 latency_ms=1000,
                 artifacts=None,
             ),
@@ -180,8 +165,6 @@ class TestConsolidateModelResults:
                     metadata=Mock(
                         model="gpt-5-mini",
                         total_tokens=1000,
-                        prompt_tokens=800,
-                        completion_tokens=200,
                         latency_ms=3000,
                     ),
                 ),
@@ -204,8 +187,6 @@ class TestConsolidateModelResults:
             error=None,
             metadata=Mock(
                 total_tokens=100,
-                prompt_tokens=50,
-                completion_tokens=50,
                 latency_ms=500,
                 artifacts=None,
             ),
@@ -221,8 +202,6 @@ class TestConsolidateModelResults:
                     metadata=Mock(
                         model="gpt-5-mini",
                         total_tokens=500,
-                        prompt_tokens=400,
-                        completion_tokens=100,
                         latency_ms=2000,
                     ),
                 ),
@@ -244,8 +223,6 @@ class TestConsolidateModelResults:
             error=None,
             metadata=Mock(
                 total_tokens=100,
-                prompt_tokens=50,
-                completion_tokens=50,
                 latency_ms=500,
                 artifacts=None,
             ),
@@ -261,8 +238,6 @@ class TestConsolidateModelResults:
                     metadata=Mock(
                         model="gpt-5-mini",
                         total_tokens=500,
-                        prompt_tokens=400,
-                        completion_tokens=100,
                         latency_ms=2000,
                     ),
                 ),
@@ -376,8 +351,6 @@ class TestInvalidJsonFiltering:
             error=None,
             metadata=Mock(
                 total_tokens=100,
-                prompt_tokens=50,
-                completion_tokens=50,
                 latency_ms=500,
                 artifacts=None,
             ),
@@ -394,8 +367,6 @@ class TestInvalidJsonFiltering:
                     metadata=Mock(
                         model="gpt-5-mini",
                         total_tokens=500,
-                        prompt_tokens=400,
-                        completion_tokens=100,
                         latency_ms=2000,
                     ),
                 ),
@@ -405,8 +376,6 @@ class TestInvalidJsonFiltering:
                     metadata=Mock(
                         model="claude-sonnet-4.5",
                         total_tokens=600,
-                        prompt_tokens=500,
-                        completion_tokens=100,
                         latency_ms=3000,
                     ),
                 ),
@@ -416,8 +385,6 @@ class TestInvalidJsonFiltering:
                     metadata=Mock(
                         model="gemini-2.5-flash",
                         total_tokens=550,
-                        prompt_tokens=450,
-                        completion_tokens=100,
                         latency_ms=2500,
                     ),
                 ),
@@ -474,8 +441,6 @@ class TestInvalidJsonFiltering:
             error=None,
             metadata=Mock(
                 total_tokens=100,
-                prompt_tokens=50,
-                completion_tokens=50,
                 latency_ms=500,
                 artifacts=None,
             ),
@@ -491,8 +456,6 @@ class TestInvalidJsonFiltering:
                     metadata=Mock(
                         model="gpt-5-mini",
                         total_tokens=500,
-                        prompt_tokens=400,
-                        completion_tokens=100,
                         latency_ms=2000,
                     ),
                 ),

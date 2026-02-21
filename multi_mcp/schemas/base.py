@@ -11,8 +11,6 @@ class ModelResponseMetadata(BaseModel):
     """Metadata about the model execution."""
 
     model: str = Field(..., description="Canonical model name used for analysis")
-    prompt_tokens: int = Field(default=0, description="Tokens in the prompt")
-    completion_tokens: int = Field(default=0, description="Tokens in the completion")
     total_tokens: int = Field(default=0, description="Total tokens used")
     latency_ms: int = Field(default=0, description="LLM call latency in milliseconds")
     artifacts: list[str] | None = Field(
@@ -39,7 +37,7 @@ class ModelResponseMetadata(BaseModel):
     @classmethod
     def error_metadata(cls, model: str = "unknown", latency_ms: int = 0) -> "ModelResponseMetadata":
         """Create metadata for error responses with zero values."""
-        return cls(model=model, prompt_tokens=0, completion_tokens=0, total_tokens=0, latency_ms=latency_ms)
+        return cls(model=model, total_tokens=0, latency_ms=latency_ms)
 
 
 # =============================================================================

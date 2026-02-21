@@ -171,8 +171,6 @@ async def save_tool_artifacts(
         "model": response.metadata.model,
         "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "usage": {
-            "prompt_tokens": response.metadata.prompt_tokens or 0,
-            "completion_tokens": response.metadata.completion_tokens or 0,
             "total_tokens": response.metadata.total_tokens or 0,
         },
         "duration_ms": response.metadata.latency_ms or 0,

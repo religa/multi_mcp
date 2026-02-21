@@ -74,8 +74,6 @@ class TestLiteLLMClient:
             assert result.content == "Test response"
             assert result.metadata.model == "gpt-5-mini"
             assert result.metadata.total_tokens == 150
-            assert result.metadata.prompt_tokens == 0  # Not available in responses API
-            assert result.metadata.completion_tokens == 0  # Not available in responses API
             assert result.metadata.latency_ms >= 0
             mock_completion.assert_called_once()
 

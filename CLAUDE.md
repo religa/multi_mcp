@@ -202,7 +202,7 @@ Models are defined in `multi_mcp/config/config.yaml`. See README.md for model al
 **LiteLLM Responses API:**
 - Uses `litellm.aresponses()` instead of `litellm.acompletion()` for unified web search across providers
 - Unified `tools=[{"type": "web_search"}]` parameter works with OpenAI, Azure, Anthropic, Gemini
-- **Limitation**: Only `total_tokens` available (no `prompt_tokens`/`completion_tokens` breakdown)
+- **Token Usage**: Only `total_tokens` available (responses API does not provide prompt/completion breakdown)
 - Web search enabled via `enable_web_search=True` parameter in `litellm_client.execute()`
 
 ## Testing Strategy

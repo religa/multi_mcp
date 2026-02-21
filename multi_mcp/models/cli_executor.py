@@ -141,8 +141,6 @@ class CLIExecutor:
 
             metadata = ModelResponseMetadata(
                 model=canonical_name,
-                prompt_tokens=0,  # CLI doesn't report tokens
-                completion_tokens=0,
                 total_tokens=0,
                 latency_ms=latency_ms,
             )

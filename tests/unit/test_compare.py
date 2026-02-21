@@ -27,8 +27,6 @@ def mock_model_response(content="Response", model="test-model", error=None):
         status="success",
         metadata=ModelResponseMetadata(
             model=model,
-            prompt_tokens=10,
-            completion_tokens=20,
             total_tokens=30,
         ),
     )
@@ -118,8 +116,6 @@ class TestCompareImpl:
             status="success",
             metadata=ModelResponseMetadata(
                 model="model-a",
-                prompt_tokens=10,
-                completion_tokens=20,
                 total_tokens=30,
             ),
         )
