@@ -115,7 +115,7 @@ See README.md for CLI usage examples. Note: CLI is experimental.
 
 **`multi_mcp/config/config.yaml`**: Model definitions
 - Canonical model names with LiteLLM model strings
-- Aliases (e.g., `mini` → `gpt-5-mini`, `sonnet` → `claude-sonnet-4.5`)
+- Aliases (e.g., `mini` → `gpt-5-mini`, `sonnet` → `claude-sonnet-4.6`)
 - Temperature constraints per model
 - User overrides: `~/.multi_mcp/config.yaml` (optional)
 

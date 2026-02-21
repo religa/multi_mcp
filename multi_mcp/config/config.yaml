@@ -89,11 +89,15 @@ models:
       - haiku
     notes: "Fast claude model"
 
-  claude-sonnet-4.5:
-    litellm_model: anthropic/claude-sonnet-4-5-20250929
+  claude-sonnet-4.6:
+    litellm_model: anthropic/claude-sonnet-4-6
     aliases:
       - sonnet
-    notes: "Great for reasoning and analysis with native web search"
+    notes: "Latest Sonnet, 200K context (1M beta), 64K output, adaptive thinking"
+
+  claude-sonnet-4.5:
+    litellm_model: anthropic/claude-sonnet-4-5-20250929
+    notes: "Previous Sonnet model"
 
   claude-opus-4.6:
     litellm_model: anthropic/claude-opus-4-6

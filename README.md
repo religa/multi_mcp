@@ -234,7 +234,7 @@ Use short aliases instead of full model names:
 | `nano` | gpt-5-nano | OpenAI |
 | `gpt` | gpt-5.2 | OpenAI |
 | `codex` | gpt-5.1-codex | OpenAI |
-| `sonnet` | claude-sonnet-4.5 | Anthropic |
+| `sonnet` | claude-sonnet-4.6 | Anthropic |
 | `haiku` | claude-haiku-4.5 | Anthropic |
 | `opus` | claude-opus-4.6 | Anthropic |
 | `gemini` | gemini-3.1-pro-preview | Google |
