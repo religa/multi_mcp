@@ -282,7 +282,10 @@ sync_env_keys() {
 
         # Handle both commented and uncommented lines
         # Use portable sed without -i (avoids macOS vs Linux incompatibility)
-        sed "s@^# *${key}=.*@${key}=${val}@; s@^${key}=.*@${key}=${val}@" "$temp_file" > "$temp_file2"
+        # Escape sed special characters in value (& and \ are replacement-active; @ is our delimiter)
+        local escaped_val
+        escaped_val=$(printf '%s' "$val" | sed 's/[&\@]/\\&/g')
+        sed "s@^# *${key}=.*@${key}=${escaped_val}@; s@^${key}=.*@${key}=${escaped_val}@" "$temp_file" > "$temp_file2"
         mv "$temp_file2" "$temp_file"
 
         print_success "Synced $key"
@@ -459,7 +462,6 @@ update_mcp_config_file() {
             return 1
         fi
         mv "$temp_config" "$config_path"
-        rm -f "$temp_config" 2>/dev/null || true
         print_success "Added multi-mcp to $config_name config"
     else
         # Update existing config file
@@ -491,7 +493,6 @@ update_mcp_config_file() {
             return 1
         fi
         mv "$temp_config" "$config_path"
-        rm -f "$temp_config" 2>/dev/null || true
         print_success "Updated multi-mcp in $config_name config"
     fi
 
@@ -537,7 +538,6 @@ update_opencode_config_file() {
             return 1
         fi
         mv "$temp_config" "$config_path"
-        rm -f "$temp_config" 2>/dev/null || true
         print_success "Added multi-mcp to OpenCode config"
     else
         # Update existing config file
@@ -569,7 +569,6 @@ update_opencode_config_file() {
             return 1
         fi
         mv "$temp_config" "$config_path"
-        rm -f "$temp_config" 2>/dev/null || true
         print_success "Updated multi-mcp in OpenCode config"
     fi
 
