@@ -254,3 +254,62 @@ class TestModelResolver:
 
         assert canonical == "gpt-5-mini"
         assert config.litellm_model == "openai/gpt-5-mini"
+
+    def test_resolve_unavailable_cli_model_raises_error(self):
+        """Test that resolving an unavailable CLI model raises ValueError."""
+        config = ModelsConfiguration(
+            version="1.0",
+            models={
+                "gemini-cli": ModelConfig(
+                    provider="cli",
+                    cli_command="gemini",
+                    cli_available=False,
+                ),
+            },
+        )
+        resolver = ModelResolver(config=config)
+
+        with pytest.raises(ValueError, match="not available"):
+            resolver.resolve("gemini-cli")
+
+    def test_resolve_available_cli_model_succeeds(self):
+        """Test that resolving an available CLI model works."""
+        config = ModelsConfiguration(
+            version="1.0",
+            models={
+                "gemini-cli": ModelConfig(
+                    provider="cli",
+                    cli_command="gemini",
+                    cli_available=True,
+                ),
+            },
+        )
+        resolver = ModelResolver(config=config)
+        canonical, mc = resolver.resolve("gemini-cli")
+        assert canonical == "gemini-cli"
+        assert mc.is_cli_model()
+
+    def test_list_models_skips_unavailable_cli(self):
+        """Test that list_models excludes CLI models not found in PATH."""
+        config = ModelsConfiguration(
+            version="1.0",
+            models={
+                "gpt-5-mini": ModelConfig(litellm_model="openai/gpt-5-mini"),
+                "gemini-cli": ModelConfig(
+                    provider="cli",
+                    cli_command="gemini",
+                    cli_available=False,
+                ),
+                "codex-cli": ModelConfig(
+                    provider="cli",
+                    cli_command="codex",
+                    cli_available=True,
+                ),
+            },
+        )
+        resolver = ModelResolver(config=config)
+        models = resolver.list_models()
+        names = [m["name"] for m in models]
+        assert "gpt-5-mini" in names
+        assert "codex-cli" in names
+        assert "gemini-cli" not in names

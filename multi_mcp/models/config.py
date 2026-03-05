@@ -1,6 +1,7 @@
 """Model configuration loader with YAML support and LiteLLM fallback."""
 
 import logging
+import shutil
 from dataclasses import dataclass
 from importlib.resources import as_file, files
 from pathlib import Path
@@ -138,6 +139,9 @@ class ModelConfig(BaseModel):
 
     # Web search support
     provider_web_search: bool = Field(default=False, description="Whether this model supports provider-native web search via LiteLLM")
+
+    # CLI availability (set at startup by check_cli_availability)
+    cli_available: bool | None = Field(default=None, exclude=True)
 
     def is_cli_model(self) -> bool:
         """Check if this is a CLI model."""
@@ -279,6 +283,32 @@ For help, see: https://github.com/religa/multi_mcp
         raise ValueError(error_msg) from e
 
 
+def check_cli_availability(config: ModelsConfiguration) -> None:
+    """Check which CLI models have their commands available in PATH.
+
+    Sets cli_available on each CLI model config. Runs once at startup.
+    """
+    cli_models = [(name, mc) for name, mc in config.models.items() if mc.is_cli_model() and mc.cli_command]
+    if not cli_models:
+        return
+
+    available = []
+    unavailable = []
+    for name, mc in cli_models:
+        cmd = mc.cli_command
+        assert cmd is not None  # guaranteed by filter above
+        mc.cli_available = shutil.which(cmd) is not None
+        if mc.cli_available:
+            available.append(name)
+        else:
+            unavailable.append(f"{name} ({cmd})")
+
+    if available:
+        logger.info(f"[CONFIG] CLI models available: {', '.join(available)}")
+    if unavailable:
+        logger.info(f"[CONFIG] CLI models not found in PATH (skipped): {', '.join(unavailable)}")
+
+
 def load_models_config(config_path: Path | None = None) -> ModelsConfiguration:
     """Load models configuration from YAML files.
 
@@ -301,7 +331,9 @@ def load_models_config(config_path: Path | None = None) -> ModelsConfiguration:
             raise FileNotFoundError(f"Model config not found: {config_path}")
         with open(config_path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
-        return ModelsConfiguration(**data)
+        config = ModelsConfiguration(**data)
+        check_cli_availability(config)
+        return config
 
     # Load package config (required)
     config_data = load_package_config()
@@ -313,7 +345,7 @@ def load_models_config(config_path: Path | None = None) -> ModelsConfiguration:
 
     # Validate and return
     try:
-        return ModelsConfiguration(**config_data)
+        config = ModelsConfiguration(**config_data)
     except Exception as e:
         user_config = get_user_config_path()
         error_msg = f"""
@@ -330,6 +362,9 @@ For help, see: https://github.com/religa/multi_mcp
 """
         logger.error(error_msg)
         raise ValueError(error_msg) from e
+
+    check_cli_availability(config)
+    return config
 
 
 _config: ModelsConfiguration | None = None

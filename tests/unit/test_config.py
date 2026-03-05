@@ -1,5 +1,8 @@
 """Unit tests for configuration management."""
 
+from unittest.mock import patch
+
+from multi_mcp.models.config import ModelConfig, ModelsConfiguration, check_cli_availability
 from multi_mcp.settings import Settings
 
 
@@ -125,3 +128,61 @@ class TestOtherConfigSettings:
         """Test log_level default value."""
         settings = Settings()
         assert settings.log_level == "INFO"
+
+
+class TestCheckCliAvailability:
+    """Tests for check_cli_availability function."""
+
+    def test_marks_available_cli(self):
+        """Test that installed CLI commands are marked available."""
+        config = ModelsConfiguration(
+            version="1.0",
+            models={
+                "gemini-cli": ModelConfig(provider="cli", cli_command="gemini"),
+            },
+        )
+        with patch("multi_mcp.models.config.shutil.which", return_value="/usr/bin/gemini"):
+            check_cli_availability(config)
+        assert config.models["gemini-cli"].cli_available is True
+
+    def test_marks_unavailable_cli(self):
+        """Test that missing CLI commands are marked unavailable."""
+        config = ModelsConfiguration(
+            version="1.0",
+            models={
+                "gemini-cli": ModelConfig(provider="cli", cli_command="gemini"),
+            },
+        )
+        with patch("multi_mcp.models.config.shutil.which", return_value=None):
+            check_cli_availability(config)
+        assert config.models["gemini-cli"].cli_available is False
+
+    def test_skips_api_models(self):
+        """Test that API models are not checked."""
+        config = ModelsConfiguration(
+            version="1.0",
+            models={
+                "gpt-5-mini": ModelConfig(litellm_model="openai/gpt-5-mini"),
+            },
+        )
+        with patch("multi_mcp.models.config.shutil.which") as mock_which:
+            check_cli_availability(config)
+            mock_which.assert_not_called()
+        assert config.models["gpt-5-mini"].cli_available is None
+
+    def test_mixed_models(self):
+        """Test with both API and CLI models."""
+        config = ModelsConfiguration(
+            version="1.0",
+            models={
+                "gpt-5-mini": ModelConfig(litellm_model="openai/gpt-5-mini"),
+                "gemini-cli": ModelConfig(provider="cli", cli_command="gemini"),
+                "codex-cli": ModelConfig(provider="cli", cli_command="codex"),
+            },
+        )
+        with patch("multi_mcp.models.config.shutil.which", side_effect=lambda cmd: "/usr/bin/gemini" if cmd == "gemini" else None):
+            check_cli_availability(config)
+
+        assert config.models["gpt-5-mini"].cli_available is None
+        assert config.models["gemini-cli"].cli_available is True
+        assert config.models["codex-cli"].cli_available is False

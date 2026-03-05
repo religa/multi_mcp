@@ -222,25 +222,25 @@ class TestCLIExecutor:
 
     def test_get_install_hint_gemini(self, cli_executor):
         """Test install hint for gemini CLI."""
-        hint = cli_executor._get_install_hint("gemini")
+        hint = cli_executor.get_install_hint("gemini")
         assert "npm install" in hint
         assert "@google/generative-ai-cli" in hint
 
     def test_get_install_hint_codex(self, cli_executor):
         """Test install hint for codex CLI."""
-        hint = cli_executor._get_install_hint("codex")
+        hint = cli_executor.get_install_hint("codex")
         assert "npm install" in hint
         assert "@anthropic-ai/codex-cli" in hint
 
     def test_get_install_hint_claude(self, cli_executor):
         """Test install hint for claude CLI."""
-        hint = cli_executor._get_install_hint("claude")
+        hint = cli_executor.get_install_hint("claude")
         assert "pip install" in hint
         assert "anthropic-cli" in hint
 
     def test_get_install_hint_unknown(self, cli_executor):
         """Test install hint for unknown CLI."""
-        hint = cli_executor._get_install_hint("unknown-cli")
+        hint = cli_executor.get_install_hint("unknown-cli")
         assert "Ensure 'unknown-cli' is installed" in hint
 
     @pytest.mark.asyncio

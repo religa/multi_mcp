@@ -62,6 +62,12 @@ class ModelResolver:
             model_config = self.config.models[canonical]
             if model_config.disabled:
                 raise ValueError(f"Model '{canonical}' is disabled")
+            if model_config.cli_available is False:
+                from multi_mcp.models.cli_executor import CLIExecutor
+
+                hint = CLIExecutor.get_install_hint(model_config.cli_command or "")
+                msg = f"CLI model '{canonical}' is not available: command '{model_config.cli_command}' not found in PATH. {hint}"
+                raise ValueError(msg)
             return canonical, model_config
 
         # Step 3: Fallback to LiteLLM database
@@ -162,6 +168,9 @@ class ModelResolver:
         result = []
         for name, config in self.config.models.items():
             if config.disabled and not include_disabled:
+                continue
+            # Skip CLI models whose command is not installed
+            if config.cli_available is False:
                 continue
 
             # Fill missing metadata from LiteLLM if not in config

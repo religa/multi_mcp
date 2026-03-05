@@ -55,7 +55,7 @@ class CLIExecutor:
 
         # Check if CLI command exists
         if not shutil.which(cli_command):
-            install_hint = self._get_install_hint(cli_command)
+            install_hint = self.get_install_hint(cli_command)
             error_msg = f"CLI command '{cli_command}' not found in PATH. {install_hint}"
             logger.error(f"[CLI_CALL] {error_msg}")
             return ModelResponse.error_response(
@@ -123,7 +123,7 @@ class CLIExecutor:
                 error_output = stderr if stderr else stdout
                 error_preview = error_output[:ERROR_PREVIEW_MAX_LENGTH] if error_output else "(no output)"
 
-                install_hint = self._get_install_hint(cli_command)
+                install_hint = self.get_install_hint(cli_command)
                 logger.error(f"[CLI_CALL] {canonical_name} failed with exit code {process.returncode}")
                 logger.debug(f"[CLI_CALL] stderr: {stderr[:DEBUG_LOG_MAX_LENGTH]}")
                 logger.debug(f"[CLI_CALL] stdout: {stdout[:DEBUG_LOG_MAX_LENGTH]}")
@@ -186,7 +186,7 @@ class CLIExecutor:
         except FileNotFoundError as e:
             # This shouldn't happen due to shutil.which() check, but handle it anyway
             latency_ms = int((time.perf_counter() - start_time) * 1000)
-            install_hint = self._get_install_hint(cli_command)
+            install_hint = self.get_install_hint(cli_command)
             logger.error(f"[CLI_CALL] {canonical_name} command not found: {e}")
             return ModelResponse.error_response(
                 error=f"CLI command '{cli_command}' not found. {install_hint}",
@@ -213,7 +213,8 @@ class CLIExecutor:
                 latency_ms=latency_ms,
             )
 
-    def _get_install_hint(self, cli_command: str) -> str:
+    @staticmethod
+    def get_install_hint(cli_command: str) -> str:
         """Get installation hint for common CLI tools.
 
         Args:
