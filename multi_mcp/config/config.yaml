@@ -152,6 +152,13 @@ models:
       - gemini-3-pro
     notes: "Google Gemini 3 Pro with grounding"
 
+  gemini-3.1-flash-lite:
+    litellm_model: gemini/gemini-3.1-flash-lite-preview
+    provider_web_search: true
+    aliases:
+      - flash-lite
+    notes: "Fastest, most cost-effective Gemini model, 2.5x faster than 2.5 Flash"
+
   gemini-3.1-pro-preview:
     litellm_model: gemini/gemini-3.1-pro-preview
     provider_web_search: true
