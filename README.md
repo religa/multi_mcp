@@ -10,6 +10,10 @@ A **multi-model AI orchestration MCP server** for **automated code review** and 
 
 ![Demo Video](https://github.com/user-attachments/assets/39c3f100-e20d-4c3d-8130-b01c401f2d29)
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/religa-multi-mcp).
+
 ## Features
 
 - **🔍 Code Review** - Systematic workflow with OWASP Top 10 security checks and performance analysis
