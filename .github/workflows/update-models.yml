@@ -1,0 +1,105 @@
+name: Update Model Config
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"  # Every Monday at 9 AM UTC
+  workflow_dispatch: {}   # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-models:
+    name: Check for new models
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        run: uv sync --frozen --extra dev
+
+      - name: Run Claude Code to update models
+        uses: anthropics/claude-code-action@v1
+        id: claude
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are updating the model configuration for the multi-mcp project.
+            Read .claude/commands/multi-update-models.md for the full procedure, then execute it.
+
+            Key context:
+            - Model config is in multi_mcp/config/config.yaml
+            - Settings fallback is in multi_mcp/settings.py
+            - LiteLLM model strings use provider prefix: openai/, anthropic/, gemini/
+            - GPT-5 family requires temperature: 1.0 constraint
+
+            For the live testing step: run it for providers with available credentials.
+            If a provider key is missing, report that provider as "skipped (missing credentials)".
+            Only make changes if there are actually new models to add or deprecated models to remove.
+            If nothing has changed, make no edits and report "No model updates needed."
+
+            After making changes, run the validation suite:
+            - uv run ruff check .
+            - uv run ruff format --check .
+            - uv run pyright
+            - uv run pytest tests/unit/ -q
+          claude_args: |
+            --max-turns 25
+            --model claude-sonnet-4-6
+          allowed_tools: |
+            Read
+            Edit
+            Write
+            Bash
+            Glob
+            Grep
+            WebSearch
+            WebFetch
+          direct_prompt: true
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automated/update-models
+          delete-branch: true
+          title: "feat: update model configuration"
+          body: |
+            ## Automated Model Config Update
+
+            This PR was created by the weekly model update workflow.
+            Claude Code researched the latest models from Anthropic, OpenAI, and Google
+            and updated the configuration accordingly.
+
+            **Please review the changes to `multi_mcp/config/config.yaml` and any test updates.**
+
+            ### Checklist
+            - [ ] New models have correct `litellm_model` strings
+            - [ ] Aliases point to the latest generation
+            - [ ] Removed models are actually shut down (not just deprecated)
+            - [ ] All tests pass
+          commit-message: "feat: update model configuration with latest available models"
+          reviewers: ${{ github.repository_owner }}
