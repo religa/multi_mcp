@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 jobs:
   update-models:
@@ -53,19 +54,7 @@ jobs:
             - uv run ruff format --check .
             - uv run pyright
             - uv run pytest tests/unit/ -q
-          claude_args: |
-            --max-turns 25
-            --model claude-sonnet-4-6
-          allowed_tools: |
-            Read
-            Edit
-            Write
-            Bash
-            Glob
-            Grep
-            WebSearch
-            WebFetch
-          direct_prompt: true
+          claude_args: "--max-turns 25 --model claude-sonnet-4-6"
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
