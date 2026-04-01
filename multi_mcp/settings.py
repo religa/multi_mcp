@@ -136,7 +136,7 @@ class Settings(BaseSettings):
                 # Parse as comma-separated string
                 models = [model.strip() for model in value.split(",") if model.strip()]
                 # Update the data dict with parsed list (or default if empty)
-                data[key] = models if models else ["gpt-5-mini", "gemini-3-flash"]
+                data[key] = models if models else ["codex", "gemini-3", "sonnet"]
         return data
 
     # Server settings

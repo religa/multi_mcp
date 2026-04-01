@@ -55,7 +55,7 @@ class TestConsolidateModelResults:
                     status="success",
                     content='{"status": "review_complete", "issues_found": []}',
                     metadata=Mock(
-                        model="gemini-3-pro-preview",
+                        model="gemini-3.1-pro-preview",
                         total_tokens=1100,
                         latency_ms=6000,
                     ),
@@ -69,7 +69,7 @@ class TestConsolidateModelResults:
             assert consolidated.status == "success"
 
             # Verify model names are comma-separated
-            assert consolidated.metadata.model == "gpt-5-mini, claude-sonnet-4.5, gemini-3-pro-preview"
+            assert consolidated.metadata.model == "gpt-5-mini, claude-sonnet-4.5, gemini-3.1-pro-preview"
 
             # Verify content is consolidated
             assert "Consolidated analysis" in consolidated.content
@@ -82,7 +82,7 @@ class TestConsolidateModelResults:
             assert consolidated.metadata.source_models == [
                 "gpt-5-mini",
                 "claude-sonnet-4.5",
-                "gemini-3-pro-preview",
+                "gemini-3.1-pro-preview",
             ]
 
             # Verify token aggregation (sum of all tokens including consolidation)
