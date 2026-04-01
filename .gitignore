@@ -84,7 +84,8 @@ tmp/
 *.bak
 
 # Project specific
-.claude/
+.claude/*
+!.claude/commands/
 archive/
 /data/
 docs/
