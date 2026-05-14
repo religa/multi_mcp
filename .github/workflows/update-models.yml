@@ -54,7 +54,8 @@ jobs:
             - uv run ruff format --check .
             - uv run pyright
             - uv run pytest tests/unit/ -q
-          claude_args: "--max-turns 25 --model claude-sonnet-4-6"
+          allowed_tools: "Bash,Read,Write,Edit,WebSearch,WebFetch"
+          claude_args: "--max-turns 40 --model claude-sonnet-4-6"
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
