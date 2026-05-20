@@ -177,22 +177,24 @@ class LiteLLMClient:
                     model=canonical_name,
                 )
 
-            # Apply temperature (config constraint > default)
+            # Apply temperature (config constraint > default), skip if model rejects it
+            no_temperature = model_config.constraints is not None and model_config.constraints.no_temperature
             temp = settings.default_temperature
             if model_config.constraints and model_config.constraints.temperature is not None:
                 temp = model_config.constraints.temperature
 
-            logger.info(f"[MODEL_CALL] canonical={canonical_name} litellm={litellm_model} temp={temp}")
+            logger.info(f"[MODEL_CALL] canonical={canonical_name} litellm={litellm_model} temp={temp if not no_temperature else 'omitted'}")
 
             # Build kwargs starting with generic params from config
             kwargs: dict[str, Any] = {
                 **model_config.params,
                 "model": litellm_model,
                 "input": messages,
-                "temperature": temp,
                 "num_retries": settings.max_retries,
                 "timeout": timeout,
             }
+            if not no_temperature:
+                kwargs["temperature"] = temp
 
             # Set max_tokens: config value > sensible default
             max_tokens = model_config.max_tokens if model_config.max_tokens is not None else DEFAULT_MAX_TOKENS

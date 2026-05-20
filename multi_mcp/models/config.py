@@ -116,6 +116,7 @@ class ModelConstraints(BaseModel):
     """Temperature and other model constraints."""
 
     temperature: float | None = None
+    no_temperature: bool = False  # Set true for models that reject the temperature parameter
 
 
 class ModelConfig(BaseModel):
