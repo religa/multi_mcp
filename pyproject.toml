@@ -87,7 +87,11 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/religa/multi_mcp"
 Repository = "https://github.com/religa/multi_mcp"
+Documentation = "https://github.com/religa/multi_mcp#readme"
 Issues = "https://github.com/religa/multi_mcp/issues"
+"Release Notes" = "https://github.com/religa/multi_mcp/releases"
+"PyPI" = "https://pypi.org/project/multi-mcp/"
+Source = "https://github.com/religa/multi_mcp"
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]

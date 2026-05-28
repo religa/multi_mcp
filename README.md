@@ -3,8 +3,11 @@
 <!-- mcp-name: io.github.religa/multi-mcp -->
 
 [![CI](https://github.com/religa/multi_mcp/workflows/CI/badge.svg)](https://github.com/religa/multi_mcp/actions)
+[![PyPI](https://img.shields.io/pypi/v/multi-mcp.svg)](https://pypi.org/project/multi-mcp/)
+[![Downloads](https://static.pepy.tech/badge/multi-mcp/month)](https://pepy.tech/project/multi-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![GitHub stars](https://img.shields.io/github/stars/religa/multi_mcp?style=social)](https://github.com/religa/multi_mcp/stargazers)
 
 A **multi-model AI orchestration MCP server** for **automated code review** and **LLM-powered analysis**. Multi-MCP integrates with **Claude Code CLI** and **OpenCode** to orchestrate multiple AI models (OpenAI GPT, Anthropic Claude, Google Gemini) for **code quality checks**, **security analysis** (OWASP Top 10), and **multi-agent consensus**. Built on the **Model Context Protocol (MCP)**, this tool enables Python developers and DevOps teams to automate code reviews with AI-powered insights directly in their development workflow.
 
