@@ -51,7 +51,9 @@ def embed_files_for_expert(files: list[str], base_path: str | None = None) -> st
             if base_path:
                 resolved_base = os.path.realpath(base_path)
                 resolved_file = os.path.realpath(resolved)
-                relative_path = os.path.relpath(resolved_file, resolved_base)
+                # Normalize to forward slashes so embedded paths are consistent
+                # across platforms (Windows os.path.relpath uses backslashes).
+                relative_path = os.path.relpath(resolved_file, resolved_base).replace(os.sep, "/")
             else:
                 relative_path = file_path
 

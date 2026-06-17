@@ -77,7 +77,10 @@ class TestPathNormalization:
         # Create symlink pointing to file within project
         target = Path(temp_project) / "src" / "main.py"
         link = Path(temp_project) / "link.py"
-        link.symlink_to(target)
+        try:
+            link.symlink_to(target)
+        except OSError as exc:
+            pytest.skip(f"symlink creation not permitted on this platform/privilege level: {exc}")
 
         try:
             resolved = resolve_path("link.py", temp_project)
@@ -93,7 +96,10 @@ class TestPathNormalization:
         """Test that symlinks pointing outside base_path are rejected."""
         # Create symlink pointing outside project
         link = Path(temp_project) / "evil_link.py"
-        link.symlink_to("/etc/passwd")
+        try:
+            link.symlink_to("/etc/passwd")
+        except OSError as exc:
+            pytest.skip(f"symlink creation not permitted on this platform/privilege level: {exc}")
 
         try:
             with pytest.raises(ValueError) as exc_info:
