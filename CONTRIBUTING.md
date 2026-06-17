@@ -30,13 +30,15 @@ cp .env.example .env
 
 **IMPORTANT:** Run full integration testing before submitting your PR to ensure everything works with real API calls.
 
+> **Windows note:** `make` is not installed by default on Windows. Run `./scripts/check.sh` via Git Bash for all quality checks + unit tests, or use the individual `uv run ...` commands shown below.
+
 ```bash
 # 1. Run all code quality checks + unit tests (fast)
 make check && make test
 
 # 2. Run full integration tests (REQUIRED before PR submission)
 make test-integration
-# This runs 93 integration tests (~8-10min) with real API calls
+# This runs 96 integration tests (~8-10min) with real API calls
 # Requires at least one API key in .env
 
 # Or run everything at once:
@@ -45,29 +47,26 @@ make check && make test-all
 # Individual commands:
 
 # Format code (auto-fixes issues)
-make format
-# or: uv run ruff format . && uv run ruff check . --fix
+uv run ruff format . && uv run ruff check . --fix
 
 # Type checking
-make typecheck
-# or: uv run pyright
+uv run pyright
 
 # Linting
-make lint
-# or: uv run ruff check .
+uv run ruff check .
 
-# Unit tests (511 tests, ~2s)
+# Unit tests (571 tests, ~2s)
 make test
 # or: uv run pytest tests/unit/ -v
 
-# Integration tests (93 tests, ~8-10min with parallel execution, REQUIRED before PR)
+# Integration tests (96 tests, ~8-10min with parallel execution, REQUIRED before PR)
 make test-integration
 # or: RUN_E2E=1 uv run pytest tests/integration/ -n auto -v
 ```
 
 ## Code Standards
 
-- **Python 3.13+** required (as specified in `pyproject.toml`)
+- **Python 3.11+** required (as specified in `pyproject.toml`: `>=3.11,<3.14`; CI runs 3.13)
 - **Type hints** on all functions
 - **Async-first** - use `async def` for I/O operations
 - **Test coverage** - minimum 80% overall (add tests for new features)
@@ -126,14 +125,14 @@ multi_mcp/
 
 ## Testing
 
-We have 604 total tests: 511 unit tests (~2s) and 93 integration tests (~8-10min with real API calls).
+We have 667 total tests: 571 unit tests (~2s) and 96 integration tests (~8-10min with real API calls).
 
 ```bash
-# Unit tests only (511 tests, ~2s, fast - run before every commit)
+# Unit tests only (571 tests, ~2s, fast - run before every commit)
 make test
 # or: uv run pytest tests/unit/ -v
 
-# Integration tests (93 tests, ~8-10min, requires real API keys)
+# Integration tests (96 tests, ~8-10min, requires real API keys)
 make test-integration
 # or: RUN_E2E=1 uv run pytest tests/integration/ -n auto -v
 
@@ -143,7 +142,7 @@ RUN_E2E=1 uv run pytest tests/integration/ -v
 # Run with specific number of workers
 RUN_E2E=1 uv run pytest tests/integration/ -n 4 -v
 
-# All tests (604 total)
+# All tests (667 total)
 make test-all
 # or: RUN_E2E=1 uv run pytest -v
 
@@ -187,8 +186,8 @@ Found a bug or have a feature request? [Open an issue](https://github.com/religa
    ```
 5. **Update docs** if you change APIs (README.md, CLAUDE.md, or docs/)
 6. **Ensure all checks pass**:
-   - ✅ Unit tests (511 tests)
-   - ✅ Integration tests (93 tests) - **REQUIRED locally before PR**
+   - ✅ Unit tests (571 tests)
+   - ✅ Integration tests (96 tests) - **REQUIRED locally before PR**
    - ✅ Type checking (pyright)
    - ✅ Linting (ruff check)
    - ✅ Format check (ruff format --check)
