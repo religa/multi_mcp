@@ -344,3 +344,44 @@ class TestCLIExecutor:
             assert "command" in call_args["request_data"]
             assert call_args["response_data"]["content"] == "Test response from CLI"
             assert call_args["response_data"]["status"] == "success"
+
+
+class TestBuildSubprocessCommand:
+    """Tests for cross-platform argv resolution (_build_subprocess_command)."""
+
+    def test_returns_none_when_not_found(self):
+        """Unresolvable command yields None (caller turns this into an error)."""
+        with patch("shutil.which", return_value=None):
+            assert CLIExecutor._build_subprocess_command("gemini", ["chat"]) is None
+
+    def test_uses_resolved_absolute_path(self):
+        """The resolved absolute path is used, not the bare command name."""
+        with patch("shutil.which", return_value="/usr/bin/gemini"), patch("os.name", "posix"):
+            cmd = CLIExecutor._build_subprocess_command("gemini", ["chat"])
+        assert cmd == ["/usr/bin/gemini", "chat"]
+
+    def test_windows_exe_runs_directly(self):
+        """A real .exe on Windows runs directly via its resolved path."""
+        with patch("shutil.which", return_value=r"C:\tools\gemini.exe"), patch("os.name", "nt"):
+            cmd = CLIExecutor._build_subprocess_command("gemini", ["chat"])
+        assert cmd == [r"C:\tools\gemini.exe", "chat"]
+
+    def test_windows_cmd_shim_wrapped_with_comspec(self):
+        """A .cmd shim on Windows is wrapped with cmd.exe /c so it can launch."""
+        resolved = r"C:\Users\me\AppData\Roaming\npm\gemini.cmd"
+        with patch("shutil.which", return_value=resolved), patch("os.name", "nt"):
+            cmd = CLIExecutor._build_subprocess_command("gemini", ["chat"])
+        assert cmd[0].lower().endswith("cmd.exe")
+        assert cmd[1] == "/c"
+        assert cmd[2] == resolved
+        assert cmd[3:] == ["chat"]
+
+    def test_windows_bat_shim_wrapped_case_insensitive(self):
+        """Shim detection is case-insensitive (.BAT is wrapped too)."""
+        resolved = r"C:\tools\codex.BAT"
+        with patch("shutil.which", return_value=resolved), patch("os.name", "nt"):
+            cmd = CLIExecutor._build_subprocess_command("codex", [])
+        assert cmd[0].lower().endswith("cmd.exe")
+        assert cmd[1] == "/c"
+        assert cmd[2] == resolved
+        assert cmd[3:] == []
