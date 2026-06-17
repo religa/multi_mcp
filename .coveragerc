@@ -4,7 +4,6 @@ omit =
     tests/*
     .venv/*
     */site-packages/*
-    multi_mcp/cli.py
 
 [report]
 exclude_lines =
