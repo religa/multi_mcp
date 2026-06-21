@@ -11,9 +11,10 @@ The server is built with FastMCP and uses a streamlined workflow architecture op
 ## Current Status
 
 **Production Ready** ✅
-- **Unit Tests**: ✅ 511 tests passing (~2s) - All tests passing (includes 24 mocked CLI tests for parsing/error handling)
-- **Integration Tests**: ✅ 93 tests passing (~8-10min) - All tests passing (includes 6 CLI smoke tests, 8 CLI workflow tests)
-- **Total Coverage**: ✅ 604 tests passing (~85% code coverage)
+- **Unit Tests**: ✅ 571 unit tests (~2s) - mocked, no API keys needed (includes CLI tests for `cli.py` and `cli_executor.py`)
+- **Integration Tests**: ✅ 96 tests (~8-10min) - real API calls, run locally before PR
+- **Total Coverage**: ✅ 667 tests total (~93% code coverage)
+- **Cross-platform**: ✅ unit suite green on Linux, macOS, and Windows (CI matrix)
 - **Model Config**: YAML-based model configuration with aliases and use-case defaults
 - **Logging**: MCP tool request/response logging enabled
 - **Implementation**: Checklist-based workflow with expert validation enabled
@@ -29,10 +30,10 @@ uv run pyright
 uv run ruff check .
 uv run ruff format .
 
-# Run all unit tests (511 tests, ~2s, all passing ✅)
+# Run all unit tests (571 tests, ~2s, all passing ✅)
 uv run pytest tests/unit/ -v
 
-# Run integration tests (93 tests, ~5-7min with parallel, all passing ✅)
+# Run integration tests (96 tests, ~5-7min with parallel, all passing ✅)
 # Note: Requires real API keys (OPENAI_API_KEY, etc.)
 # CLI tests will skip gracefully if CLIs not installed
 RUN_E2E=1 uv run pytest tests/integration/ -n auto -v
@@ -40,7 +41,7 @@ RUN_E2E=1 uv run pytest tests/integration/ -n auto -v
 # Or run sequentially (slower, ~15min)
 RUN_E2E=1 uv run pytest tests/integration/ -v
 
-# Run all tests (604 total)
+# Run all tests (667 total)
 RUN_E2E=1 uv run pytest tests/ -v
 
 # Run the MCP server
@@ -207,13 +208,13 @@ Models are defined in `multi_mcp/config/config.yaml`. See README.md for model al
 
 ## Testing Strategy
 
-### Unit Tests (511 tests) ✅
+### Unit Tests (571 tests) ✅
 **Location:** `tests/unit/`
 - Mock LiteLLM with fixtures, test `*_impl()` functions directly
-- No real API calls, Runtime: ~2 seconds, Coverage: ~85%
+- No real API calls, Runtime: ~2 seconds, Coverage: ~93%
 - Tests: schemas, tools (codereview/chat/compare/debate), models, MCP factory, CLI, utils
 
-### Integration Tests (93 tests) ✅
+### Integration Tests (96 tests) ✅
 **Location:** `tests/integration/`
 - End-to-end tests with real APIs (codereview, chat, compare, debate, web search)
 - MCP server integration, CLI workflows, error handling, thread management
