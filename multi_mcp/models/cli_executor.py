@@ -53,8 +53,12 @@ class CLIExecutor:
         # Narrow type for type checker - we know cli_command is str here
         cli_command: str = model_config.cli_command
 
-        # Check if CLI command exists
-        if not shutil.which(cli_command):
+        # Resolve the CLI command to a runnable argv list. This uses the absolute
+        # path from shutil.which() and, on Windows, wraps .cmd/.bat shims (common
+        # for npm-installed CLIs like gemini/codex/claude) with cmd.exe, since
+        # create_subprocess_exec/CreateProcess cannot launch those directly.
+        command = self._build_subprocess_command(cli_command, model_config.cli_args)
+        if command is None:
             install_hint = self.get_install_hint(cli_command)
             error_msg = f"CLI command '{cli_command}' not found in PATH. {install_hint}"
             logger.error(f"[CLI_CALL] {error_msg}")
@@ -65,9 +69,6 @@ class CLIExecutor:
 
         # Extract prompt from messages (use last user message)
         prompt = messages[-1]["content"] if messages else ""
-
-        # Build command
-        command = [cli_command, *model_config.cli_args]
 
         # Prepare environment
         env = os.environ.copy()
@@ -212,6 +213,35 @@ class CLIExecutor:
                 model=canonical_name,
                 latency_ms=latency_ms,
             )
+
+    @staticmethod
+    def _build_subprocess_command(cli_command: str, cli_args: list[str]) -> list[str] | None:
+        """Resolve a CLI command into a runnable argv list (cross-platform).
+
+        Returns None if the command cannot be found on PATH.
+
+        Uses the absolute path from shutil.which() rather than the bare command
+        name, so the exact executable that was found is the one that runs. On
+        Windows, npm-installed CLIs are typically .cmd/.bat shims which
+        create_subprocess_exec (CreateProcess) cannot launch directly, so those
+        are wrapped with the command interpreter (cmd.exe /c).
+
+        Args:
+            cli_command: Command name as configured (e.g. "gemini").
+            cli_args: Static arguments from model config.
+
+        Returns:
+            argv list ready for create_subprocess_exec, or None if not found.
+        """
+        resolved = shutil.which(cli_command)
+        if not resolved:
+            return None
+
+        if os.name == "nt" and resolved.lower().endswith((".cmd", ".bat")):
+            comspec = os.environ.get("COMSPEC", "cmd.exe")
+            return [comspec, "/c", resolved, *cli_args]
+
+        return [resolved, *cli_args]
 
     @staticmethod
     def get_install_hint(cli_command: str) -> str:
