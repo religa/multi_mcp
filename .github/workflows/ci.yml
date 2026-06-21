@@ -8,8 +8,17 @@ on:
 
 jobs:
   check:
-    name: Lint, Type Check, Test
-    runs-on: ubuntu-latest
+    name: Lint, Type Check, Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    defaults:
+      run:
+        # Use bash on all platforms so the single check.sh is the source of truth.
+        # GitHub provides Git bash on windows-latest.
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 
@@ -26,7 +35,7 @@ jobs:
         run: uv sync --frozen --extra dev
 
       - name: Run CI checks
-        run: make ci
+        run: ./scripts/check.sh --ci
 
   coverage:
     name: Coverage Report

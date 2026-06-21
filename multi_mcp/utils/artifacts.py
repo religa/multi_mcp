@@ -192,8 +192,18 @@ async def save_tool_artifacts(
         return None
 
     if artifact_paths:
-        # Return relative paths from base_path
+        # Return relative paths from base_path as forward-slash strings so output
+        # is consistent across platforms. Fall back to the resolved absolute path
+        # if an artifact lives outside base_path (e.g. an absolute ARTIFACTS_DIR),
+        # instead of raising ValueError from relative_to().
         base = Path(base_path).resolve()
-        return [str(p.relative_to(base)) for p in artifact_paths]
+        relative_paths: list[str] = []
+        for path in artifact_paths:
+            resolved = Path(path).resolve()
+            try:
+                relative_paths.append(resolved.relative_to(base).as_posix())
+            except ValueError:
+                relative_paths.append(resolved.as_posix())
+        return relative_paths
 
     return None
