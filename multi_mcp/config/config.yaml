@@ -191,7 +191,7 @@ models:
     provider_web_search: true  # LiteLLM handles web search automatically
     aliases:
       - gemini-2.5
-    notes: "High-quality Google model with grounding (retiring June 17 2026 — migrate to gemini-3.1-pro-preview)"
+    notes: "High-quality Google model with grounding (legacy — see gemini-3.1-pro)"
 
   gemini-3.5-flash:
     litellm_model: gemini/gemini-3.5-flash
@@ -214,15 +214,14 @@ models:
       - flash-lite
     notes: "Fastest, most cost-effective Gemini model, 2.5x faster than 2.5 Flash (stable)"
 
-  gemini-3.1-pro-preview:
-    litellm_model: gemini/gemini-3.1-pro-preview
+  gemini-3.1-pro:
+    litellm_model: gemini/gemini-3.1-pro
     provider_web_search: true
     aliases:
-      - gemini-3.1-pro
       - gemini-3.1
       - gemini-3
       - gemini
-    notes: "Latest Google model, 2x reasoning over 3 Pro, 1M context"
+    notes: "Latest stable Google model (GA Feb 2026), 2x reasoning over 3 Pro, 1M context"
 
   # ============================================
   # CLI Models
