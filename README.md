@@ -249,16 +249,19 @@ Use short aliases instead of full model names:
 
 | Alias | Model | Provider |
 |-------|-------|----------|
-| `mini` | gpt-5-mini | OpenAI |
-| `nano` | gpt-5-nano | OpenAI |
-| `gpt` | gpt-5.2 | OpenAI |
-| `codex` | gpt-5.1-codex | OpenAI |
-| `sonnet` | claude-sonnet-4.6 | Anthropic |
+| `mini` | gpt-5.4-mini | OpenAI |
+| `nano` | gpt-5.4-nano | OpenAI |
+| `gpt` | gpt-5.6-sol | OpenAI |
+| `terra` | gpt-5.6-terra | OpenAI |
+| `luna` | gpt-5.6-luna | OpenAI |
+| `codex` | gpt-5.3-codex | OpenAI |
+| `fable` | claude-fable-5 | Anthropic |
+| `sonnet` | claude-sonnet-5 | Anthropic |
 | `haiku` | claude-haiku-4.5 | Anthropic |
-| `opus` | claude-opus-4.6 | Anthropic |
+| `opus` | claude-opus-4.8 | Anthropic |
 | `gemini` | gemini-3.1-pro-preview | Google |
 | `gemini-3` | gemini-3.1-pro-preview | Google |
-| `flash` | gemini-3-flash | Google |
+| `flash` | gemini-3.5-flash | Google |
 | `azure-mini` | azure-gpt-5-mini | Azure |
 | `bedrock-sonnet` | bedrock-claude-4-5-sonnet | AWS |
 
