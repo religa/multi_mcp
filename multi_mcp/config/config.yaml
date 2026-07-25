@@ -16,7 +16,7 @@ models:
     litellm_model: openai/gpt-5-nano
     constraints:
       temperature: 1.0  # gpt-5 family only supports 1.0
-    notes: "Fast, cost-effective (legacy, see gpt-5.4-nano)"
+    notes: "Fast, cost-effective (legacy, shuts down Dec 11 2026 — see gpt-5.4-nano)"
 
   gpt-5-mini:
     litellm_model: openai/gpt-5-mini
@@ -25,7 +25,7 @@ models:
       - gpt-mini
     constraints:
       temperature: 1.0  # gpt-5 family only supports 1.0
-    notes: "Fast, cost-effective with web search (legacy, see gpt-5.4-mini)"
+    notes: "Fast, cost-effective with web search (legacy, shuts down Dec 11 2026 — see gpt-5.4-mini)"
     # disabled: true  # Uncomment this line to disable this model (it won't appear in /multi:models)
 
   gpt-5.2:
@@ -33,47 +33,23 @@ models:
     provider_web_search: true  # Native web search support (per OpenAI docs)
     constraints:
       temperature: 1.0
-    notes: "Strong general-purpose model with web search (legacy, see gpt-5.4)"
+    notes: "Strong general-purpose model with web search (legacy, see gpt-5.6-sol)"
 
   gpt-5.1:
     litellm_model: openai/gpt-5.1
     provider_web_search: true  # Native web search support (per OpenAI docs)
     constraints:
       temperature: 1.0
-    notes: "Strong general-purpose model with web search, temperature=1.0 only"
-
-  gpt-5.1-codex-mini:
-    litellm_model: openai/gpt-5.1-codex-mini
-    aliases:
-      - codex-mini
-    constraints:
-      temperature: 1.0
-    notes: "Strong general-purpose model, temperature=1.0 only"
-
-  gpt-5.2-codex:
-    litellm_model: openai/gpt-5.2-codex
-    aliases:
-      - gpt-codex
-    constraints:
-      temperature: 1.0
-    notes: "Strong general-purpose model (deprecated July 23 2026 — see gpt-5.3-codex)"
+    notes: "Strong general-purpose model with web search (legacy, see gpt-5.6-sol)"
 
   gpt-5.3-codex:
     litellm_model: openai/gpt-5.3-codex
     aliases:
       - codex
+      - gpt-codex
     constraints:
       temperature: 1.0
-    notes: "Most capable agentic coding model, 400K context, 128K output"
-
-  gpt-5.3-chat-latest:
-    litellm_model: openai/gpt-5.3-chat-latest
-    aliases:
-      - gpt-5.3
-      - gpt-instant
-    constraints:
-      temperature: 1.0  # Experimental: temperature/top_p not supported, uses reasoning_effort instead
-    notes: "GPT-5.3 Instant (deprecated Aug 10 2026, migrate to gpt-5.5)"
+    notes: "Most capable dedicated agentic coding model, 400K context, 128K output"
 
   gpt-5.6-sol:
     litellm_model: openai/gpt-5.6-sol
@@ -185,6 +161,15 @@ models:
       no_temperature: true  # sampling params (temperature/top_p) not supported, uses adaptive thinking
     notes: "Anthropic's most capable model (June 2026), Mythos-class tier, 1M context, 128K output ($10/$50 per 1M)"
 
+  claude-opus-5:
+    litellm_model: anthropic/claude-opus-5
+    aliases:
+      - opus
+      - opus-5
+    constraints:
+      no_temperature: true  # sampling params not supported, uses adaptive thinking + effort
+    notes: "Latest Opus (June 2026), complex agentic coding and enterprise work, 1M context, 128K output ($5/$25 per 1M)"
+
   claude-sonnet-5:
     litellm_model: anthropic/claude-sonnet-5
     aliases:
@@ -204,11 +189,9 @@ models:
 
   claude-opus-4.8:
     litellm_model: anthropic/claude-opus-4-8
-    aliases:
-      - opus
     constraints:
       no_temperature: true  # temperature parameter not supported for Opus 4.8+
-    notes: "Latest Anthropic Opus model (May 2026), 1M context, 128K output (Fable 5 sits above Opus)"
+    notes: "Previous Opus model (May 2026), 1M context, 128K output (legacy — see claude-opus-5)"
 
   claude-opus-4.7:
     litellm_model: anthropic/claude-opus-4-7
@@ -235,26 +218,42 @@ models:
       - gemini-2.5
     notes: "High-quality Google model with grounding (retirement extended to Oct 16 2026 — migrate to gemini-3.1-pro-preview)"
 
-  gemini-3.5-flash:
-    litellm_model: gemini/gemini-3.5-flash
+  gemini-3.6-flash:
+    litellm_model: gemini/gemini-3.6-flash
     provider_web_search: true
     aliases:
       - gemini-flash
       - flash
+      - gemini-3.6
+    constraints:
+      no_temperature: true  # temperature/top_p/top_k deprecated and ignored on 3.6+ (400 error in future generations)
+    notes: "Latest stable Gemini flash model (July 2026), better token efficiency and agentic planning than 3.5 Flash ($1.50/$7.50 per 1M)"
+
+  gemini-3.5-flash:
+    litellm_model: gemini/gemini-3.5-flash
+    provider_web_search: true
+    aliases:
       - gemini-3.5
-    notes: "Latest stable Gemini flash model (May 2026), beats 3.1 Pro on coding/agentic benchmarks, 4x faster"
+    notes: "Previous stable Gemini flash model (May 2026, legacy — see gemini-3.6-flash)"
 
   gemini-3-flash:
     litellm_model: gemini/gemini-3-flash-preview
     provider_web_search: true
-    notes: "Gemini 3 Flash preview (legacy — see gemini-3.5-flash)"
+    notes: "Gemini 3 Flash preview (legacy — see gemini-3.6-flash)"
+
+  gemini-3.5-flash-lite:
+    litellm_model: gemini/gemini-3.5-flash-lite
+    provider_web_search: true
+    aliases:
+      - flash-lite
+    constraints:
+      no_temperature: true  # temperature/top_p/top_k deprecated and ignored on 3.5 Flash-Lite / 3.6+ models
+    notes: "Fastest, most cost-effective Gemini model (July 2026), low-latency subagent tier ($0.30/$2.50 per 1M)"
 
   gemini-3.1-flash-lite:
     litellm_model: gemini/gemini-3.1-flash-lite
     provider_web_search: true
-    aliases:
-      - flash-lite
-    notes: "Fastest, most cost-effective Gemini model, 2.5x faster than 2.5 Flash (stable)"
+    notes: "Previous flash-lite tier (stable, legacy — see gemini-3.5-flash-lite)"
 
   gemini-3.1-pro-preview:
     litellm_model: gemini/gemini-3.1-pro-preview
