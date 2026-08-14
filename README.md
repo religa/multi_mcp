@@ -249,8 +249,8 @@ Use short aliases instead of full model names:
 
 | Alias | Model | Provider |
 |-------|-------|----------|
-| `mini` | gpt-5.4-mini | OpenAI |
-| `nano` | gpt-5.4-nano | OpenAI |
+| `mini` | gpt-5.6-luna | OpenAI |
+| `nano` | gpt-5.6-luna | OpenAI |
 | `gpt` | gpt-5.6-sol | OpenAI |
 | `terra` | gpt-5.6-terra | OpenAI |
 | `luna` | gpt-5.6-luna | OpenAI |
@@ -261,7 +261,7 @@ Use short aliases instead of full model names:
 | `haiku` | claude-haiku-4.5 | Anthropic |
 | `gemini` | gemini-3.1-pro-preview | Google |
 | `gemini-3` | gemini-3.1-pro-preview | Google |
-| `flash` | gemini-3.6-flash | Google |
+| `flash` | gemini-3.7-flash | Google |
 | `flash-lite` | gemini-3.5-flash-lite | Google |
 | `azure-mini` | azure-gpt-5-mini | Azure |
 | `bedrock-sonnet` | bedrock-claude-4-5-sonnet | AWS |
