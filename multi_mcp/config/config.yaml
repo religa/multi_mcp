@@ -16,7 +16,7 @@ models:
     litellm_model: openai/gpt-5-nano
     constraints:
       temperature: 1.0  # gpt-5 family only supports 1.0
-    notes: "Fast, cost-effective (legacy, shuts down Dec 11 2026 — see gpt-5.4-nano)"
+    notes: "Fast, cost-effective (legacy, shuts down Dec 11 2026 — migrate to gpt-5.6-luna)"
 
   gpt-5-mini:
     litellm_model: openai/gpt-5-mini
@@ -25,7 +25,7 @@ models:
       - gpt-mini
     constraints:
       temperature: 1.0  # gpt-5 family only supports 1.0
-    notes: "Fast, cost-effective with web search (legacy, shuts down Dec 11 2026 — see gpt-5.4-mini)"
+    notes: "Fast, cost-effective with web search (legacy, shuts down Dec 11 2026 — migrate to gpt-5.6-terra)"
     # disabled: true  # Uncomment this line to disable this model (it won't appear in /multi:models)
 
   gpt-5.2:
@@ -49,7 +49,7 @@ models:
       - gpt-codex
     constraints:
       temperature: 1.0
-    notes: "Most capable dedicated agentic coding model, 400K context, 128K output"
+    notes: "Dedicated agentic coding model, 400K context, 128K output (legacy — superseded by gpt-5.6-sol for coding; removed from Codex product, still on the API)"
 
   gpt-5.6-sol:
     litellm_model: openai/gpt-5.6-sol
@@ -61,7 +61,7 @@ models:
       - gpt
     constraints:
       temperature: 1.0
-    notes: "Latest GPT flagship (July 2026), 1.05M context, 128K output ($5/$30 per 1M). Use reasoning.mode=pro for pro-tier compute."
+    notes: "Latest GPT flagship (July 9 2026), 1.05M context, 128K output ($5/$30 per 1M list, >20% API discount through Nov 2026). Use reasoning.mode=pro for pro-tier compute."
 
   gpt-5.6-terra:
     litellm_model: openai/gpt-5.6-terra
@@ -70,7 +70,7 @@ models:
       - terra
     constraints:
       temperature: 1.0
-    notes: "Balanced mid-tier GPT-5.6 model, 1.05M context ($2/$12 per 1M). Official replacement for gpt-5-mini."
+    notes: "Balanced mid-tier GPT-5.6 model, 1.05M context ($2.50/$15 per 1M). Official replacement for gpt-5-mini and gpt-5.4."
 
   gpt-5.6-luna:
     litellm_model: openai/gpt-5.6-luna
@@ -81,7 +81,7 @@ models:
       - nano
     constraints:
       temperature: 1.0
-    notes: "Cheapest GPT-5.6 tier, 1.05M context ($0.20/$1.20 per 1M). Official replacement for gpt-5-nano."
+    notes: "Cheapest GPT-5.6 tier, 1.05M context ($1/$6 per 1M). Official replacement for gpt-5-nano and gpt-5.4-mini."
 
   gpt-5.5:
     litellm_model: openai/gpt-5.5
@@ -151,13 +151,20 @@ models:
       - haiku
     notes: "Fast claude model"
 
-  claude-fable-5:
-    litellm_model: anthropic/claude-fable-5
+  claude-fable-5-1:
+    litellm_model: anthropic/claude-fable-5-1
     aliases:
       - fable
+      - fable-5.1
+    constraints:
+      no_temperature: true  # sampling params (temperature/top_p) not supported, adaptive thinking always on
+    notes: "Anthropic's most capable model (Sept 1 2026), for demanding reasoning and long-horizon agentic work, 1M context, 128K output ($10/$50 per 1M, 75% cheaper cache reads)"
+
+  claude-fable-5:
+    litellm_model: anthropic/claude-fable-5
     constraints:
       no_temperature: true  # sampling params (temperature/top_p) not supported, uses adaptive thinking
-    notes: "Anthropic's most capable model (June 2026), Mythos-class tier, 1M context, 128K output ($10/$50 per 1M)"
+    notes: "Previous Mythos-class model (June 2026, legacy — see claude-fable-5-1), 1M context, 128K output"
 
   claude-opus-5:
     litellm_model: anthropic/claude-opus-5
@@ -175,7 +182,7 @@ models:
       - sonnet-5
     constraints:
       no_temperature: true  # non-default sampling params return 400, uses adaptive thinking
-    notes: "Latest Sonnet (June 2026), 1M context, 128K output, adaptive thinking ($2/$10 until Aug 31 2026, then $3/$15)"
+    notes: "Latest Sonnet (June 2026), 1M context, 128K output, adaptive thinking ($2/$10 per 1M)"
 
   claude-sonnet-4.6:
     litellm_model: anthropic/claude-sonnet-4-6
@@ -216,16 +223,25 @@ models:
       - gemini-2.5
     notes: "High-quality Google model with grounding (retirement extended to Oct 16 2026 — migrate to gemini-3.1-pro-preview)"
 
-  gemini-3.7-flash:
-    litellm_model: gemini/gemini-3.7-flash
+  gemini-3.8-flash:
+    litellm_model: gemini/gemini-3.8-flash
     provider_web_search: true
     aliases:
       - gemini-flash
       - flash
+      - gemini-3.8
+    constraints:
+      no_temperature: true  # temperature/top_p/top_k not supported on 3.6+ (strip from generation config)
+    notes: "Latest stable Gemini flash model (Sept 2 2026), long-horizon software engineering and autonomous agents, 1M context, 64K output ($0.75/$3.75 per 1M intro through Dec 31 2026, then $1.50/$7.50)"
+
+  gemini-3.7-flash:
+    litellm_model: gemini/gemini-3.7-flash
+    provider_web_search: true
+    aliases:
       - gemini-3.7
     constraints:
       no_temperature: true  # temperature/top_p/top_k not supported on 3.6+ (strip from generation config)
-    notes: "Latest stable Gemini flash model (Aug 13 2026), major coding/agentic gains, 1M context, 64K output ($0.75/$3.75 per 1M intro through Dec 31 2026, then $1.50/$7.50)"
+    notes: "Previous stable Gemini flash model (Aug 13 2026, legacy — see gemini-3.8-flash)"
 
   gemini-3.6-flash:
     litellm_model: gemini/gemini-3.6-flash

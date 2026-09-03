@@ -255,13 +255,13 @@ Use short aliases instead of full model names:
 | `terra` | gpt-5.6-terra | OpenAI |
 | `luna` | gpt-5.6-luna | OpenAI |
 | `codex` | gpt-5.3-codex | OpenAI |
-| `fable` | claude-fable-5 | Anthropic |
+| `fable` | claude-fable-5-1 | Anthropic |
 | `opus` | claude-opus-5 | Anthropic |
 | `sonnet` | claude-sonnet-5 | Anthropic |
 | `haiku` | claude-haiku-4.5 | Anthropic |
 | `gemini` | gemini-3.1-pro-preview | Google |
 | `gemini-3` | gemini-3.1-pro-preview | Google |
-| `flash` | gemini-3.7-flash | Google |
+| `flash` | gemini-3.8-flash | Google |
 | `flash-lite` | gemini-3.5-flash-lite | Google |
 | `azure-mini` | azure-gpt-5-mini | Azure |
 | `bedrock-sonnet` | bedrock-claude-4-5-sonnet | AWS |
