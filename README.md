@@ -251,7 +251,9 @@ Use short aliases instead of full model names:
 |-------|-------|----------|
 | `mini` | gpt-5.6-luna | OpenAI |
 | `nano` | gpt-5.6-luna | OpenAI |
-| `gpt` | gpt-5.6-sol | OpenAI |
+| `gpt` | gpt-6-astra | OpenAI |
+| `astra` | gpt-6-astra | OpenAI |
+| `sol` | gpt-5.6-sol | OpenAI |
 | `terra` | gpt-5.6-terra | OpenAI |
 | `luna` | gpt-5.6-luna | OpenAI |
 | `codex` | gpt-5.3-codex | OpenAI |
