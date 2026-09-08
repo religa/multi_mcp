@@ -279,6 +279,28 @@ def _repair_json(s: str) -> str:
     return s
 
 
+def _try_fenced_blocks(text: str) -> Any | None:
+    """Last resort: try each fenced block on its own, newest first.
+
+    `_strip_code_fences` is greedy (first ``` to last ```) and additionally does
+    not match at all when prose follows the closing fence. A model that writes an
+    analysis containing a code block and then emits its JSON at the end - with or
+    without a trailing sentence - defeats both paths and the function returns None.
+
+    This is purely additive: it only runs once every other strategy has failed.
+    """
+    for block in reversed(_CODE_FENCE_RE.findall(text)):
+        block = block.strip()
+        if not block.startswith(("{", "[")):
+            continue
+        for attempt in (block, _repair_json(block)):
+            try:
+                return json.loads(attempt)
+            except Exception:
+                continue
+    return None
+
+
 def parse_llm_json(text: str) -> Any | None:
     """Parse JSON from LLM response with robust error handling.
 
@@ -297,11 +319,29 @@ def parse_llm_json(text: str) -> Any | None:
     if not isinstance(text, str) or not text.strip():
         return None
 
+    # Fast path: if the input already is valid JSON, return it untouched.
+    # Repair heuristics can corrupt input that never needed repairing. Example:
+    # the Claude CLI `--output-format json` envelope is valid JSON whose "result"
+    # field contains an escaped ```json ... ``` block; the greedy fence stripper
+    # below matches into that escaped block and destroys the envelope.
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+
     raw = _strip_analysis_blocks(text)
     raw = _strip_code_fences(raw)
     candidate = raw.strip()
 
     if not candidate.startswith(("{", "[")):
+        # No clean JSON candidate. Prefer a complete fenced block over scavenging
+        # a fragment out of `candidate`: when the first fence holds a ```python
+        # block, `_extract_first_json_block` can pull a JSON-looking fragment out of
+        # it and "succeed" with the wrong value (often a list), so the real ```json
+        # block is never read.
+        fenced = _try_fenced_blocks(text)
+        if fenced is not None:
+            return fenced
         block = _extract_first_json_block(candidate)
         if block is None:
             return None
@@ -316,4 +356,6 @@ def parse_llm_json(text: str) -> Any | None:
     try:
         return json.loads(repaired)
     except Exception:
-        return None
+        pass
+
+    return _try_fenced_blocks(text)
