@@ -90,9 +90,9 @@ class Settings(BaseSettings):
     aws_region_name: str | None = Field(default=None, alias="AWS_REGION_NAME")
 
     # Model defaults
-    default_model: str = Field(default="gemini-3", alias="DEFAULT_MODEL")
+    default_model: str = Field(default="flash", alias="DEFAULT_MODEL")
     default_model_list: list[str] = Field(
-        default=["codex", "gemini-3", "sonnet"],
+        default=["gpt", "gemini", "opus"],
         alias="DEFAULT_MODEL_LIST",
         description="Default models for multi-model compare (minimum 2)",
     )
@@ -136,7 +136,7 @@ class Settings(BaseSettings):
                 # Parse as comma-separated string
                 models = [model.strip() for model in value.split(",") if model.strip()]
                 # Update the data dict with parsed list (or default if empty)
-                data[key] = models if models else ["codex", "gemini-3", "sonnet"]
+                data[key] = models if models else ["gpt", "gemini", "opus"]
         return data
 
     # Server settings

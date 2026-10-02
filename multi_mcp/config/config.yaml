@@ -18,7 +18,6 @@ models:
     aliases:
       - astra
       - gpt-6
-      - gpt
     constraints:
       temperature: 1.0
     notes: "Latest OpenAI flagship (Sept 3 2026), most capable model for end-to-end agentic work, computer use, coding and cybersecurity. 1.05M context, 128K output ($10/$50 per 1M)"
@@ -29,6 +28,7 @@ models:
     aliases:
       - sol
       - gpt-6.1
+      - gpt
     constraints:
       temperature: 1.0
     notes: "Latest Sol (Sept 29 2026), near-Astra performance for complex coding at lower cost, 1.05M context, 128K output ($2/$10 per 1M)"
@@ -239,7 +239,7 @@ models:
 
   claude-sonnet-4.5:
     litellm_model: anthropic/claude-sonnet-4-5-20250929
-    notes: "Previous Sonnet model (legacy; retirement not sooner than Sept 29 2026)"
+    notes: "Previous Sonnet model (deprecated Sept 30 2026, retires Nov 30 2026 — migrate to claude-sonnet-5-5)"
 
   claude-opus-4.8:
     litellm_model: anthropic/claude-opus-4-8
@@ -279,6 +279,7 @@ models:
       - gemini-flash
       - flash
       - gemini-3.8
+      - gemini
     constraints:
       no_temperature: true  # temperature/top_p/top_k not supported on 3.6+ (strip from generation config)
     notes: "Latest stable Gemini flash model (Sept 2 2026), long-horizon software engineering and autonomous agents, 1M context, 64K output ($0.75/$3.75 per 1M intro through Dec 31 2026, then $1.50/$7.50)"
@@ -311,7 +312,7 @@ models:
   gemini-3-flash:
     litellm_model: gemini/gemini-3-flash-preview
     provider_web_search: true
-    notes: "Gemini 3 Flash preview (legacy — see gemini-3.6-flash)"
+    notes: "Gemini 3 Flash preview (legacy — see gemini-3.8-flash; Google lists replacement gemini-3.6-flash)"
 
   gemini-3.5-flash-lite:
     litellm_model: gemini/gemini-3.5-flash-lite
@@ -334,8 +335,7 @@ models:
       - gemini-3.1-pro
       - gemini-3.1
       - gemini-3
-      - gemini
-    notes: "Latest Google model, 2x reasoning over 3 Pro, 1M context"
+    notes: "Latest Gemini Pro (still preview, no 3.5+ Pro yet), advanced reasoning, 1M context ($2/$12 per 1M)"
 
   # ============================================
   # CLI Models
