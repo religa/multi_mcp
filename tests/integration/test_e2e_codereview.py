@@ -302,7 +302,7 @@ async def test_codereview_multi_model_parallel(test_repo_path, auth_file_path):
     thread_id = str(uuid.uuid4())
 
     # Use 2 fast models for multi-model review
-    models = ["gpt-5-nano", "claude-haiku-4-5-20251001"]
+    models = ["gpt-5-nano", "claude-haiku-5-5"]
 
     # Step 1: Get checklist
     response1 = await codereview_impl(
@@ -397,7 +397,7 @@ async def test_codereview_multi_model_consensus(test_repo_path, auth_file_path):
     thread_id = str(uuid.uuid4())
 
     # Use 2 models
-    models = ["gpt-5-nano", "claude-haiku-4-5-20251001"]
+    models = ["gpt-5-nano", "claude-haiku-5-5"]
 
     # Skip to step 2 (review)
     response = await codereview_impl(

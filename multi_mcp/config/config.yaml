@@ -178,11 +178,17 @@ models:
   # Anthropic Models
   # ============================================
 
-  claude-haiku-4.5:
-    litellm_model: anthropic/claude-haiku-4-5-20251001
+  claude-haiku-5-5:
+    litellm_model: anthropic/claude-haiku-5-5
     aliases:
       - haiku
-    notes: "Fast claude model, 200K context, 64K output ($1/$5 per 1M; retirement not sooner than Oct 15 2026)"
+    constraints:
+      no_temperature: true  # adaptive thinking; sampling params not supported
+    notes: "Latest Haiku (Oct 7 2026), for high-volume latency-sensitive tasks (classification, extraction, routing), 1M context, 128K output ($0.10/$0.50 per 1M; retirement not sooner than Oct 7 2027)"
+
+  claude-haiku-4.5:
+    litellm_model: anthropic/claude-haiku-4-5-20251001
+    notes: "Previous fast claude model, 200K context, 64K output (legacy — retires Oct 15 2026, migrate to claude-haiku-5-5)"
 
   claude-fable-5-1:
     litellm_model: anthropic/claude-fable-5-1
