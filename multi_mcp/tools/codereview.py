@@ -54,6 +54,23 @@ def _build_model_status_summary(raw_results: list) -> str:
     return ", ".join(parts)
 
 
+# Models do not always honour the requested schema. Observed on a single review
+# task: Claude CLI returned "issues_found" on one run and "verified_findings" on
+# another; Codex CLI returned "findings" and no "status" field at all. All three
+# carry the same shape - a list of dicts with id/severity/location - so accepting
+# the aliases is safe and keeps those models from silently reporting 0 issues.
+_ISSUE_KEYS = ("issues_found", "verified_findings", "findings")
+
+
+def _extract_issue_list(parsed_json: dict) -> list[dict]:
+    """Return the first list of issue dicts found under any known key."""
+    for key in _ISSUE_KEYS:
+        val = parsed_json.get(key)
+        if isinstance(val, list) and val and all(isinstance(i, dict) for i in val):
+            return val
+    return []
+
+
 async def codereview_impl(
     name: str,
     content: str,
@@ -203,7 +220,7 @@ Complete this checklist, then call step 2 with your findings and relevant_files.
                             status=r.status,
                             error=r.error,
                             metadata=r.metadata,
-                            issues_found=parsed_json.get("issues_found", []),
+                            issues_found=parsed_json.get("issues_found") or _extract_issue_list(parsed_json),
                         )
                     )
                 else:
@@ -322,6 +339,9 @@ Complete this checklist, then call step 2 with your findings and relevant_files.
                 model_issues = parsed_json.get("issues_found", [])
             elif status == "no_issues_found":
                 model_issues = []
+            else:
+                # Schema-divergent responses; the original conditions ran first.
+                model_issues = _extract_issue_list(parsed_json)
 
             # Tag issues with model name
             for issue in model_issues:
