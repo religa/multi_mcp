@@ -180,9 +180,7 @@ models:
 
   claude-haiku-4.5:
     litellm_model: anthropic/claude-haiku-4-5-20251001
-    aliases:
-      - haiku
-    notes: "Fast claude model, 200K context, 64K output ($1/$5 per 1M; retirement not sooner than Oct 15 2026)"
+    notes: "Fast claude model, 200K context, 64K output ($1/$5 per 1M; legacy — retired Oct 15 2026, migrate to claude-haiku-5-5)"
 
   claude-fable-5-1:
     litellm_model: anthropic/claude-fable-5-1
@@ -216,6 +214,14 @@ models:
     constraints:
       no_temperature: true  # non-default sampling params return 400, uses adaptive thinking
     notes: "Latest Sonnet (Sept 28 2026), best speed/intelligence balance, 1M context, 128K output ($2/$10 per 1M)"
+
+  claude-haiku-5-5:
+    litellm_model: anthropic/claude-haiku-5-5
+    aliases:
+      - haiku
+    constraints:
+      no_temperature: true  # adaptive thinking, non-default sampling params not supported
+    notes: "Latest Haiku (Oct 7 2026), fastest for high-volume latency-sensitive tasks, 1M context, 128K output ($0.10/$0.50 per 1M standard, $0.50/$2.50 over 100K context)"
 
   claude-opus-5:
     litellm_model: anthropic/claude-opus-5
@@ -264,6 +270,16 @@ models:
   # ============================================
   # Google Models
   # ============================================
+
+  gemini-4-argon:
+    litellm_model: gemini/gemini-4-argon
+    provider_web_search: true
+    aliases:
+      - argon
+      - gemini-4
+    constraints:
+      no_temperature: true  # temperature/top_p/top_k not supported on 3.6+ (same for 4.x)
+    notes: "Flagship Gemini 4 reasoning model (GA Oct 13 2026), 1M context, 1M output ($2/$10 per 1M intro through Nov 30 2026, then $4/$20)"
 
   gemini-2.5-pro:
     litellm_model: gemini/gemini-2.5-pro
