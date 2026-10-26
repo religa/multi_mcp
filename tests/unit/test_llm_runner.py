@@ -43,7 +43,7 @@ async def test_execute_parallel_all_success():
     assert all(r.status == "success" for r in results)
     assert call_count[0] == 2
     assert "gpt-5-mini" in models_used
-    assert "claude-haiku-4.5" in models_used  # Changed from "haiku" to canonical name
+    assert "claude-haiku-5-5" in models_used  # Changed from "haiku" to canonical name
     assert all(r.metadata is not None for r in results)
 
 

@@ -178,11 +178,17 @@ models:
   # Anthropic Models
   # ============================================
 
-  claude-haiku-4.5:
-    litellm_model: anthropic/claude-haiku-4-5-20251001
+  claude-haiku-5-5:
+    litellm_model: anthropic/claude-haiku-5-5
     aliases:
       - haiku
-    notes: "Fast claude model, 200K context, 64K output ($1/$5 per 1M; retirement not sooner than Oct 15 2026)"
+    constraints:
+      no_temperature: true  # adaptive thinking always on, sampling params not supported
+    notes: "Latest Haiku (Oct 7 2026), for high-volume latency-sensitive tasks, 1M context, 128K output ($0.10/$0.50 per 1M, retirement not sooner than Oct 7 2027)"
+
+  claude-haiku-4.5:
+    litellm_model: anthropic/claude-haiku-4-5-20251001
+    notes: "Previous fast model, 200K context, 64K output ($1/$5 per 1M, legacy — see claude-haiku-5-5)"
 
   claude-fable-5-1:
     litellm_model: anthropic/claude-fable-5-1
@@ -328,6 +334,15 @@ models:
     provider_web_search: true
     notes: "Previous flash-lite tier (stable, legacy — see gemini-3.5-flash-lite)"
 
+  gemini-4-argon:
+    litellm_model: gemini/gemini-4-argon
+    provider_web_search: true
+    aliases:
+      - gemini-4
+    constraints:
+      no_temperature: true  # temperature not supported on Gemini 4 family (same as 3.6+)
+    notes: "Gemini 4 flagship (GA Oct 13 2026), most capable Google model for complex coding/agentic/math/science, 1M context, 1M output"
+
   gemini-3.1-pro-preview:
     litellm_model: gemini/gemini-3.1-pro-preview
     provider_web_search: true
@@ -335,7 +350,7 @@ models:
       - gemini-3.1-pro
       - gemini-3.1
       - gemini-3
-    notes: "Latest Gemini Pro (still preview, no 3.5+ Pro yet), advanced reasoning, 1M context ($2/$12 per 1M)"
+    notes: "Previous Gemini Pro (preview, legacy — see gemini-4-argon), advanced reasoning, 1M context ($2/$12 per 1M)"
 
   # ============================================
   # CLI Models
@@ -383,7 +398,7 @@ models:
       # - "--dangerously-skip-permissions"  # Most dangerous: bypass all permissions
     cli_env:
       ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
-      ANTHROPIC_MODEL: "claude-haiku-4-5-20251001"  # Use cheaper Haiku for integration tests
+      ANTHROPIC_MODEL: "claude-haiku-5-5"  # Use cheaper Haiku for integration tests
     cli_parser: json
     aliases:
       - cl-cli
