@@ -33,6 +33,15 @@ models:
       temperature: 1.0
     notes: "Latest Sol (Sept 29 2026), near-Astra performance for complex coding at lower cost, 1.05M context, 128K output ($2/$10 per 1M)"
 
+  gpt-6.1-terra:
+    litellm_model: openai/gpt-6.1-terra
+    provider_web_search: true
+    aliases:
+      - terra
+    constraints:
+      temperature: 1.0
+    notes: "Mid-tier GPT-6.1 model (Oct 15 2026), between luna and sol, 1.05M context, 128K output ($1/$5 per 1M)"
+
   gpt-6-sol:
     litellm_model: openai/gpt-6-sol
     provider_web_search: true
@@ -64,7 +73,7 @@ models:
       - gpt-mini
     constraints:
       temperature: 1.0  # gpt-5 family only supports 1.0
-    notes: "Fast, cost-effective with web search (legacy, shuts down Dec 11 2026 — migrate to gpt-5.6-terra)"
+    notes: "Fast, cost-effective with web search (legacy, shuts down Dec 11 2026 — migrate to gpt-6.1-terra)"
     # disabled: true  # Uncomment this line to disable this model (it won't appear in /multi:models)
 
   gpt-5.2:
@@ -103,11 +112,9 @@ models:
   gpt-5.6-terra:
     litellm_model: openai/gpt-5.6-terra
     provider_web_search: true
-    aliases:
-      - terra
     constraints:
       temperature: 1.0
-    notes: "Balanced mid-tier GPT-5.6 model, 1.05M context, 128K output ($2/$12 per 1M). Official replacement for gpt-5-mini and gpt-5.4."
+    notes: "Balanced mid-tier GPT-5.6 model, 1.05M context, 128K output ($2/$12 per 1M). Official replacement for gpt-5-mini and gpt-5.4. (legacy — see gpt-6.1-terra)"
 
   gpt-5.6-luna:
     litellm_model: openai/gpt-5.6-luna
@@ -178,11 +185,17 @@ models:
   # Anthropic Models
   # ============================================
 
-  claude-haiku-4.5:
-    litellm_model: anthropic/claude-haiku-4-5-20251001
+  claude-haiku-5-5:
+    litellm_model: anthropic/claude-haiku-5-5
     aliases:
       - haiku
-    notes: "Fast claude model, 200K context, 64K output ($1/$5 per 1M; retirement not sooner than Oct 15 2026)"
+    constraints:
+      no_temperature: true  # adaptive thinking, same as other Claude 5.x models
+    notes: "Fastest Claude model (Oct 7 2026), for high-volume, latency-sensitive tasks, 1M context, 128K output ($0.10/$0.50 per 1M, retirement not sooner than Oct 7 2027)"
+
+  claude-haiku-4.5:
+    litellm_model: anthropic/claude-haiku-4-5-20251001
+    notes: "Fast claude model, 200K context, 64K output ($1/$5 per 1M; retirement not sooner than Oct 15 2026, legacy — see claude-haiku-5-5)"
 
   claude-fable-5-1:
     litellm_model: anthropic/claude-fable-5-1
@@ -265,12 +278,22 @@ models:
   # Google Models
   # ============================================
 
+  gemini-4-argon:
+    litellm_model: gemini/gemini-4-argon
+    provider_web_search: true
+    aliases:
+      - argon
+      - gemini-4
+    constraints:
+      no_temperature: true  # Gemini 4 follows same no-temperature pattern as 3.6+
+    notes: "Flagship Gemini model (Nov 2026), most capable, 1M context, 65K output ($2/$10 through Nov 30 2026, then $4/$20 per 1M)"
+
   gemini-2.5-pro:
     litellm_model: gemini/gemini-2.5-pro
     provider_web_search: true  # LiteLLM handles web search automatically
     aliases:
       - gemini-2.5
-    notes: "High-quality Google model with grounding (legacy; since Sept 18 2026 access limited to prior active users — migrate to gemini-3.8-flash)"
+    notes: "High-quality Google model with grounding (deprecated; since Sept 18 2026 access limited to prior active users; routes to gemini-3.8-flash from Dec 1 2026 — migrate now)"
 
   gemini-3.8-flash:
     litellm_model: gemini/gemini-3.8-flash
